@@ -1,0 +1,847 @@
+/* Vibrant Gradient Meal Planner with Glassmorphism */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a2e;
+    color: #ffffff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Subtle dark circle pattern background */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle 600px at 10% 20%, #16162a 0%, transparent 100%),
+        radial-gradient(circle 800px at 90% 80%, #141428 0%, transparent 100%),
+        radial-gradient(circle 500px at 70% 10%, #181830 0%, transparent 100%),
+        radial-gradient(circle 700px at 30% 70%, #15152a 0%, transparent 100%),
+        radial-gradient(circle 900px at 85% 30%, #171729 0%, transparent 100%),
+        radial-gradient(circle 400px at 5% 90%, #16162a 0%, transparent 100%);
+    z-index: -1;
+}
+
+/* Header - Glassmorphic */
+.header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.header-title {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+}
+
+.header-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.header-btn {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.header-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Category Pills Container - Glassmorphic */
+.category-pills-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px 24px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+.pills-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-right: 20px;
+}
+
+/* Category Pills - Vibrant Gradients */
+.category-pill {
+    border-radius: 30px;
+    padding: 12px 24px;
+    cursor: move;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.category-pill::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.5s;
+}
+
+.category-pill:hover::before {
+    left: 100%;
+}
+
+.category-pill:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+}
+
+.category-pill.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+.category-pill.protein {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.category-pill.veg {
+    background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+}
+
+.category-pill.fruit {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.category-pill.carbs {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.category-pill.extras {
+    background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+}
+
+.category-pill span:first-child {
+    font-size: 20px;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+}
+
+/* Main Board */
+.main-board {
+    flex: 1;
+    padding: 24px;
+    overflow-x: auto;
+    overflow-y: auto;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* Category Columns - Glassmorphic */
+.category-column {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    min-width: 280px;
+    max-width: 280px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    overflow: hidden;
+    animation: slideIn 0.4s ease;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.category-column.drop-indicator-left::before,
+.day-column.drop-indicator-left::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+    border-radius: 2px;
+    z-index: 10;
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+}
+
+.category-column.drop-indicator-right::after,
+.day-column.drop-indicator-right::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+    border-radius: 2px;
+    z-index: 10;
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.category-header {
+    padding: 16px;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.category-header.protein {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.category-header.veg {
+    background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+}
+
+.category-header.fruit {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.category-header.carbs {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.category-header.extras {
+    background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+}
+
+.close-column {
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+}
+
+.close-column:hover {
+    background: rgba(255,255,255,0.3);
+    transform: rotate(90deg);
+}
+
+.category-items {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+/* Food Items - Glassmorphic Cards */
+.food-item {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 14px;
+    border-radius: 16px;
+    cursor: move;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.food-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.food-item.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+.food-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: white;
+    margin-bottom: 6px;
+}
+
+.food-portion {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.portion-input {
+    width: 60px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s;
+    color: white;
+}
+
+.portion-input:focus {
+    outline: none;
+    border-color: rgba(102, 126, 234, 0.8);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
+}
+
+.unit-select {
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+}
+
+.unit-select:focus {
+    outline: none;
+    border-color: rgba(102, 126, 234, 0.8);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.unit-select option {
+    background: #2a2a3e;
+    color: white;
+}
+
+.food-macros {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.macro {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.macro.kcal {
+    background: linear-gradient(135deg, rgba(240, 147, 251, 0.3), rgba(245, 87, 108, 0.3));
+}
+
+.macro.protein {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+}
+
+.macro.carbs {
+    background: linear-gradient(135deg, rgba(250, 112, 154, 0.3), rgba(254, 225, 64, 0.3));
+}
+
+.macro.fat {
+    background: linear-gradient(135deg, rgba(48, 207, 208, 0.3), rgba(51, 8, 103, 0.3));
+}
+
+.macro.cost {
+    background: linear-gradient(135deg, rgba(0, 210, 255, 0.3), rgba(58, 123, 213, 0.3));
+}
+
+/* Day Columns - Glassmorphic */
+.day-column {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    min-width: 380px;
+    max-width: 380px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 160px);
+    position: relative;
+}
+
+.day-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 18px 18px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.day-name {
+    font-size: 22px;
+    font-weight: 800;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.add-meal-btn {
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.2s;
+}
+
+.add-meal-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Meals Container */
+.meals-container {
+    flex: 1;
+    padding: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Meal - Glassmorphic */
+.meal {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+}
+
+.meal:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.meal-header {
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px 14px 0 0;
+}
+
+.meal-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.meal-header-bottom {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.meal-name {
+    font-weight: 700;
+    font-size: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.meal-time {
+    font-size: 13px;
+    color: white;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 3px 8px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.meal-controls {
+    display: flex;
+    gap: 6px;
+}
+
+.meal-control-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.meal-control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* Meal Drop Zone */
+.meal-drop-zone {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 0 0 14px 14px;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    min-height: 100px;
+}
+
+.food-modules-container {
+    padding: 4px;
+    transition: all 0.3s;
+}
+
+.food-modules-container.drag-over {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.add-food-zone {
+    margin-top: 6px;
+    padding: 8px 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    flex-shrink: 0;
+}
+
+.add-food-zone:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(102, 126, 234, 0.5);
+    transform: translateY(-1px);
+}
+
+.add-food-zone.drag-over {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.8);
+    box-shadow: inset 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+.add-food-text {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Food Modules in Meals - Glassmorphic */
+.food-module {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: move;
+    transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+}
+
+.food-module:hover {
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.food-module.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+.module-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.module-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: white;
+}
+
+.remove-module {
+    background: rgba(245, 87, 108, 0.3);
+    color: white;
+    border: 1px solid rgba(245, 87, 108, 0.5);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.remove-module:hover {
+    background: rgba(245, 87, 108, 0.5);
+    transform: rotate(90deg);
+}
+
+.module-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.module-portion-input {
+    width: 60px;
+    padding: 3px 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    color: white;
+}
+
+.module-portion-input:focus {
+    outline: none;
+    border-color: rgba(102, 126, 234, 0.8);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.module-unit-select {
+    padding: 3px 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: white;
+}
+
+.module-unit-select:focus {
+    outline: none;
+    border-color: rgba(102, 126, 234, 0.8);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.module-unit-select option {
+    background: #2a2a3e;
+    color: white;
+}
+
+.module-macros {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.module-macros .macro {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+/* Meal Totals */
+.meal-totals {
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0 0 14px 14px;
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.meal-total {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.meal-total-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+}
+
+.meal-total-value {
+    color: white;
+    font-weight: 800;
+}
+
+/* Day Totals - Glassmorphic */
+.day-totals {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0 0 18px 18px;
+}
+
+.day-totals-title {
+    font-weight: 800;
+    font-size: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.day-totals-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.day-total-item {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    padding: 8px 12px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.day-total-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+}
+
+.day-total-value {
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #f5576c 100%);
+}
+
+/* Animation for new elements */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-in {
+    animation: fadeInScale 0.3s ease;
+}

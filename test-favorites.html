@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorites Feature Test</title>
+    <link rel="stylesheet" href="styles-clean.css">
+</head>
+<body>
+    <div style="padding: 20px;">
+        <h1>🧪 Favorites Feature Test</h1>
+        <div style="display: flex; gap: 20px; margin: 20px 0;">
+            <button onclick="testAddFavorite()">Add Test Favorite</button>
+            <button onclick="testShowModal()">Show Favorites Modal</button>
+            <button onclick="testHistory()">Add to History</button>
+            <button onclick="testStats()">Show Stats</button>
+        </div>
+        
+        <div id="testResults" style="background: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3>Test Results:</h3>
+            <div id="results"></div>
+        </div>
+        
+        <!-- Sample food item for testing -->
+        <div class="food-item" draggable="true" data-food='{"name":"Test Chicken","category":"protein","baseQuantity":100,"baseUnit":"g","kcal":165,"protein":31,"carbs":0,"fat":3.6,"cost":3.50}'>
+            <div class="food-item-header">
+                <div class="food-name">Test Chicken</div>
+                <button class="favorite-btn" 
+                        onclick="event.stopPropagation(); window.favoritesManager.toggleFavorite(this)" 
+                        title="Add to favorites">
+                    🤍
+                </button>
+            </div>
+            <div class="food-portion">
+                <input type="number" class="portion-input" value="100" min="1" step="1">
+                <select class="unit-select">
+                    <option value="g">g</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script src="storage.js"></script>
+    <script src="favorites-manager.js"></script>
+    
+    <script>
+        function logResult(message) {
+            const results = document.getElementById('results');
+            results.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+        }
+        
+        function testAddFavorite() {
+            const testFood = {
+                name: 'Test Apple',
+                category: 'fruit',
+                baseQuantity: 1,
+                baseUnit: 'medium',
+                kcal: 95,
+                protein: 0.5,
+                carbs: 25,
+                fat: 0.3,
+                cost: 0.50
+            };
+            
+            const result = favoritesManager.addToFavorites(testFood);
+            logResult(`Add to favorites: ${result ? 'SUCCESS' : 'FAILED (already exists)'}`);
+        }
+        
+        function testShowModal() {
+            favoritesManager.showFavoritesModal();
+            logResult('Favorites modal opened');
+        }
+        
+        function testHistory() {
+            const testFood = {
+                name: 'Test Banana',
+                category: 'fruit',
+                baseQuantity: 1,
+                baseUnit: 'medium',
+                kcal: 105,
+                protein: 1.3,
+                carbs: 27,
+                fat: 0.4,
+                cost: 0.35
+            };
+            
+            favoritesManager.addToHistory(testFood);
+            logResult('Added to history');
+        }
+        
+        function testStats() {
+            const stats = favoritesManager.getStatistics();
+            logResult(`Stats - Favorites: ${stats.totalFavorites}, History: ${stats.totalHistoryItems}, Usage: ${stats.totalUsageCount}`);
+        }
+        
+        // Initialize
+        logResult('Favorites system initialized');
+    </script>
+</body>
+</html>

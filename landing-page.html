@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hannah.health - Meal Planning That Supports Your Health Journey</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Clean, minimal palette */
+            --primary: #2D3436;
+            --secondary: #636E72;
+            --accent: #00B894;
+            --accent-light: #55EFC4;
+            
+            /* Neutrals */
+            --white: #FFFFFF;
+            --off-white: #FDFDFD;
+            --light-gray: #F8F9FA;
+            --medium-gray: #B2BEC3;
+            --dark-gray: #636E72;
+            --charcoal: #2D3436;
+            
+            /* Soft backgrounds */
+            --bg-card: #FFFFFF;
+            --bg-section: #F8F9FA;
+            --bg-hover: #00B89410;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--off-white);
+            color: var(--charcoal);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--charcoal);
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--dark-gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
+        .sign-in-btn {
+            background: var(--accent);
+            color: var(--white);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sign-in-btn:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 140px 20px 80px;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #00B894 0%, #6C5CE7 50%, #00CEC9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .hero .subtitle {
+            font-size: 20px;
+            color: var(--dark-gray);
+            margin-bottom: 60px;
+            animation: fadeInUp 0.8s ease 0.2s;
+            animation-fill-mode: both;
+        }
+
+        .question {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--charcoal);
+            margin-bottom: 50px;
+            animation: fadeInUp 0.8s ease 0.4s;
+            animation-fill-mode: both;
+        }
+
+        /* Cards Section */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+            animation: fadeInUp 0.8s ease 0.6s;
+            animation-fill-mode: both;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 3px 8px rgba(0, 0, 0, 0.08);
+            border-color: var(--accent);
+            background: var(--bg-hover);
+        }
+
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .card.medical .card-icon {
+            animation-delay: 0s;
+        }
+
+        .card.recovery .card-icon {
+            animation-delay: 1s;
+        }
+
+        .card.wellness .card-icon {
+            animation-delay: 2s;
+        }
+
+        .card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--charcoal);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .card p {
+            color: var(--dark-gray);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Stories Section */
+        .stories {
+            margin-top: -100px;
+            padding: 60px 20px;
+            background: #F8F9FA;
+        }
+
+        .stories-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stories-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .stories-header h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--charcoal);
+            margin-bottom: 16px;
+        }
+
+        .stories-header p {
+            font-size: 18px;
+            color: var(--dark-gray);
+        }
+
+        .stories-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .story-card {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+        }
+
+        .story-label {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--accent);
+            background: var(--bg-hover);
+            border: 1px solid var(--accent);
+        }
+
+        .story-content {
+            color: var(--charcoal);
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .story-content p {
+            margin-bottom: 16px;
+        }
+
+        .story-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Trust Statement */
+        .trust-statement {
+            text-align: center;
+            padding: 60px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .trust-statement p {
+            font-size: 18px;
+            color: var(--secondary);
+            line-height: 1.8;
+            padding: 40px;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            border: 1px solid #E5E7EB;
+        }
+        
+        .trust-statement p strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 12px;
+            font-size: 20px;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--charcoal);
+            color: var(--white);
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        footer p {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero .subtitle {
+                font-size: 18px;
+            }
+
+            .question {
+                font-size: 24px;
+            }
+
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+
+            .stories-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .story-card {
+                padding: 30px;
+            }
+        }
+
+        /* Loading state for cards */
+        .card.loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .card.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            margin: -15px 0 0 -15px;
+            border: 3px solid var(--light-gray);
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">Hannah.health</a>
+            <div class="nav-links">
+                <a href="#our-story" class="nav-link">Our Story</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#" class="sign-in-btn">Sign In</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Hannah.health</h1>
+        <p class="subtitle">Meal planning that supports your health journey, not a quick fix</p>
+        
+        <h2 class="question">What brought you here today?</h2>
+        
+        <div class="cards-container">
+            <!-- Medical Condition Card -->
+            <div class="card medical" onclick="handleCardClick('medical')">
+                <div class="card-icon">🏥</div>
+                <h3>I'm managing a medical condition</h3>
+                <p>Get meal plans tailored to your specific health needs</p>
+            </div>
+
+            <!-- Recovery Card -->
+            <div class="card recovery" onclick="handleCardClick('recovery')">
+                <div class="card-icon">🌱</div>
+                <h3>I want to improve my relationship with food</h3>
+                <p>Focus on nourishment and balance without the numbers</p>
+            </div>
+
+            <!-- Wellness Card -->
+            <div class="card wellness" onclick="handleCardClick('wellness')">
+                <div class="card-icon">✨</div>
+                <h3>I want to eat healthier</h3>
+                <p>Build sustainable habits for better energy and wellbeing</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stories Section -->
+    <section class="stories" id="our-story">
+        <div class="stories-container">
+            <div class="stories-header">
+                <h2>Our Story</h2>
+                <p>Built by real people facing real health challenges</p>
+            </div>
+
+            <div class="stories-grid">
+                <!-- Vince's Story -->
+                <div class="story-card him">
+                    <span class="story-label">Vince</span>
+                    <div class="story-content">
+                        <p>I was the fitness guy - endurance cycling, always active. Then Hannah became pregnant, life got busy as it does, and I started working more and paying attention to my health less.</p>
+                        <p>In just 9 months, my liver inflammation markers tripled. Only 8kg heavier, but suddenly diagnosed with NAFLD.</p>
+                        <p>The shock was my wake-up call. I didn't want a fad diet - I wanted to change how I approached food for life. I built this app to be the companion I needed.</p>
+                    </div>
+                </div>
+
+                <!-- Hannah's Story -->
+                <div class="story-card her">
+                    <span class="story-label">Hannah</span>
+                    <div class="story-content">
+                        <p>My relationship with food has been complicated. It's still a daily choice, and it's never perfect, but with the right support it gets a little easier every day.</p>
+                        <p>This isn't a magic solution - I have a team: doctors, nutritionist, therapist. But having a meal planning tool that doesn't trigger me, that focuses on nourishment over numbers?</p>
+                        <p>That's one less battle to fight.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Statement -->
+    <section class="trust-statement">
+        <p>
+            <strong>Hannah isn't a replacement for medical care.</strong><br>
+            It's a tool designed to support the guidance from your healthcare team.
+        </p>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Hannah.health - Built with care for your health journey</p>
+    </footer>
+
+    <script>
+        // Handle card clicks
+        function handleCardClick(type) {
+            // Add loading state
+            event.currentTarget.classList.add('loading');
+            
+            // Store selection in sessionStorage
+            sessionStorage.setItem('userPath', type);
+            
+            // Redirect to onboarding after a brief delay
+            setTimeout(() => {
+                window.location.href = `/onboarding?path=${type}`;
+            }, 500);
+        }
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navigation
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+            } else {
+                nav.style.boxShadow = 'none';
+            }
+        });
+
+        // Add intersection observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe story cards
+        document.querySelectorAll('.story-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban Meal Planner - Wireframe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        /* Scoreboard - Sticky Top */
+        .scoreboard {
+            position: sticky;
+            top: 0;
+            background: white;
+            border-bottom: 2px solid #e5e5e7;
+            padding: 16px 20px;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .scoreboard-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-metrics {
+            display: flex;
+            gap: 32px;
+        }
+
+        .metric {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            background: #f9f9fb;
+            border-radius: 12px;
+            min-width: 100px;
+        }
+
+        .metric.on-target {
+            background: #d4f4dd;
+            border: 1px solid #52c41a;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .date-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Main Layout */
+        .main-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            display: flex;
+            gap: 20px;
+            padding: 0 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Food Library - Left Sidebar */
+        .food-library {
+            width: 280px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .library-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e5e7;
+            background: #fafafa;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            color: #86868b;
+            cursor: pointer;
+            border: none;
+            background: none;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #007aff;
+            background: white;
+            border-bottom: 2px solid #007aff;
+        }
+
+        .library-search {
+            padding: 12px;
+            border-bottom: 1px solid #e5e5e7;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .library-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .food-card {
+            background: #f9f9fb;
+            border: 1px solid #e5e5e7;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: move;
+            transition: all 0.2s;
+        }
+
+        .food-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: #007aff;
+        }
+
+        .food-card.dragging {
+            opacity: 0.5;
+        }
+
+        .food-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .food-macros {
+            display: flex;
+            gap: 8px;
+            font-size: 11px;
+            color: #86868b;
+            margin-bottom: 4px;
+        }
+
+        .macro-badge {
+            background: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .food-cost {
+            font-size: 13px;
+            color: #52c41a;
+            font-weight: 500;
+        }
+
+        /* Meal Board */
+        .meal-board {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .board-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e5e7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+        }
+
+        .view-btn {
+            padding: 6px 12px;
+            background: #f9f9fb;
+            border: 1px solid #d2d2d7;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .view-btn.active {
+            background: #007aff;
+            color: white;
+            border-color: #007aff;
+        }
+
+        .board-columns {
+            flex: 1;
+            display: flex;
+            gap: 16px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .meal-column {
+            flex: 1;
+            min-width: 200px;
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .column-header {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e5e7;
+        }
+
+        .column-totals {
+            font-size: 11px;
+            color: #86868b;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .drop-zone {
+            min-height: 400px;
+            background: white;
+            border: 2px dashed #e5e5e7;
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+        }
+
+        .drop-zone.drag-over {
+            background: #e3f2fd;
+            border-color: #007aff;
+        }
+
+        .drop-zone-empty {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #c7c7cc;
+            font-size: 13px;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .meal-item {
+            background: white;
+            border: 1px solid #e5e5e7;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .meal-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 6px;
+        }
+
+        .meal-item-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .meal-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .action-btn {
+            padding: 2px 6px;
+            background: #f9f9fb;
+            border: 1px solid #e5e5e7;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            color: #86868b;
+        }
+
+        .action-btn:hover {
+            background: #007aff;
+            color: white;
+            border-color: #007aff;
+        }
+
+        .meal-item-macros {
+            display: flex;
+            gap: 6px;
+            font-size: 10px;
+            color: #86868b;
+        }
+
+        /* Quick Actions Bar */
+        .quick-actions {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #007aff;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .fab.secondary {
+            width: 48px;
+            height: 48px;
+            background: white;
+            color: #007aff;
+            border: 2px solid #007aff;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .food-library {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .board-columns {
+                flex-direction: column;
+            }
+            
+            .meal-column {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sticky Scoreboard -->
+    <div class="scoreboard">
+        <div class="scoreboard-inner">
+            <div class="score-metrics">
+                <div class="metric on-target">
+                    <div class="metric-value">1,850</div>
+                    <div class="metric-label">Calories</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">165g</div>
+                    <div class="metric-label">Protein</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">180g</div>
+                    <div class="metric-label">Carbs</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">65g</div>
+                    <div class="metric-label">Fat</div>
+                </div>
+                <div class="metric on-target">
+                    <div class="metric-value">$12.50</div>
+                    <div class="metric-label">Cost</div>
+                </div>
+            </div>
+            <div class="date-selector">
+                <button class="date-btn">←</button>
+                <button class="date-btn">Today</button>
+                <button class="date-btn">→</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Food Library Sidebar -->
+        <div class="food-library">
+            <div class="library-tabs">
+                <button class="tab active">Proteins</button>
+                <button class="tab">Carbs</button>
+                <button class="tab">Veg</button>
+                <button class="tab">Extras</button>
+            </div>
+            <div class="library-search">
+                <input type="text" class="search-input" placeholder="Search foods...">
+            </div>
+            <div class="library-items">
+                <div class="food-card" draggable="true">
+                    <div class="food-name">Grilled Chicken Breast</div>
+                    <div class="food-macros">
+                        <span class="macro-badge">165 kcal</span>
+                        <span class="macro-badge">31g P</span>
+                        <span class="macro-badge">0g C</span>
+                        <span class="macro-badge">3.6g F</span>
+                    </div>
+                    <div class="food-cost">$3.50</div>
+                </div>
+                <div class="food-card" draggable="true">
+                    <div class="food-name">Salmon Fillet</div>
+                    <div class="food-macros">
+                        <span class="macro-badge">206 kcal</span>
+                        <span class="macro-badge">22g P</span>
+                        <span class="macro-badge">0g C</span>
+                        <span class="macro-badge">13g F</span>
+                    </div>
+                    <div class="food-cost">$5.75</div>
+                </div>
+                <div class="food-card" draggable="true">
+                    <div class="food-name">Tofu (Firm)</div>
+                    <div class="food-macros">
+                        <span class="macro-badge">144 kcal</span>
+                        <span class="macro-badge">15g P</span>
+                        <span class="macro-badge">3.5g C</span>
+                        <span class="macro-badge">8.7g F</span>
+                    </div>
+                    <div class="food-cost">$2.25</div>
+                </div>
+                <div class="food-card" draggable="true">
+                    <div class="food-name">Ground Turkey</div>
+                    <div class="food-macros">
+                        <span class="macro-badge">200 kcal</span>
+                        <span class="macro-badge">27g P</span>
+                        <span class="macro-badge">0g C</span>
+                        <span class="macro-badge">11g F</span>
+                    </div>
+                    <div class="food-cost">$4.00</div>
+                </div>
+                <div class="food-card" draggable="true">
+                    <div class="food-name">Black Beans</div>
+                    <div class="food-macros">
+                        <span class="macro-badge">227 kcal</span>
+                        <span class="macro-badge">15g P</span>
+                        <span class="macro-badge">41g C</span>
+                        <span class="macro-badge">0.9g F</span>
+                    </div>
+                    <div class="food-cost">$1.50</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meal Planning Board -->
+        <div class="meal-board">
+            <div class="board-header">
+                <h2 style="font-size: 18px; font-weight: 600;">Monday, Dec 18</h2>
+                <div class="view-toggle">
+                    <button class="view-btn active">Daily View</button>
+                    <button class="view-btn">Weekly View</button>
+                </div>
+            </div>
+            <div class="board-columns">
+                <!-- Breakfast Column -->
+                <div class="meal-column">
+                    <div class="column-header">Breakfast</div>
+                    <div class="column-totals">
+                        <span>450 kcal</span>
+                        <span>35g P</span>
+                        <span>45g C</span>
+                        <span>12g F</span>
+                        <span>$4.25</span>
+                    </div>
+                    <div class="drop-zone">
+                        <div class="meal-item">
+                            <div class="meal-item-header">
+                                <div class="meal-item-name">Scrambled Eggs (3)</div>
+                                <div class="meal-actions">
+                                    <button class="action-btn">Swap</button>
+                                    <button class="action-btn">×</button>
+                                </div>
+                            </div>
+                            <div class="meal-item-macros">
+                                <span>234 kcal</span>
+                                <span>20g P</span>
+                                <span>2g C</span>
+                                <span>16g F</span>
+                                <span>$1.75</span>
+                            </div>
+                        </div>
+                        <div class="meal-item">
+                            <div class="meal-item-header">
+                                <div class="meal-item-name">Whole Wheat Toast</div>
+                                <div class="meal-actions">
+                                    <button class="action-btn">Swap</button>
+                                    <button class="action-btn">×</button>
+                                </div>
+                            </div>
+                            <div class="meal-item-macros">
+                                <span>140 kcal</span>
+                                <span>6g P</span>
+                                <span>24g C</span>
+                                <span>2g F</span>
+                                <span>$0.50</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lunch Column -->
+                <div class="meal-column">
+                    <div class="column-header">Lunch</div>
+                    <div class="column-totals">
+                        <span>620 kcal</span>
+                        <span>52g P</span>
+                        <span>65g C</span>
+                        <span>18g F</span>
+                        <span>$7.50</span>
+                    </div>
+                    <div class="drop-zone">
+                        <div class="meal-item">
+                            <div class="meal-item-header">
+                                <div class="meal-item-name">Grilled Chicken Breast</div>
+                                <div class="meal-actions">
+                                    <button class="action-btn">Swap</button>
+                                    <button class="action-btn">×</button>
+                                </div>
+                            </div>
+                            <div class="meal-item-macros">
+                                <span>165 kcal</span>
+                                <span>31g P</span>
+                                <span>0g C</span>
+                                <span>3.6g F</span>
+                                <span>$3.50</span>
+                            </div>
+                        </div>
+                        <div class="meal-item">
+                            <div class="meal-item-header">
+                                <div class="meal-item-name">Brown Rice (1 cup)</div>
+                                <div class="meal-actions">
+                                    <button class="action-btn">Swap</button>
+                                    <button class="action-btn">×</button>
+                                </div>
+                            </div>
+                            <div class="meal-item-macros">
+                                <span>216 kcal</span>
+                                <span>5g P</span>
+                                <span>45g C</span>
+                                <span>2g F</span>
+                                <span>$1.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dinner Column -->
+                <div class="meal-column">
+                    <div class="column-header">Dinner</div>
+                    <div class="column-totals">
+                        <span>580 kcal</span>
+                        <span>48g P</span>
+                        <span>55g C</span>
+                        <span>20g F</span>
+                        <span>$8.25</span>
+                    </div>
+                    <div class="drop-zone">
+                        <div class="drop-zone-empty">
+                            Drag items here
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Snacks Column -->
+                <div class="meal-column">
+                    <div class="column-header">Snacks</div>
+                    <div class="column-totals">
+                        <span>200 kcal</span>
+                        <span>8g P</span>
+                        <span>15g C</span>
+                        <span>12g F</span>
+                        <span>$2.50</span>
+                    </div>
+                    <div class="drop-zone">
+                        <div class="meal-item">
+                            <div class="meal-item-header">
+                                <div class="meal-item-name">Greek Yogurt</div>
+                                <div class="meal-actions">
+                                    <button class="action-btn">Swap</button>
+                                    <button class="action-btn">×</button>
+                                </div>
+                            </div>
+                            <div class="meal-item-macros">
+                                <span>100 kcal</span>
+                                <span>10g P</span>
+                                <span>6g C</span>
+                                <span>0g F</span>
+                                <span>$1.50</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Action Buttons -->
+    <div class="quick-actions">
+        <button class="fab secondary" title="Generate Shopping List">🛒</button>
+        <button class="fab secondary" title="Undo">↶</button>
+        <button class="fab" title="Add Custom Food">+</button>
+    </div>
+
+    <script>
+        // Basic drag and drop functionality
+        let draggedElement = null;
+
+        // Add drag listeners to food cards
+        document.querySelectorAll('.food-card').forEach(card => {
+            card.addEventListener('dragstart', (e) => {
+                draggedElement = e.target;
+                e.target.classList.add('dragging');
+            });
+
+            card.addEventListener('dragend', (e) => {
+                e.target.classList.remove('dragging');
+            });
+        });
+
+        // Add drop zone listeners
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('drag-over');
+            });
+
+            zone.addEventListener('dragleave', (e) => {
+                zone.classList.remove('drag-over');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                
+                // Remove empty message if exists
+                const emptyMsg = zone.querySelector('.drop-zone-empty');
+                if (emptyMsg) {
+                    emptyMsg.remove();
+                }
+
+                // Create a new meal item from the dragged food card
+                if (draggedElement && draggedElement.classList.contains('food-card')) {
+                    const foodName = draggedElement.querySelector('.food-name').textContent;
+                    const macros = draggedElement.querySelector('.food-macros').innerHTML;
+                    const cost = draggedElement.querySelector('.food-cost').textContent;
+                    
+                    const mealItem = document.createElement('div');
+                    mealItem.className = 'meal-item';
+                    mealItem.innerHTML = `
+                        <div class="meal-item-header">
+                            <div class="meal-item-name">${foodName}</div>
+                            <div class="meal-actions">
+                                <button class="action-btn">Swap</button>
+                                <button class="action-btn">×</button>
+                            </div>
+                        </div>
+                        <div class="meal-item-macros">
+                            ${macros.replace(/macro-badge/g, '')}
+                            <span>${cost}</span>
+                        </div>
+                    `;
+                    
+                    zone.appendChild(mealItem);
+                    
+                    // Update totals (in real app this would recalculate)
+                    updateTotals();
+                }
+            });
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                // In real app, this would filter the food items
+            });
+        });
+
+        // View toggle
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                // In real app, this would switch between daily/weekly view
+            });
+        });
+
+        // Delete items
+        document.addEventListener('click', (e) => {
+            if (e.target.textContent === '×' && e.target.classList.contains('action-btn')) {
+                e.target.closest('.meal-item').remove();
+                updateTotals();
+            }
+        });
+
+        // Mock function to update totals
+        function updateTotals() {
+            // In real app, this would recalculate all totals
+            console.log('Updating totals...');
+        }
+    </script>
+</body>
+</html>

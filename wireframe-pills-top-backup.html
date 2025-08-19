@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban Meal Planner - Modular Design</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #1d1d1f;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 2px solid #e1e4e8;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #dfe1e6;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .header-btn:hover {
+            background: #f4f5f7;
+            border-color: #0052cc;
+        }
+
+        /* Main Board Container */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Days Board */
+        .days-board {
+            flex: 1;
+            display: flex;
+            gap: 16px;
+            padding: 20px;
+            overflow-x: auto;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Day Column */
+        .day-column {
+            background: white;
+            border-radius: 12px;
+            min-width: 340px;
+            max-width: 340px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 300px);
+        }
+
+        .day-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .day-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .day-date {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* Day Content */
+        .day-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        /* Meal Card */
+        .meal-card {
+            background: #f8f9fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .meal-header {
+            background: white;
+            padding: 10px 12px;
+            border-bottom: 1px solid #e1e4e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .meal-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meal-time {
+            font-size: 11px;
+            color: #6c757d;
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .meal-expand {
+            font-size: 12px;
+            color: #6c757d;
+            transition: transform 0.2s;
+        }
+
+        .meal-card.expanded .meal-expand {
+            transform: rotate(90deg);
+        }
+
+        /* Meal Content */
+        .meal-content {
+            padding: 8px;
+        }
+
+        /* Food Module Card */
+        .food-module {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: move;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .food-module:hover {
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+
+        .food-module.dragging {
+            opacity: 0.5;
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .module-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #2c3e50;
+        }
+
+        .module-portion {
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        .module-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .food-module:hover .module-actions {
+            opacity: 1;
+        }
+
+        .module-btn {
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: #f1f3f4;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .module-btn:hover {
+            background: #e8eaed;
+        }
+
+        /* Module Totals */
+        .module-totals {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .module-stat {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #495057;
+        }
+
+        .module-stat.calories {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .module-stat.protein {
+            background: #cfe2ff;
+            color: #052c65;
+        }
+
+        .module-stat.cost {
+            background: #d1f2eb;
+            color: #0a5d4e;
+        }
+
+        /* Meal Totals */
+        .meal-totals {
+            background: #e9ecef;
+            padding: 8px 10px;
+            margin-top: 8px;
+            border-radius: 6px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 11px;
+        }
+
+        .meal-total-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .meal-total-label {
+            color: #6c757d;
+        }
+
+        .meal-total-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Add Module Button */
+        .add-module-btn {
+            width: 100%;
+            padding: 8px;
+            background: transparent;
+            border: 2px dashed #dee2e6;
+            border-radius: 6px;
+            color: #6c757d;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .add-module-btn:hover {
+            background: #f8f9fa;
+            border-color: #6c757d;
+        }
+
+        /* Day Totals */
+        .day-totals {
+            background: white;
+            border-top: 2px solid #e1e4e8;
+            padding: 12px 16px;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .day-totals-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        .day-totals-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .day-total-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .day-total-label {
+            color: #6c757d;
+        }
+
+        .day-total-value {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .day-total-value.good {
+            color: #28a745;
+        }
+
+        .day-total-value.warning {
+            color: #ffc107;
+        }
+
+        .day-total-value.over {
+            color: #dc3545;
+        }
+
+        /* Category Drawer - Bottom */
+        .category-drawer {
+            background: white;
+            border-top: 2px solid #e1e4e8;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            transition: height 0.3s ease;
+            position: relative;
+        }
+
+        .category-drawer.expanded {
+            height: 400px;
+        }
+
+        .drawer-handle {
+            background: #f8f9fa;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .drawer-handle:hover {
+            background: #e9ecef;
+        }
+
+        .handle-bar {
+            width: 40px;
+            height: 4px;
+            background: #adb5bd;
+            border-radius: 2px;
+            margin: 0 auto;
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 2px;
+            padding: 0 20px;
+            background: #f8f9fa;
+            overflow-x: auto;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .category-tab {
+            padding: 12px 20px;
+            background: white;
+            border: none;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            color: #6c757d;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .category-tab:hover {
+            background: #f8f9fa;
+        }
+
+        .category-tab.active {
+            background: white;
+            color: #2c3e50;
+            border-bottom: 2px solid #007bff;
+        }
+
+        /* Category Content */
+        .category-content {
+            flex: 1;
+            overflow-x: auto;
+            padding: 16px 20px;
+            background: white;
+        }
+
+        .category-items {
+            display: flex;
+            gap: 12px;
+            min-height: 60px;
+        }
+
+        /* Category Food Item */
+        .category-food-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            min-width: 180px;
+            cursor: move;
+            transition: all 0.2s;
+        }
+
+        .category-food-item:hover {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .category-food-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .category-food-portion {
+            font-size: 11px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        .category-food-stats {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .category-stat {
+            background: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 10px;
+            color: #495057;
+        }
+
+        /* Expanded Category Panel */
+        .category-panel {
+            display: none;
+            position: absolute;
+            left: 360px;
+            top: 80px;
+            width: 300px;
+            height: calc(100vh - 280px);
+            background: white;
+            border: 2px solid #e1e4e8;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .category-panel.show {
+            display: block;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .panel-close {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #f8f9fa;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .panel-items {
+            display: grid;
+            gap: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .day-column {
+                min-width: 280px;
+            }
+            
+            .category-drawer {
+                height: 100px;
+            }
+            
+            .category-drawer.expanded {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">🍱 Weekly Meal Planner</div>
+        <div class="header-controls">
+            <button class="header-btn">← Previous Week</button>
+            <button class="header-btn">Dec 18-24, 2024</button>
+            <button class="header-btn">Next Week →</button>
+            <button class="header-btn">📊 Analytics</button>
+            <button class="header-btn">🛒 Shopping List</button>
+            <button class="header-btn">⚙️ Settings</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Days Board -->
+        <div class="days-board">
+            <!-- Monday Column -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Monday</div>
+                    <div class="day-date">Dec 18, 2024</div>
+                </div>
+                
+                <div class="day-content">
+                    <!-- Breakfast Meal Card -->
+                    <div class="meal-card expanded">
+                        <div class="meal-header">
+                            <div class="meal-title">
+                                🍳 Breakfast
+                                <span class="meal-time">7:00 AM</span>
+                            </div>
+                            <span class="meal-expand">▶</span>
+                        </div>
+                        <div class="meal-content">
+                            <!-- Food Module 1 -->
+                            <div class="food-module" draggable="true">
+                                <div class="module-header">
+                                    <div>
+                                        <div class="module-name">Scrambled Eggs</div>
+                                        <div class="module-portion">2 large eggs</div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="module-btn">🔄</button>
+                                        <button class="module-btn">✕</button>
+                                    </div>
+                                </div>
+                                <div class="module-totals">
+                                    <span class="module-stat calories">156 kcal</span>
+                                    <span class="module-stat protein">13g P</span>
+                                    <span class="module-stat">1.2g C</span>
+                                    <span class="module-stat">11g F</span>
+                                    <span class="module-stat cost">$1.20</span>
+                                </div>
+                            </div>
+
+                            <!-- Food Module 2 -->
+                            <div class="food-module" draggable="true">
+                                <div class="module-header">
+                                    <div>
+                                        <div class="module-name">Whole Wheat Toast</div>
+                                        <div class="module-portion">2 slices</div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="module-btn">🔄</button>
+                                        <button class="module-btn">✕</button>
+                                    </div>
+                                </div>
+                                <div class="module-totals">
+                                    <span class="module-stat calories">140 kcal</span>
+                                    <span class="module-stat">6g P</span>
+                                    <span class="module-stat">24g C</span>
+                                    <span class="module-stat">2g F</span>
+                                    <span class="module-stat cost">$0.50</span>
+                                </div>
+                            </div>
+
+                            <!-- Food Module 3 -->
+                            <div class="food-module" draggable="true">
+                                <div class="module-header">
+                                    <div>
+                                        <div class="module-name">Mushrooms</div>
+                                        <div class="module-portion">1/2 cup sautéed</div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="module-btn">🔄</button>
+                                        <button class="module-btn">✕</button>
+                                    </div>
+                                </div>
+                                <div class="module-totals">
+                                    <span class="module-stat calories">15 kcal</span>
+                                    <span class="module-stat">2g P</span>
+                                    <span class="module-stat">2g C</span>
+                                    <span class="module-stat">0.3g F</span>
+                                    <span class="module-stat cost">$0.75</span>
+                                </div>
+                            </div>
+
+                            <button class="add-module-btn">+ Add food module</button>
+
+                            <!-- Meal Totals -->
+                            <div class="meal-totals">
+                                <div class="meal-total-item">
+                                    <span class="meal-total-label">Total:</span>
+                                    <span class="meal-total-value">311 kcal</span>
+                                </div>
+                                <div class="meal-total-item">
+                                    <span class="meal-total-value">21g P</span>
+                                </div>
+                                <div class="meal-total-item">
+                                    <span class="meal-total-value">27.2g C</span>
+                                </div>
+                                <div class="meal-total-item">
+                                    <span class="meal-total-value">13.3g F</span>
+                                </div>
+                                <div class="meal-total-item">
+                                    <span class="meal-total-value">$2.45</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Morning Tea Meal Card -->
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <div class="meal-title">
+                                ☕ Morning Tea
+                                <span class="meal-time">10:00 AM</span>
+                            </div>
+                            <span class="meal-expand">▶</span>
+                        </div>
+                    </div>
+
+                    <!-- Lunch Meal Card -->
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <div class="meal-title">
+                                🥗 Lunch
+                                <span class="meal-time">12:30 PM</span>
+                            </div>
+                            <span class="meal-expand">▶</span>
+                        </div>
+                    </div>
+
+                    <!-- Afternoon Snack Meal Card -->
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <div class="meal-title">
+                                🍎 Afternoon Snack
+                                <span class="meal-time">3:00 PM</span>
+                            </div>
+                            <span class="meal-expand">▶</span>
+                        </div>
+                    </div>
+
+                    <!-- Dinner Meal Card -->
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <div class="meal-title">
+                                🍽️ Dinner
+                                <span class="meal-time">6:30 PM</span>
+                            </div>
+                            <span class="meal-expand">▶</span>
+                        </div>
+                    </div>
+
+                    <!-- Evening Snack Meal Card -->
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <div class="meal-title">
+                                🌙 Evening Snack
+                                <span class="meal-time">8:30 PM</span>
+                            </div>
+                            <span class="meal-expand">▶</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day Totals -->
+                <div class="day-totals">
+                    <div class="day-totals-title">DAY TOTALS</div>
+                    <div class="day-totals-grid">
+                        <div class="day-total-item">
+                            <span class="day-total-label">Calories:</span>
+                            <span class="day-total-value good">1,850</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Protein:</span>
+                            <span class="day-total-value good">165g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Carbs:</span>
+                            <span class="day-total-value">180g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Fat:</span>
+                            <span class="day-total-value warning">75g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Cost:</span>
+                            <span class="day-total-value good">$22.50</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Target:</span>
+                            <span class="day-total-value">2,000 kcal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tuesday Column -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Tuesday</div>
+                    <div class="day-date">Dec 19, 2024</div>
+                </div>
+                
+                <div class="day-content">
+                    <!-- Meal cards here -->
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <div class="meal-title">
+                                🍳 Breakfast
+                                <span class="meal-time">7:00 AM</span>
+                            </div>
+                            <span class="meal-expand">▶</span>
+                        </div>
+                    </div>
+                    
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <div class="meal-title">
+                                ☕ Morning Tea
+                                <span class="meal-time">10:00 AM</span>
+                            </div>
+                            <span class="meal-expand">▶</span>
+                        </div>
+                    </div>
+                    
+                    <div class="meal-card">
+                        <div class="meal-header">
+                            <div class="meal-title">
+                                🥗 Lunch
+                                <span class="meal-time">12:30 PM</span>
+                            </div>
+                            <span class="meal-expand">▶</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="day-totals">
+                    <div class="day-totals-title">DAY TOTALS</div>
+                    <div class="day-totals-grid">
+                        <div class="day-total-item">
+                            <span class="day-total-label">Calories:</span>
+                            <span class="day-total-value">0</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Protein:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Carbs:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Fat:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Cost:</span>
+                            <span class="day-total-value">$0.00</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Target:</span>
+                            <span class="day-total-value">2,000 kcal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wednesday Column -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Wednesday</div>
+                    <div class="day-date">Dec 20, 2024</div>
+                </div>
+                
+                <div class="day-content">
+                    <!-- Meal cards here -->
+                </div>
+
+                <div class="day-totals">
+                    <div class="day-totals-title">DAY TOTALS</div>
+                    <div class="day-totals-grid">
+                        <div class="day-total-item">
+                            <span class="day-total-label">Calories:</span>
+                            <span class="day-total-value">0</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Protein:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Carbs:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Fat:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Cost:</span>
+                            <span class="day-total-value">$0.00</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Target:</span>
+                            <span class="day-total-value">2,000 kcal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thursday Column -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Thursday</div>
+                    <div class="day-date">Dec 21, 2024</div>
+                </div>
+                
+                <div class="day-content">
+                    <!-- Meal cards here -->
+                </div>
+
+                <div class="day-totals">
+                    <div class="day-totals-title">DAY TOTALS</div>
+                    <div class="day-totals-grid">
+                        <div class="day-total-item">
+                            <span class="day-total-label">Calories:</span>
+                            <span class="day-total-value">0</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Protein:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Carbs:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Fat:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Cost:</span>
+                            <span class="day-total-value">$0.00</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Target:</span>
+                            <span class="day-total-value">2,000 kcal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Friday Column -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Friday</div>
+                    <div class="day-date">Dec 22, 2024</div>
+                </div>
+                
+                <div class="day-content">
+                    <!-- Meal cards here -->
+                </div>
+
+                <div class="day-totals">
+                    <div class="day-totals-title">DAY TOTALS</div>
+                    <div class="day-totals-grid">
+                        <div class="day-total-item">
+                            <span class="day-total-label">Calories:</span>
+                            <span class="day-total-value">0</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Protein:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Carbs:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Fat:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Cost:</span>
+                            <span class="day-total-value">$0.00</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Target:</span>
+                            <span class="day-total-value">2,000 kcal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saturday Column -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Saturday</div>
+                    <div class="day-date">Dec 23, 2024</div>
+                </div>
+                
+                <div class="day-content">
+                    <!-- Meal cards here -->
+                </div>
+
+                <div class="day-totals">
+                    <div class="day-totals-title">DAY TOTALS</div>
+                    <div class="day-totals-grid">
+                        <div class="day-total-item">
+                            <span class="day-total-label">Calories:</span>
+                            <span class="day-total-value">0</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Protein:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Carbs:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Fat:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Cost:</span>
+                            <span class="day-total-value">$0.00</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Target:</span>
+                            <span class="day-total-value">2,000 kcal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sunday Column -->
+            <div class="day-column">
+                <div class="day-header">
+                    <div class="day-name">Sunday</div>
+                    <div class="day-date">Dec 24, 2024</div>
+                </div>
+                
+                <div class="day-content">
+                    <!-- Meal cards here -->
+                </div>
+
+                <div class="day-totals">
+                    <div class="day-totals-title">DAY TOTALS</div>
+                    <div class="day-totals-grid">
+                        <div class="day-total-item">
+                            <span class="day-total-label">Calories:</span>
+                            <span class="day-total-value">0</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Protein:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Carbs:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Fat:</span>
+                            <span class="day-total-value">0g</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Cost:</span>
+                            <span class="day-total-value">$0.00</span>
+                        </div>
+                        <div class="day-total-item">
+                            <span class="day-total-label">Target:</span>
+                            <span class="day-total-value">2,000 kcal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Drawer -->
+        <div class="category-drawer" id="categoryDrawer">
+            <div class="drawer-handle" onclick="toggleDrawer()">
+                <div class="handle-bar"></div>
+            </div>
+            <div class="category-tabs">
+                <button class="category-tab active" onclick="switchCategory('proteins')">🥩 Proteins</button>
+                <button class="category-tab" onclick="switchCategory('veg')">🥦 Vegetables</button>
+                <button class="category-tab" onclick="switchCategory('fruit')">🍎 Fruits</button>
+                <button class="category-tab" onclick="switchCategory('carbs')">🍞 Carbs</button>
+                <button class="category-tab" onclick="switchCategory('extras')">🧈 Extras</button>
+                <button class="category-tab" onclick="switchCategory('beverages')">☕ Beverages</button>
+            </div>
+            <div class="category-content">
+                <div class="category-items" id="categoryItems">
+                    <!-- Protein Items -->
+                    <div class="category-food-item" draggable="true">
+                        <div class="category-food-name">Chicken Breast</div>
+                        <div class="category-food-portion">100g grilled</div>
+                        <div class="category-food-stats">
+                            <span class="category-stat">165 kcal</span>
+                            <span class="category-stat">31g P</span>
+                            <span class="category-stat">0g C</span>
+                            <span class="category-stat">3.6g F</span>
+                            <span class="category-stat">$3.50</span>
+                        </div>
+                    </div>
+                    
+                    <div class="category-food-item" draggable="true">
+                        <div class="category-food-name">Salmon</div>
+                        <div class="category-food-portion">100g fillet</div>
+                        <div class="category-food-stats">
+                            <span class="category-stat">206 kcal</span>
+                            <span class="category-stat">22g P</span>
+                            <span class="category-stat">0g C</span>
+                            <span class="category-stat">13g F</span>
+                            <span class="category-stat">$5.75</span>
+                        </div>
+                    </div>
+                    
+                    <div class="category-food-item" draggable="true">
+                        <div class="category-food-name">Eggs</div>
+                        <div class="category-food-portion">2 large</div>
+                        <div class="category-food-stats">
+                            <span class="category-stat">156 kcal</span>
+                            <span class="category-stat">13g P</span>
+                            <span class="category-stat">1.2g C</span>
+                            <span class="category-stat">11g F</span>
+                            <span class="category-stat">$1.20</span>
+                        </div>
+                    </div>
+                    
+                    <div class="category-food-item" draggable="true">
+                        <div class="category-food-name">Tofu</div>
+                        <div class="category-food-portion">150g firm</div>
+                        <div class="category-food-stats">
+                            <span class="category-stat">144 kcal</span>
+                            <span class="category-stat">15g P</span>
+                            <span class="category-stat">3.5g C</span>
+                            <span class="category-stat">8.7g F</span>
+                            <span class="category-stat">$2.25</span>
+                        </div>
+                    </div>
+                    
+                    <div class="category-food-item" draggable="true">
+                        <div class="category-food-name">Greek Yogurt</div>
+                        <div class="category-food-portion">150g</div>
+                        <div class="category-food-stats">
+                            <span class="category-stat">100 kcal</span>
+                            <span class="category-stat">10g P</span>
+                            <span class="category-stat">6g C</span>
+                            <span class="category-stat">0g F</span>
+                            <span class="category-stat">$1.50</span>
+                        </div>
+                    </div>
+                    
+                    <div class="category-food-item" draggable="true">
+                        <div class="category-food-name">Black Beans</div>
+                        <div class="category-food-portion">1 cup cooked</div>
+                        <div class="category-food-stats">
+                            <span class="category-stat">227 kcal</span>
+                            <span class="category-stat">15g P</span>
+                            <span class="category-stat">41g C</span>
+                            <span class="category-stat">0.9g F</span>
+                            <span class="category-stat">$1.50</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expanded Category Panel (Hidden by default) -->
+        <div class="category-panel" id="categoryPanel">
+            <div class="panel-header">
+                <div class="panel-title">🥩 Proteins</div>
+                <button class="panel-close" onclick="closePanel()">✕</button>
+            </div>
+            <div class="panel-items">
+                <!-- Panel items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle drawer expand/collapse
+        function toggleDrawer() {
+            const drawer = document.getElementById('categoryDrawer');
+            drawer.classList.toggle('expanded');
+        }
+
+        // Switch category tabs
+        function switchCategory(category) {
+            // Update active tab
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Here you would load different category items
+            console.log('Switching to category:', category);
+        }
+
+        // Expand/collapse meal cards
+        document.querySelectorAll('.meal-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const mealCard = header.closest('.meal-card');
+                mealCard.classList.toggle('expanded');
+            });
+        });
+
+        // Drag and drop functionality for food modules
+        let draggedElement = null;
+
+        // Add drag listeners to food modules
+        document.querySelectorAll('.food-module, .category-food-item').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                draggedElement = e.target;
+                e.target.classList.add('dragging');
+            });
+
+            item.addEventListener('dragend', (e) => {
+                e.target.classList.remove('dragging');
+            });
+        });
+
+        // Add drop zones to meal content areas
+        document.querySelectorAll('.meal-content').forEach(content => {
+            content.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+
+            content.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (draggedElement) {
+                    // Clone if dragging from category drawer
+                    if (draggedElement.classList.contains('category-food-item')) {
+                        const newModule = createFoodModule(draggedElement);
+                        const addBtn = content.querySelector('.add-module-btn');
+                        content.insertBefore(newModule, addBtn);
+                    } else {
+                        // Move existing module
+                        const addBtn = content.querySelector('.add-module-btn');
+                        content.insertBefore(draggedElement, addBtn);
+                    }
+                    updateMealTotals(content);
+                }
+            });
+        });
+
+        // Create food module from category item
+        function createFoodModule(categoryItem) {
+            const name = categoryItem.querySelector('.category-food-name').textContent;
+            const portion = categoryItem.querySelector('.category-food-portion').textContent;
+            const stats = categoryItem.querySelector('.category-food-stats').innerHTML;
+
+            const module = document.createElement('div');
+            module.className = 'food-module';
+            module.draggable = true;
+            module.innerHTML = `
+                <div class="module-header">
+                    <div>
+                        <div class="module-name">${name}</div>
+                        <div class="module-portion">${portion}</div>
+                    </div>
+                    <div class="module-actions">
+                        <button class="module-btn">🔄</button>
+                        <button class="module-btn">✕</button>
+                    </div>
+                </div>
+                <div class="module-totals">
+                    ${stats.replace(/category-stat/g, 'module-stat')}
+                </div>
+            `;
+
+            // Add drag listeners
+            module.addEventListener('dragstart', (e) => {
+                draggedElement = e.target;
+                e.target.classList.add('dragging');
+            });
+
+            module.addEventListener('dragend', (e) => {
+                e.target.classList.remove('dragging');
+            });
+
+            return module;
+        }
+
+        // Update meal totals
+        function updateMealTotals(mealContent) {
+            // This would calculate real totals in production
+            console.log('Updating meal totals...');
+        }
+
+        // Delete module
+        document.addEventListener('click', (e) => {
+            if (e.target.textContent === '✕' && e.target.classList.contains('module-btn')) {
+                const module = e.target.closest('.food-module');
+                const mealContent = module.closest('.meal-content');
+                module.remove();
+                updateMealTotals(mealContent);
+            }
+        });
+
+        // Show category panel (when clicking expand on category)
+        function showCategoryPanel(category) {
+            const panel = document.getElementById('categoryPanel');
+            panel.classList.add('show');
+            // Load category items into panel
+        }
+
+        // Close category panel
+        function closePanel() {
+            const panel = document.getElementById('categoryPanel');
+            panel.classList.remove('show');
+        }
+    </script>
+</body>
+</html>

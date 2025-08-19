@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Kanban Board</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emoji {
+            font-size: 32px;
+        }
+
+        .kanban-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .kanban-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 24px;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .kanban-header.todo {
+            background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+        }
+
+        .kanban-header.in-progress {
+            background: linear-gradient(135deg, #ed8936 0%, #c05621 100%);
+        }
+
+        .kanban-header.completed {
+            background: linear-gradient(135deg, #48bb78 0%, #2f855a 100%);
+        }
+
+        .task-count-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .kanban-board {
+            padding: 20px;
+            background: #f7fafc;
+            overflow-x: auto;
+        }
+
+        .agent-columns {
+            display: flex;
+            gap: 20px;
+            min-width: fit-content;
+        }
+
+        .agent-column {
+            background: white;
+            border-radius: 8px;
+            min-width: 280px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .agent-column-header {
+            background: #edf2f7;
+            padding: 12px 16px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            font-size: 13px;
+            color: #2d3748;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .agent-task-count {
+            background: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #718096;
+        }
+
+        .task-drop-zone {
+            padding: 12px;
+            min-height: 120px;
+            transition: all 0.2s ease;
+        }
+
+        .task-drop-zone.drag-over {
+            background: rgba(102, 126, 234, 0.05);
+            border: 2px dashed #667eea;
+            border-radius: 6px;
+        }
+
+        .task-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: move;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .task-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .task-card.dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+        }
+
+        .task-card.high-priority {
+            border-left-color: #f56565;
+        }
+
+        .task-card.medium-priority {
+            border-left-color: #ed8936;
+        }
+
+        .task-card.low-priority {
+            border-left-color: #48bb78;
+        }
+
+        .task-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .task-description {
+            color: #718096;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .task-label {
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .task-timestamp {
+            font-size: 11px;
+            color: #a0aec0;
+            margin-left: auto;
+        }
+
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: #a0aec0;
+            font-size: 14px;
+        }
+
+        .add-task-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: all 0.2s ease;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-task-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 6px;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        @media (max-width: 768px) {
+            .agent-column {
+                min-width: 240px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            <span class="emoji">🤖</span>
+            AI Agent Kanban Board
+        </h1>
+    </div>
+
+    <!-- To Do Kanban Board -->
+    <div class="kanban-section">
+        <div class="kanban-header todo">
+            <span>📝 To Do</span>
+            <span class="task-count-badge" id="todo-count">0 tasks</span>
+        </div>
+        <div class="kanban-board">
+            <div class="agent-columns" data-status="todo">
+                <!-- Agent columns will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- In Progress Kanban Board -->
+    <div class="kanban-section">
+        <div class="kanban-header in-progress">
+            <span>🚀 In Progress</span>
+            <span class="task-count-badge" id="in-progress-count">0 tasks</span>
+        </div>
+        <div class="kanban-board">
+            <div class="agent-columns" data-status="in-progress">
+                <!-- Agent columns will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Completed Kanban Board -->
+    <div class="kanban-section">
+        <div class="kanban-header completed">
+            <span>✅ Completed</span>
+            <span class="task-count-badge" id="completed-count">0 tasks</span>
+        </div>
+        <div class="kanban-board">
+            <div class="agent-columns" data-status="completed">
+                <!-- Agent columns will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Add Task Button -->
+    <button class="add-task-btn" onclick="openModal()" title="Add New Task">+</button>
+
+    <!-- Add Task Modal -->
+    <div class="modal" id="add-task-modal">
+        <div class="modal-content">
+            <h2 class="modal-header">Add New Task</h2>
+            <form id="task-form">
+                <div class="form-group">
+                    <label class="form-label" for="task-agent">Agent</label>
+                    <select id="task-agent" class="form-select" required>
+                        <!-- Agent options will be generated here -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="task-title">Task Title</label>
+                    <input type="text" id="task-title" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="task-description">Description</label>
+                    <textarea id="task-description" class="form-textarea"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="task-priority">Priority</label>
+                    <select id="task-priority" class="form-select">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="task-status">Status</label>
+                    <select id="task-status" class="form-select">
+                        <option value="todo" selected>To Do</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Agent definitions from the responsibilities document
+        const agents = [
+            'Frontend Agent',
+            'Backend Agent',
+            'UI/UX Agent',
+            'Security Agent',
+            'SEO Agent',
+            'Code Quality Agent',
+            'Architecture Agent',
+            'Performance Agent',
+            'Testing Agent',
+            'File Tracker Agent',
+            'Documentation Agent',
+            'Analytics Agent',
+            'Data Validation Agent',
+            'Recipe/Meal Agent',
+            'Shopping List Agent',
+            'Deployment Agent',
+            'Monitoring Agent',
+            'Project Manager Agent'
+        ];
+
+        const statuses = ['todo', 'in-progress', 'completed'];
+
+        // Store tasks in localStorage
+        let tasks = JSON.parse(localStorage.getItem('agentTasks')) || {};
+        let draggedElement = null;
+
+        // Initialize default tasks for Hannah.health project
+        function getDefaultTasks() {
+            return {
+                'Frontend Agent': {
+                    'todo': [
+                        {
+                            id: 'fe-4',
+                            title: 'Build daily/weekly view toggle',
+                            description: 'Implement calendar view switching for meal plans',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [],
+                    'completed': [
+                        {
+                            id: 'fe-c-1',
+                            title: 'Set up meal planner HTML structure',
+                            description: 'Created index.html with drag-drop category pills',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'fe-c-13',
+                            title: 'Create landing page with card selection',
+                            description: 'Built beautiful landing page with 3 cards, stories, and gradient heading',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'fe-c-2',
+                            title: 'Design clean meal planner CSS',
+                            description: 'Implemented styles-clean.css with minimal aesthetic',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'fe-c-3',
+                            title: 'Create food database structure',
+                            description: 'Built foodDatabase with nutrition and cost data',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'fe-c-4',
+                            title: 'Implement visual macro bars',
+                            description: 'Created visual bar charts for protein/carbs/fat with percentages',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'fe-c-5',
+                            title: 'Add search and filter functionality',
+                            description: 'Implemented search bars and macro filters for food categories',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'fe-c-6',
+                            title: 'Implement barcode scanning',
+                            description: 'Added barcode scanner with QuaggaJS and OpenFoodFacts API',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'fe-c-7',
+                            title: 'Create favorites system with hearts',
+                            description: 'Built food favorites feature with ❤️ icons and history tracking',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'fe-c-8',
+                            title: 'FatSecret API integration',
+                            description: 'Set up FatSecret proxy server and client integration',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'fe-c-9',
+                            title: 'Build meal planning drag-and-drop interface',
+                            description: 'Create interactive drag-and-drop meal planner',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'fe-c-10',
+                            title: 'Create meal card components',
+                            description: 'Design reusable meal card UI components',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'fe-c-11',
+                            title: 'Implement meal search functionality',
+                            description: 'Add search bar with filters for dietary restrictions',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'fe-c-12',
+                            title: 'Add meal customization modal',
+                            description: 'Create interface for portion/ingredient adjustments',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                },
+                'Backend Agent': {
+                    'todo': [
+                        {
+                            id: 'be-2',
+                            title: 'Create API endpoints for meal operations',
+                            description: 'Build CRUD endpoints for meal management',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'be-3',
+                            title: 'Implement user authentication flow',
+                            description: 'Set up Supabase Auth with email verification',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'be-5',
+                            title: 'Set up real-time sync',
+                            description: 'Configure Supabase real-time subscriptions',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [],
+                    'completed': [
+                        {
+                            id: 'be-c-1',
+                            title: 'Set up Supabase database schema',
+                            description: 'Created complete database schema with 15+ tables, RLS policies, indexes, and triggers',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'be-c-2',
+                            title: 'Build meal plan saving/loading',
+                            description: 'Create backend logic for persisting meal plans to localStorage',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'be-c-3',
+                            title: 'Set up FatSecret API proxy server',
+                            description: 'Created Node.js proxy with OAuth 2.0 for FatSecret API',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                },
+                'UI/UX Agent': {
+                    'todo': [
+                        {
+                            id: 'ux-new-2',
+                            title: 'Build responsive mobile views',
+                            description: 'Ensure mobile-first responsive design',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [
+                        {
+                            id: 'ux-new-1',
+                            title: 'Design meal planning dashboard',
+                            description: 'Create main dashboard layout with navigation',
+                            priority: 'high',
+                            status: 'in-progress',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'ux-ip-1',
+                            title: 'Implement responsive design patterns',
+                            description: 'Building responsive layout patterns for meal planner interface',
+                            priority: 'high',
+                            status: 'in-progress',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'completed': [
+                        {
+                            id: 'ux-c-1',
+                            title: 'Design Headspace-inspired theme',
+                            description: 'Created calming color palette and design system inspired by Headspace',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'ux-c-2',
+                            title: 'Create Hannah welcome screen',
+                            description: 'Designed personalized welcome screen featuring Hannah character',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'ux-c-3',
+                            title: 'Design mood selection interface',
+                            description: 'Created intuitive interface for users to select between medical and ED-safe modes',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'ux-c-4',
+                            title: 'Create onboarding flow',
+                            description: 'Designed complete user onboarding experience with progressive disclosure',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                },
+                'Security Agent': {
+                    'todo': [
+                        {
+                            id: 'sec-2',
+                            title: 'Implement session management',
+                            description: 'Create secure session handling with refresh tokens',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'sec-3',
+                            title: 'Add HIPAA compliance measures',
+                            description: 'Implement data encryption and audit logs for health data',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [],
+                    'completed': [
+                        {
+                            id: 'sec-c-1',
+                            title: 'Domain registered with privacy',
+                            description: 'Successfully registered hannahhealth.app domain with WHOIS privacy protection',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'sec-c-2',
+                            title: 'Configure Supabase RLS policies',
+                            description: 'Implemented Row Level Security policies for all 15+ database tables',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'sec-c-3',
+                            title: 'Secure API credentials management',
+                            description: 'Set up .env files and .gitignore for FatSecret API security',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                },
+                'SEO Agent': {
+                    'todo': [
+                        {
+                            id: 'seo-1',
+                            title: 'Meta tags implementation',
+                            description: 'Add comprehensive meta tags for social media and SEO',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'seo-2',
+                            title: 'Create sitemap',
+                            description: 'Generate XML sitemap for search engine indexing',
+                            priority: 'low',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'seo-3',
+                            title: 'Optimize for Core Web Vitals',
+                            description: 'Ensure fast loading and good user experience metrics',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [],
+                    'completed': []
+                },
+                'Code Quality Agent': {
+                    'todo': [
+                        {
+                            id: 'cq-1',
+                            title: 'Set up pre-commit hooks',
+                            description: 'Configure pre-commit hooks for code quality enforcement',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'cq-2',
+                            title: 'Configure testing framework',
+                            description: 'Set up Jest and Testing Library for component testing',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [],
+                    'completed': [
+                        {
+                            id: 'cq-c-1',
+                            title: 'TypeScript strict mode setup',
+                            description: 'Successfully configured TypeScript with strict mode for type safety',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'cq-c-2',
+                            title: 'ESLint configuration',
+                            description: 'Set up ESLint with React, TypeScript, and accessibility rules',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'cq-c-3',
+                            title: 'Project structure organization',
+                            description: 'Organized project structure with proper component hierarchy',
+                            priority: 'medium',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                },
+                'Architecture Agent': {
+                    'todo': [
+                        {
+                            id: 'arch-1',
+                            title: 'Create state management with Zustand',
+                            description: 'Set up global state for app data',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'arch-2',
+                            title: 'Design API service layer',
+                            description: 'Build abstraction layer for Supabase operations',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [
+                        {
+                            id: 'arch-ip-1',
+                            title: 'Implement dual-mode architecture',
+                            description: 'Building architecture for medical vs ED-safe mode switching',
+                            priority: 'high',
+                            status: 'in-progress',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'completed': [
+                        {
+                            id: 'arch-c-1',
+                            title: 'Initialize React + Vite + TypeScript project',
+                            description: 'Successfully set up project foundation with React, Vite, TypeScript, and Tailwind CSS',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'arch-c-2',
+                            title: 'Set up GitHub repository',
+                            description: 'Created and configured GitHub repository with proper branch protection',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'arch-c-3',
+                            title: 'Configure project structure',
+                            description: 'Organized project with proper component hierarchy and folder structure',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'arch-c-4',
+                            title: 'Set up path aliases (@/)',
+                            description: 'Configured TypeScript path aliases for cleaner imports',
+                            priority: 'medium',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'arch-c-5',
+                            title: 'Fix Tailwind CSS configuration',
+                            description: 'Resolved Tailwind v3 compatibility issues',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'arch-c-6',
+                            title: 'Configure environment variables',
+                            description: 'Set up .env files with FatSecret API credentials and security configuration',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                },
+                'Performance Agent': {
+                    'todo': [
+                        {
+                            id: 'perf-1',
+                            title: 'Optimize bundle size',
+                            description: 'Analyze and reduce bundle size for faster loading',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'perf-2',
+                            title: 'Implement code splitting',
+                            description: 'Set up lazy loading for route-based code splitting',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'perf-3',
+                            title: 'Add lazy loading',
+                            description: 'Implement lazy loading for images and non-critical components',
+                            priority: 'low',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [],
+                    'completed': []
+                },
+                'Testing Agent': {
+                    'todo': [
+                        {
+                            id: 'test-1',
+                            title: 'Set up Jest and Testing Library',
+                            description: 'Configure testing framework for React components',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'test-2',
+                            title: 'Write tests for critical user flows',
+                            description: 'Create tests for meal planning and auth',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'test-3',
+                            title: 'Add integration tests',
+                            description: 'Test component interactions and data flow',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'test-4',
+                            title: 'Accessibility testing',
+                            description: 'Implement automated accessibility testing with axe-core',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [],
+                    'completed': []
+                },
+                'File Tracker Agent': {
+                    'todo': [
+                        {
+                            id: 'ft-1',
+                            title: 'Set up file registry system',
+                            description: 'Implement system to track all project files and dependencies',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [],
+                    'completed': [
+                        {
+                            id: 'ft-c-1',
+                            title: 'Project structure created',
+                            description: 'Successfully organized project structure with component hierarchy',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'ft-c-2',
+                            title: 'Component organization',
+                            description: 'Structured components folder with proper file organization',
+                            priority: 'medium',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                },
+                'Documentation Agent': {
+                    'todo': [
+                        {
+                            id: 'doc-2',
+                            title: 'User guide creation',
+                            description: 'Write user guides for both medical and ED-safe modes',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [],
+                    'completed': [
+                        {
+                            id: 'doc-c-1',
+                            title: 'Create comprehensive README',
+                            description: 'Written detailed README with setup instructions and project overview',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'doc-c-2',
+                            title: 'Project charter documentation',
+                            description: 'Created comprehensive project charter with goals and roadmap',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'doc-c-3',
+                            title: 'Week 1 action plan',
+                            description: 'Documented detailed Week 1 development plan with milestones',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'doc-c-4',
+                            title: 'User lifecycle document',
+                            description: 'Created comprehensive user journey from landing to daily use',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'doc-c-5',
+                            title: 'Database documentation',
+                            description: 'Documented complete Supabase schema with blood test tracking',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'doc-c-6',
+                            title: 'Macro logic guide',
+                            description: 'Created comprehensive macro distribution system for all user types',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                },
+                'Analytics Agent': {
+                    'todo': [
+                        {
+                            id: 'ana-1',
+                            title: 'Privacy-focused analytics setup',
+                            description: 'Configure privacy-compliant analytics tracking system',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'ana-2',
+                            title: 'User behavior tracking',
+                            description: 'Implement tracking for user interactions and feature usage',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'ana-3',
+                            title: 'Conversion funnel setup',
+                            description: 'Track user sign-up and engagement conversion funnels',
+                            priority: 'low',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [],
+                    'completed': []
+                },
+                'Data Validation Agent': {
+                    'todo': [
+                        {
+                            id: 'dv-1',
+                            title: 'Nutrition data validation',
+                            description: 'Validate accuracy of nutrition database and calculations',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'dv-2',
+                            title: 'Form input validation',
+                            description: 'Implement client and server-side form validation',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'dv-3',
+                            title: 'Medical safety checks',
+                            description: 'Validate medical recommendations stay within safe ranges',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [],
+                    'completed': [
+                        {
+                            id: 'dv-c-1',
+                            title: 'Create macro logic and user goal system',
+                            description: 'Designed comprehensive macro distribution logic for NAFLD, ED recovery, and fitness goals with questionnaire',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                },
+                'Recipe/Meal Agent': {
+                    'todo': [
+                        {
+                            id: 'rm-2',
+                            title: 'Implement meal card components',
+                            description: 'Build reusable meal card components for the UI',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'rm-3',
+                            title: 'Build recipe database structure',
+                            description: 'Create database schema for storing and managing recipes',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [
+                        {
+                            id: 'rm-ip-1',
+                            title: 'Populate initial meal database',
+                            description: 'Add 50+ starter meals with nutrition data',
+                            priority: 'high',
+                            status: 'in-progress',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'completed': [
+                        {
+                            id: 'rm-c-1',
+                            title: 'Create meal data models',
+                            description: 'Food data models with macros implemented',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                },
+                'Shopping List Agent': {
+                    'todo': [],
+                    'in-progress': [],
+                    'completed': [
+                        {
+                            id: 'sl-1',
+                            title: 'Build shopping list generator',
+                            description: 'Create algorithm to aggregate ingredients from meal plans',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'sl-2',
+                            title: 'Design shopping list UI component',
+                            description: 'Build interactive checklist interface',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'sl-3',
+                            title: 'Implement ingredient aggregation',
+                            description: 'Combine duplicate ingredients and optimize quantities',
+                            priority: 'medium',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                },
+                'Deployment Agent': {
+                    'todo': [
+                        {
+                            id: 'dep-1',
+                            title: 'Set up CI/CD pipeline',
+                            description: 'Configure automated deployment pipeline with GitHub Actions',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'dep-2',
+                            title: 'Configure production build',
+                            description: 'Optimize build settings for production deployment',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'dep-3',
+                            title: 'Set up staging environment',
+                            description: 'Create staging environment for testing before production',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [
+                        {
+                            id: 'dep-ip-1',
+                            title: 'Configure Vercel deployment',
+                            description: 'Set up automatic deployment from GitHub',
+                            priority: 'high',
+                            status: 'in-progress',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'completed': [
+                        {
+                            id: 'dep-c-1',
+                            title: 'Vercel domain configuration',
+                            description: 'Successfully configured hannahhealth.app domain with Vercel',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                },
+                'Monitoring Agent': {
+                    'todo': [
+                        {
+                            id: 'mon-1',
+                            title: 'Set up error tracking',
+                            description: 'Configure error monitoring and alerting system',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'mon-2',
+                            title: 'Configure analytics',
+                            description: 'Set up application performance and usage analytics',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'mon-3',
+                            title: 'Implement performance monitoring',
+                            description: 'Monitor Core Web Vitals and application performance',
+                            priority: 'medium',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [],
+                    'completed': []
+                },
+                'Project Manager Agent': {
+                    'todo': [
+                        {
+                            id: 'pm-1',
+                            title: 'Create social media accounts',
+                            description: 'Set up Twitter/X, Instagram for @hannahhealth',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'pm-2',
+                            title: 'Write Week 1 build in public post',
+                            description: 'Document journey and progress publicly',
+                            priority: 'high',
+                            status: 'todo',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'in-progress': [
+                        {
+                            id: 'pm-ip-1',
+                            title: 'Week 1 daily coordination',
+                            description: 'Managing daily coordination and tracking Week 1 development progress',
+                            priority: 'high',
+                            status: 'in-progress',
+                            timestamp: new Date().toISOString()
+                        }
+                    ],
+                    'completed': [
+                        {
+                            id: 'pm-c-1',
+                            title: 'Domain registration (hannahhealth.app)',
+                            description: 'Successfully registered hannahhealth.app domain with privacy protection',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'pm-c-2',
+                            title: 'Project discovery and planning',
+                            description: 'Completed comprehensive project discovery phase with stakeholder interviews',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'pm-c-3',
+                            title: 'Create project charter document',
+                            description: 'Documented project goals, scope, and success metrics',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: 'pm-c-4',
+                            title: 'Define target user personas',
+                            description: 'Created detailed user personas for medical patients and ED recovery users',
+                            priority: 'high',
+                            status: 'completed',
+                            timestamp: new Date().toISOString()
+                        }
+                    ]
+                }
+            };
+        }
+
+        // Initialize the board
+        function initializeBoard() {
+            // Load existing tasks or use defaults
+            const savedTasks = localStorage.getItem('agentTasks');
+            if (!savedTasks) {
+                tasks = getDefaultTasks();
+                saveTasks();
+            } else {
+                tasks = JSON.parse(savedTasks);
+            }
+
+            // Generate agent columns for each status board
+            statuses.forEach(status => {
+                const columnsContainer = document.querySelector(`.agent-columns[data-status="${status}"]`);
+                columnsContainer.innerHTML = '';
+                
+                agents.forEach(agent => {
+                    const column = createAgentColumn(agent, status);
+                    columnsContainer.appendChild(column);
+                    
+                    // Initialize tasks structure if not exists
+                    if (!tasks[agent]) {
+                        tasks[agent] = {
+                            'todo': [],
+                            'in-progress': [],
+                            'completed': []
+                        };
+                    }
+                    
+                    // Render existing tasks
+                    renderTasks(agent, status);
+                });
+            });
+
+            // Populate agent dropdown in modal
+            const agentSelect = document.getElementById('task-agent');
+            agentSelect.innerHTML = '';
+            agents.forEach(agent => {
+                const option = document.createElement('option');
+                option.value = agent;
+                option.textContent = agent;
+                agentSelect.appendChild(option);
+            });
+
+            // Update all counts
+            updateAllCounts();
+        }
+
+        // Create an agent column
+        function createAgentColumn(agentName, status) {
+            const column = document.createElement('div');
+            column.className = 'agent-column';
+            column.dataset.agent = agentName;
+            column.dataset.status = status;
+
+            const header = document.createElement('div');
+            header.className = 'agent-column-header';
+            
+            const agentNameSpan = document.createElement('span');
+            agentNameSpan.textContent = agentName;
+            
+            const countSpan = document.createElement('span');
+            countSpan.className = 'agent-task-count';
+            countSpan.dataset.agent = agentName;
+            countSpan.dataset.status = status;
+            countSpan.textContent = '0';
+            
+            header.appendChild(agentNameSpan);
+            header.appendChild(countSpan);
+
+            const dropZone = document.createElement('div');
+            dropZone.className = 'task-drop-zone';
+            dropZone.dataset.agent = agentName;
+            dropZone.dataset.status = status;
+            
+            // Add drag and drop event listeners
+            dropZone.addEventListener('dragover', handleDragOver);
+            dropZone.addEventListener('drop', handleDrop);
+            dropZone.addEventListener('dragleave', handleDragLeave);
+            
+            column.appendChild(header);
+            column.appendChild(dropZone);
+            
+            return column;
+        }
+
+        // Render tasks for a specific agent and status
+        function renderTasks(agentName, status) {
+            const dropZone = document.querySelector(`.task-drop-zone[data-agent="${agentName}"][data-status="${status}"]`);
+            if (!dropZone) return;
+            
+            dropZone.innerHTML = '';
+            
+            if (tasks[agentName] && tasks[agentName][status] && tasks[agentName][status].length > 0) {
+                tasks[agentName][status].forEach(task => {
+                    const taskCard = createTaskCard(task, agentName, status);
+                    dropZone.appendChild(taskCard);
+                });
+            }
+
+            // Update counts
+            updateAgentCount(agentName, status);
+            updateStatusCount(status);
+        }
+
+        // Create a task card
+        function createTaskCard(task, agentName, status) {
+            const card = document.createElement('div');
+            card.className = `task-card ${task.priority}-priority`;
+            card.draggable = true;
+            card.dataset.taskId = task.id;
+            card.dataset.agent = agentName;
+            card.dataset.status = status;
+
+            const timestamp = new Date(task.timestamp).toLocaleDateString();
+
+            card.innerHTML = `
+                <div class="task-title">${task.title}</div>
+                ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
+                <div class="task-meta">
+                    <span class="task-label">${task.priority.toUpperCase()}</span>
+                    <span class="task-timestamp">${timestamp}</span>
+                </div>
+            `;
+
+            // Add drag event listeners
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+
+            return card;
+        }
+
+        // Update agent task count
+        function updateAgentCount(agentName, status) {
+            const count = tasks[agentName] && tasks[agentName][status] ? tasks[agentName][status].length : 0;
+            const countElement = document.querySelector(`.agent-task-count[data-agent="${agentName}"][data-status="${status}"]`);
+            if (countElement) {
+                countElement.textContent = count;
+            }
+        }
+
+        // Update status board count
+        function updateStatusCount(status) {
+            let totalCount = 0;
+            agents.forEach(agent => {
+                if (tasks[agent] && tasks[agent][status]) {
+                    totalCount += tasks[agent][status].length;
+                }
+            });
+            
+            const countElement = document.getElementById(`${status}-count`);
+            if (countElement) {
+                countElement.textContent = `${totalCount} task${totalCount !== 1 ? 's' : ''}`;
+            }
+        }
+
+        // Update all counts
+        function updateAllCounts() {
+            statuses.forEach(status => {
+                agents.forEach(agent => {
+                    updateAgentCount(agent, status);
+                });
+                updateStatusCount(status);
+            });
+        }
+
+        // Drag and Drop handlers
+        function handleDragStart(e) {
+            draggedElement = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', e.target.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedElement = null;
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            e.preventDefault();
+
+            const dropZone = e.currentTarget;
+            dropZone.classList.remove('drag-over');
+
+            if (draggedElement && draggedElement !== e.target) {
+                const sourceAgent = draggedElement.dataset.agent;
+                const sourceStatus = draggedElement.dataset.status;
+                const targetAgent = dropZone.dataset.agent;
+                const targetStatus = dropZone.dataset.status;
+                const taskId = draggedElement.dataset.taskId;
+
+                // Find the task
+                const taskIndex = tasks[sourceAgent][sourceStatus].findIndex(t => t.id === taskId);
+                if (taskIndex !== -1) {
+                    const task = tasks[sourceAgent][sourceStatus][taskIndex];
+                    
+                    // Remove from source
+                    tasks[sourceAgent][sourceStatus].splice(taskIndex, 1);
+                    
+                    // Update task status if moving to different swim lane
+                    task.status = targetStatus;
+                    
+                    // Add to target
+                    tasks[targetAgent][targetStatus].push(task);
+                    
+                    // Save and re-render
+                    saveTasks();
+                    renderTasks(sourceAgent, sourceStatus);
+                    renderTasks(targetAgent, targetStatus);
+                }
+            }
+
+            return false;
+        }
+
+        // Modal functions
+        function openModal() {
+            document.getElementById('add-task-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('add-task-modal').classList.remove('active');
+            document.getElementById('task-form').reset();
+        }
+
+        // Task management
+        function addTask(task) {
+            const agent = task.agent;
+            const status = task.status;
+            
+            if (!tasks[agent]) {
+                tasks[agent] = {
+                    'todo': [],
+                    'in-progress': [],
+                    'completed': []
+                };
+            }
+            
+            task.id = generateId();
+            task.timestamp = new Date().toISOString();
+            
+            tasks[agent][status].push(task);
+            saveTasks();
+            renderTasks(agent, status);
+        }
+
+        function saveTasks() {
+            localStorage.setItem('agentTasks', JSON.stringify(tasks));
+        }
+
+        function generateId() {
+            return 'task-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Form submission
+        document.getElementById('task-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const task = {
+                agent: document.getElementById('task-agent').value,
+                title: document.getElementById('task-title').value,
+                description: document.getElementById('task-description').value,
+                priority: document.getElementById('task-priority').value,
+                status: document.getElementById('task-status').value
+            };
+            
+            addTask(task);
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('add-task-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Initialize the application
+        initializeBoard();
+    </script>
+</body>
+</html>
