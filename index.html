@@ -19,6 +19,21 @@
         </div>
     </header>
 
+    <!-- AI Recipe Search -->
+    <div class="ai-recipe-search-container">
+        <div class="ai-search-wrapper">
+            <span class="ai-search-label">🤖 AI Recipe Search:</span>
+            <input type="text" 
+                   class="ai-recipe-search-input" 
+                   placeholder="Try: 'quick healthy breakfast under 300 calories' or 'vegan pasta dinner'..."
+                   onkeypress="if(event.key === 'Enter') RecipeAI.search(this.value)">
+            <button class="ai-search-btn" onclick="RecipeAI.search(document.querySelector('.ai-recipe-search-input').value)">
+                Search Recipes
+            </button>
+        </div>
+        <div class="ai-search-results" style="display: none;"></div>
+    </div>
+
     <!-- Category Pills Container -->
     <div class="category-pills-container">
         <span class="pills-label">Drag to add →</span>
@@ -96,9 +111,12 @@
 
     <!-- Load JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <script src="config.js"></script>
     <script src="storage.js"></script>
     <script src="favorites-manager.js"></script>
+    <script src="spoonacular-client.js"></script>
     <script src="app.js"></script>
+    <script src="recipe-ai.js"></script>
     <script src="fatsecret-client.js"></script>
     <script src="barcode-scanner.js"></script>
 </body>

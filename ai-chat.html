@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hannah AI Chat - Test Interface</title>
+    <link rel="stylesheet" href="ai-chat.css">
+</head>
+<body>
+    <!-- Test wrapper to simulate meal planner page -->
+    <div class="test-wrapper">
+        <header class="app-header">
+            <h1>Hannah.health</h1>
+        </header>
+
+        <!-- AI Chat Component -->
+        <div id="ai-chat-container" class="ai-chat-container">
+            <!-- Skip AI Button (always visible) -->
+            <button id="skip-ai-btn" class="skip-ai-btn" title="Skip AI and plan manually">
+                Skip AI - Plan Manually
+            </button>
+
+            <!-- Chat Messages Area -->
+            <div id="chat-messages" class="chat-messages">
+                <!-- Messages will be added here dynamically -->
+            </div>
+
+            <!-- Input Area -->
+            <div id="chat-input-area" class="chat-input-area">
+                <!-- ABC Options (shown/hidden dynamically) -->
+                <div id="abc-options" class="abc-options hidden">
+                    <!-- Options will be added dynamically -->
+                </div>
+
+                <!-- Text Input -->
+                <div class="text-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="user-text-input" 
+                        class="user-text-input"
+                        placeholder="Or type your answer..."
+                        disabled
+                    >
+                    <button id="send-btn" class="send-btn" disabled>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Minimized State -->
+        <div id="chat-minimized" class="chat-minimized hidden">
+            <button id="expand-chat-btn" class="expand-chat-btn">
+                💬 Need help? Chat with Hannah
+            </button>
+        </div>
+
+        <!-- Mock Meal Board Area -->
+        <div class="mock-meal-board">
+            <h3>Macro Categories (Drag to add)</h3>
+            <div class="category-pills">
+                <div class="pill">🥩 Proteins</div>
+                <div class="pill">🌾 Carbs</div>
+                <div class="pill">🥬 Vegetables</div>
+                <div class="pill">🥑 Healthy Fats</div>
+            </div>
+
+            <h3>Your Meal Plan</h3>
+            <div id="meal-board" class="meal-board">
+                <div class="day-column" data-day="monday">
+                    <h4>Monday</h4>
+                    <div class="meal-slots">
+                        <div class="meal-slot" data-meal="breakfast">Breakfast</div>
+                        <div class="meal-slot" data-meal="lunch">Lunch</div>
+                        <div class="meal-slot" data-meal="dinner">Dinner</div>
+                        <div class="meal-slot" data-meal="snack">Snack</div>
+                    </div>
+                </div>
+                <div class="day-column" data-day="tuesday">
+                    <h4>Tuesday</h4>
+                    <div class="meal-slots">
+                        <div class="meal-slot" data-meal="breakfast">Breakfast</div>
+                        <div class="meal-slot" data-meal="lunch">Lunch</div>
+                        <div class="meal-slot" data-meal="dinner">Dinner</div>
+                        <div class="meal-slot" data-meal="snack">Snack</div>
+                    </div>
+                </div>
+                <!-- Add more days as needed -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Load conversation flows first -->
+    <script src="conversation-flows.js"></script>
+    <!-- Load AI service -->
+    <script src="ai-service.js"></script>
+    <!-- Then load main chat logic -->
+    <script src="ai-chat.js"></script>
+    
+    <!-- For testing with Claude API key -->
+    <script>
+        // IMPORTANT: API keys should NEVER be in client-side code!
+        // This needs a backend server to handle Claude API calls securely
+        window.CLAUDE_API_KEY = null; // Removed for security - use backend proxy instead
+    </script>
+</body>
+</html>

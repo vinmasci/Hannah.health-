@@ -1,0 +1,864 @@
+// AI Assistant Column for Meal Planner
+// Beautiful purple gradient design matching ai-chat-simple
+
+import AIService from '../services/ai-service.js';
+
+class AIAssistantColumn {
+    constructor() {
+        this.aiService = new AIService();
+        this.conversationHistory = [];
+        this.isProcessing = false;
+    }
+    
+    createColumn() {
+        const column = document.createElement('div');
+        column.className = 'ai-assistant-column';
+        column.innerHTML = `
+            <div class="ai-column-header">
+                <div class="ai-header-gradient">
+                    <div class="ai-header-content">
+                        <h3>💬 Hannah AI</h3>
+                        <span class="ai-subtitle">Your Meal Assistant</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-column-body">
+                <!-- Quick action badges -->
+                <div class="ai-quick-actions">
+                    <button class="ai-quick-badge primary" onclick="aiAssistant.quickPlan()">
+                        🚀 Quick meal plan!
+                    </button>
+                    <button class="ai-quick-badge secondary" onclick="aiAssistant.askForHelp()">
+                        💡 Meal ideas
+                    </button>
+                </div>
+                
+                <!-- Chat messages area -->
+                <div class="ai-chat-messages" id="ai-chat-messages">
+                    <div class="ai-welcome-message">
+                        <div class="hannah-avatar">H</div>
+                        <div class="message-bubble">
+                            Hi! I'm Hannah, your meal planning assistant. How can I help you today?
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Input area -->
+                <div class="ai-chat-input-area">
+                    <input 
+                        type="text" 
+                        class="ai-text-input" 
+                        id="ai-text-input"
+                        placeholder="Type a message..."
+                        onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); aiAssistant.handleUserInput(); }"
+                    >
+                    <button class="ai-send-btn" onclick="aiAssistant.handleUserInput()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        return column;
+    }
+    
+    async handleUserInput() {
+        const input = document.getElementById('ai-text-input');
+        const userText = input.value.trim();
+        if (!userText || this.isProcessing) return;
+        
+        // Clear input
+        input.value = '';
+        
+        // Add user message
+        this.addMessage(userText, 'user');
+        
+        // Process with AI
+        this.isProcessing = true;
+        this.showTypingIndicator();
+        
+        try {
+            const context = {
+                systemPrompt: `You are Hannah, an AI assistant for Hannah.health meal planning app. You're helpful, knowledgeable about nutrition, and can help users plan their meals.
+
+You have multiple abilities to manage the user's meal planner:
+
+1. ADD RECIPE - To add a recipe with multiple ingredients, ALWAYS include ALL ingredients:
+**ACTION_START**
+{
+  "action": "add_recipe",
+  "recipe_name": "Chicken Stir Fry",
+  "day": "monday",
+  "meal": "lunch",
+  "items": [
+    {
+      "food": "Chicken Breast",
+      "quantity": 150,
+      "unit": "g"
+    },
+    {
+      "food": "Bell Pepper",
+      "quantity": 100,
+      "unit": "g"
+    },
+    {
+      "food": "Broccoli",
+      "quantity": 80,
+      "unit": "g"
+    },
+    {
+      "food": "Soy Sauce",
+      "quantity": 15,
+      "unit": "ml",
+      "custom": true,
+      "kcal": 10,
+      "protein": 1,
+      "carbs": 1,
+      "fat": 0,
+      "cost": 0.20
+    },
+    {
+      "food": "Sesame Oil",
+      "quantity": 10,
+      "unit": "ml",
+      "custom": true,
+      "kcal": 88,
+      "protein": 0,
+      "carbs": 0,
+      "fat": 10,
+      "cost": 0.30
+    },
+    {
+      "food": "Brown Rice",
+      "quantity": 100,
+      "unit": "g"
+    }
+  ]
+}
+**ACTION_END**
+
+IMPORTANT: When creating recipes, ALWAYS include:
+- Main protein/base ingredient
+- All vegetables
+- Sauces and seasonings
+- Oils/cooking fats
+- Side items (rice, pasta, etc.)
+- Garnishes if relevant
+
+For custom ingredients not in the database (like sauces), create them with estimated nutrition.
+
+2. ADD MEALS - To add individual items (not as a recipe), include this in your response:
+**ACTION_START**
+{
+  "action": "add_meal",
+  "items": [
+    {
+      "food": "Food Name",
+      "day": "monday",
+      "meal": "breakfast",
+      "quantity": 100,
+      "unit": "g",
+      "custom": true,  // Set to true for custom/created items
+      "kcal": 250,     // Required for custom items
+      "protein": 20,   // Required for custom items
+      "carbs": 30,     // Required for custom items
+      "fat": 8,        // Required for custom items
+      "cost": 3.50     // Required for custom items
+    }
+  ]
+}
+**ACTION_END**
+
+2. CLEAR MEALS - To remove all items from a specific meal slot:
+**ACTION_START**
+{
+  "action": "clear_meal",
+  "day": "monday",
+  "meal": "breakfast"
+}
+**ACTION_END**
+
+3. CLEAR DAY - To remove all meals from an entire day:
+**ACTION_START**
+{
+  "action": "clear_day",
+  "day": "monday"
+}
+**ACTION_END**
+
+Available days: monday, tuesday, wednesday, thursday, friday, saturday, sunday
+Available meals: breakfast, morning snack, lunch, afternoon snack, dinner, evening snack
+
+IMPORTANT: When users want to REPLACE or CHANGE a meal:
+1. First CLEAR the meal slot
+2. Then ADD the new items
+
+Example: If user says "I don't like carrots, change my snack":
+- First send a clear_meal action for that snack
+- Then send an add_meal action with the new snack
+
+Be a normal, helpful AI assistant. Have conversations. Answer questions. Be natural and conversational.
+
+You can create custom foods with estimated nutritional values when needed. Be creative with meal suggestions when asked.`,
+                conversationHistory: this.conversationHistory.slice(-3)
+            };
+            
+            const response = await this.aiService.chat(userText, context);
+            
+            // Simulate typing delay
+            await this.delay(1000);
+            this.hideTypingIndicator();
+            
+            // Parse response for actions - can have multiple action blocks
+            const actionMatches = response.message.matchAll(/\*\*ACTION_START\*\*([\s\S]*?)\*\*ACTION_END\*\*/g);
+            let hasActions = false;
+            
+            for (const match of actionMatches) {
+                hasActions = true;
+                try {
+                    const action = JSON.parse(match[1]);
+                    
+                    if (action.action === 'add_recipe') {
+                        // Add a recipe with multiple items
+                        await this.addRecipeToPlanner(action);
+                    } else if (action.action === 'add_meal' && action.items) {
+                        // Process each meal item
+                        for (const item of action.items) {
+                            await this.addFoodToPlanner(item);
+                        }
+                    } else if (action.action === 'clear_meal') {
+                        // Clear a specific meal
+                        await this.clearMeal(action.day, action.meal);
+                    } else if (action.action === 'clear_day') {
+                        // Clear an entire day
+                        await this.clearDay(action.day);
+                    }
+                } catch (parseError) {
+                    console.error('Failed to parse action:', parseError);
+                }
+            }
+            
+            // Show response without the action blocks
+            const cleanMessage = response.message.replace(/\*\*ACTION_START\*\*[\s\S]*?\*\*ACTION_END\*\*/g, '').trim();
+            if (cleanMessage) {
+                this.addMessage(cleanMessage, 'hannah');
+            }
+            
+            if (!hasActions && response.message) {
+                // No action, just show the message
+                this.addMessage(response.message, 'hannah');
+            }
+            
+            // Save to history
+            this.conversationHistory.push({
+                user: userText,
+                hannah: response.message.replace(/\*\*ACTION_START\*\*[\s\S]*?\*\*ACTION_END\*\*/, '').trim()
+            });
+            
+        } catch (error) {
+            console.error('AI error:', error);
+            this.hideTypingIndicator();
+            this.addMessage("I'm having trouble connecting right now. Please try again in a moment.", 'hannah');
+        }
+        
+        this.isProcessing = false;
+    }
+    
+    async quickPlan() {
+        this.addMessage("Quick meal plan!", 'user');
+        
+        // Show typing indicator
+        this.showTypingIndicator();
+        await this.delay(500);
+        this.hideTypingIndicator();
+        
+        // Add message
+        this.addMessage("BAM! Full day of balanced meals coming right up! 🎯", 'hannah');
+        
+        // Add comprehensive meals for the whole day
+        const meals = [
+            // Breakfast
+            { food: "Protein Oatmeal Bowl", day: "monday", meal: "breakfast", quantity: 350, unit: "g", custom: true, kcal: 420, protein: 22, carbs: 58, fat: 12, cost: 3.50 },
+            // Morning Snack
+            { food: "Greek Yogurt Parfait", day: "monday", meal: "morning snack", quantity: 200, unit: "g", custom: true, kcal: 180, protein: 15, carbs: 24, fat: 4, cost: 2.50 },
+            // Lunch
+            { food: "Grilled Chicken Caesar Wrap", day: "monday", meal: "lunch", quantity: 300, unit: "g", custom: true, kcal: 480, protein: 38, carbs: 42, fat: 18, cost: 6.50 },
+            // Afternoon Snack
+            { food: "Apple", day: "monday", meal: "afternoon snack", quantity: 1, unit: "medium" },
+            { food: "Almond Butter", day: "monday", meal: "afternoon snack", quantity: 1, unit: "tbsp" },
+            // Dinner
+            { food: "Teriyaki Salmon", day: "monday", meal: "dinner", quantity: 180, unit: "g", custom: true, kcal: 380, protein: 32, carbs: 18, fat: 20, cost: 8.50 },
+            { food: "Quinoa", day: "monday", meal: "dinner", quantity: 100, unit: "g" },
+            { food: "Roasted Vegetables", day: "monday", meal: "dinner", quantity: 150, unit: "g", custom: true, kcal: 80, protein: 3, carbs: 16, fat: 2, cost: 2.00 },
+            // Evening Snack
+            { food: "Dark Chocolate Protein Bites", day: "monday", meal: "evening snack", quantity: 40, unit: "g", custom: true, kcal: 140, protein: 8, carbs: 14, fat: 6, cost: 2.00 }
+        ];
+        
+        for (const meal of meals) {
+            await this.addFoodToPlanner(meal);
+            await this.delay(150); // Faster adds for immediate gratification
+        }
+    }
+    
+    async askForHelp() {
+        this.addMessage("I need meal ideas", 'user');
+        
+        // Show typing indicator
+        this.showTypingIndicator();
+        await this.delay(1000);
+        this.hideTypingIndicator();
+        
+        // Add creative meal suggestions
+        this.addMessage("Here are some creative meal ideas I can add for you! 🌟", 'hannah');
+        
+        // Create custom meal cards
+        const ideasHTML = `
+            <div class="meal-ideas-grid">
+                <div class="meal-idea-card" onclick="aiAssistant.addCustomMeal('power-bowl')">
+                    <div class="meal-idea-name">🥗 Power Buddha Bowl</div>
+                    <div class="meal-idea-macros">520 kcal • 22g P • 58g C • 24g F</div>
+                </div>
+                <div class="meal-idea-card" onclick="aiAssistant.addCustomMeal('protein-pancakes')">
+                    <div class="meal-idea-name">🥞 Protein Pancakes</div>
+                    <div class="meal-idea-macros">380 kcal • 32g P • 42g C • 8g F</div>
+                </div>
+                <div class="meal-idea-card" onclick="aiAssistant.addCustomMeal('energy-smoothie')">
+                    <div class="meal-idea-name">🥤 Energy Boost Smoothie</div>
+                    <div class="meal-idea-macros">320 kcal • 25g P • 38g C • 10g F</div>
+                </div>
+                <div class="meal-idea-card" onclick="aiAssistant.addCustomMeal('mediterranean-wrap')">
+                    <div class="meal-idea-name">🌯 Mediterranean Wrap</div>
+                    <div class="meal-idea-macros">450 kcal • 28g P • 45g C • 18g F</div>
+                </div>
+            </div>
+        `;
+        
+        const messagesArea = document.getElementById('ai-chat-messages');
+        const ideaDiv = document.createElement('div');
+        ideaDiv.className = 'ai-message hannah';
+        ideaDiv.innerHTML = `
+            <div class="hannah-avatar">H</div>
+            <div class="message-bubble">${ideasHTML}</div>
+        `;
+        messagesArea.appendChild(ideaDiv);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+    
+    async addCustomMeal(mealType) {
+        const customMeals = {
+            'power-bowl': {
+                name: "Power Buddha Bowl",
+                items: [
+                    { food: "Rainbow Buddha Bowl", day: "monday", meal: "lunch", quantity: 400, unit: "g", custom: true, kcal: 520, protein: 22, carbs: 58, fat: 24, cost: 6.50 }
+                ]
+            },
+            'protein-pancakes': {
+                name: "Protein Pancakes",
+                items: [
+                    { food: "Protein Pancakes with Berries", day: "monday", meal: "breakfast", quantity: 200, unit: "g", custom: true, kcal: 380, protein: 32, carbs: 42, fat: 8, cost: 4.00 }
+                ]
+            },
+            'energy-smoothie': {
+                name: "Energy Boost Smoothie",
+                items: [
+                    { food: "Green Energy Smoothie", day: "monday", meal: "morning snack", quantity: 400, unit: "ml", custom: true, kcal: 320, protein: 25, carbs: 38, fat: 10, cost: 5.50 }
+                ]
+            },
+            'mediterranean-wrap': {
+                name: "Mediterranean Wrap",
+                items: [
+                    { food: "Mediterranean Chicken Wrap", day: "monday", meal: "lunch", quantity: 250, unit: "g", custom: true, kcal: 450, protein: 28, carbs: 45, fat: 18, cost: 5.00 }
+                ]
+            }
+        };
+        
+        const meal = customMeals[mealType];
+        if (!meal) return;
+        
+        this.addMessage(`Adding ${meal.name} to your planner! ✨`, 'hannah');
+        
+        for (const item of meal.items) {
+            await this.addFoodToPlanner(item);
+            await this.delay(200);
+        }
+    }
+    
+    addMessage(text, sender) {
+        const messagesArea = document.getElementById('ai-chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `ai-message ${sender}`;
+        
+        if (sender === 'hannah') {
+            messageDiv.innerHTML = `
+                <div class="hannah-avatar">H</div>
+                <div class="message-bubble">${text}</div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="message-bubble">${text}</div>
+            `;
+        }
+        
+        messagesArea.appendChild(messageDiv);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+    
+    showTypingIndicator() {
+        const messagesArea = document.getElementById('ai-chat-messages');
+        const typing = document.createElement('div');
+        typing.className = 'ai-typing-indicator';
+        typing.id = 'ai-typing';
+        typing.innerHTML = `
+            <div class="hannah-avatar">H</div>
+            <div class="typing-dots">
+                <span></span><span></span><span></span>
+            </div>
+        `;
+        messagesArea.appendChild(typing);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+    
+    hideTypingIndicator() {
+        const typing = document.getElementById('ai-typing');
+        if (typing) typing.remove();
+    }
+    
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    async clearMeal(day, meal) {
+        try {
+            // Find the day column
+            const dayColumn = document.querySelector(`.day-column[data-day="${day}"]`);
+            if (!dayColumn) {
+                console.warn(`Day column not found: ${day}`);
+                return;
+            }
+            
+            // Find the meal
+            const mealName = meal.toLowerCase().replace(/[-_]/g, ' ');
+            const meals = dayColumn.querySelectorAll('.meal');
+            
+            for (const mealEl of meals) {
+                const mealNameEl = mealEl.querySelector('.meal-name');
+                if (mealNameEl) {
+                    const currentMealName = mealNameEl.textContent.toLowerCase();
+                    if (currentMealName.includes(mealName) || 
+                        (mealName === 'morning snack' && currentMealName.includes('morning') && currentMealName.includes('snack')) ||
+                        (mealName === 'afternoon snack' && currentMealName.includes('afternoon') && currentMealName.includes('snack')) ||
+                        (mealName === 'evening snack' && currentMealName.includes('evening') && currentMealName.includes('snack'))) {
+                        
+                        // Clear all food modules from this meal
+                        const modules = mealEl.querySelectorAll('.food-module');
+                        modules.forEach(module => {
+                            module.style.animation = 'fadeOutScale 0.3s ease';
+                            setTimeout(() => module.remove(), 300);
+                        });
+                        
+                        // Update totals after a delay
+                        setTimeout(() => {
+                            if (window.updateMealTotals) {
+                                window.updateMealTotals(mealEl);
+                            }
+                            if (window.updateDayTotals) {
+                                window.updateDayTotals(dayColumn);
+                            }
+                        }, 350);
+                        
+                        break;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error clearing meal:', error);
+        }
+    }
+    
+    async clearDay(day) {
+        try {
+            // Find the day column
+            const dayColumn = document.querySelector(`.day-column[data-day="${day}"]`);
+            if (!dayColumn) {
+                console.warn(`Day column not found: ${day}`);
+                return;
+            }
+            
+            // Clear all food modules from all meals
+            const modules = dayColumn.querySelectorAll('.food-module');
+            modules.forEach(module => {
+                module.style.animation = 'fadeOutScale 0.3s ease';
+                setTimeout(() => module.remove(), 300);
+            });
+            
+            // Update totals after a delay
+            setTimeout(() => {
+                const meals = dayColumn.querySelectorAll('.meal');
+                meals.forEach(meal => {
+                    if (window.updateMealTotals) {
+                        window.updateMealTotals(meal);
+                    }
+                });
+                if (window.updateDayTotals) {
+                    window.updateDayTotals(dayColumn);
+                }
+            }, 350);
+            
+        } catch (error) {
+            console.error('Error clearing day:', error);
+        }
+    }
+    
+    async addRecipeToPlanner(recipeData) {
+        try {
+            // Find the day column
+            const dayColumn = document.querySelector(`.day-column[data-day="${recipeData.day}"]`);
+            if (!dayColumn) {
+                console.warn(`Day column not found: ${recipeData.day}`);
+                return;
+            }
+            
+            // Find the meal
+            const mealName = recipeData.meal.toLowerCase().replace(/[-_]/g, ' ');
+            const meals = dayColumn.querySelectorAll('.meal');
+            let targetMeal = null;
+            
+            for (const meal of meals) {
+                const mealNameEl = meal.querySelector('.meal-name');
+                if (mealNameEl) {
+                    const currentMealName = mealNameEl.textContent.toLowerCase();
+                    if (currentMealName.includes(mealName) || 
+                        (mealName === 'morning snack' && currentMealName.includes('morning') && currentMealName.includes('snack')) ||
+                        (mealName === 'afternoon snack' && currentMealName.includes('afternoon') && currentMealName.includes('snack')) ||
+                        (mealName === 'evening snack' && currentMealName.includes('evening') && currentMealName.includes('snack'))) {
+                        targetMeal = meal;
+                        break;
+                    }
+                }
+            }
+            
+            if (!targetMeal) {
+                console.warn(`Meal not found: ${recipeData.meal} on ${recipeData.day}`);
+                return;
+            }
+            
+            // Get the recipes container
+            const recipesContainer = targetMeal.querySelector('.recipes-container');
+            if (!recipesContainer) {
+                console.warn('Recipes container not found');
+                return;
+            }
+            
+            // Create the recipe container
+            const recipeContainer = window.createRecipeContainer(recipeData.recipe_name);
+            recipesContainer.appendChild(recipeContainer);
+            
+            // Add each ingredient to the recipe
+            const recipeModulesContainer = recipeContainer.querySelector('.recipe-modules-container');
+            for (const item of recipeData.items) {
+                // Look up or create food data
+                let foodData;
+                if (item.custom) {
+                    foodData = {
+                        name: item.food,
+                        category: this.categorizeFood(item.food, item.protein || 0, item.carbs || 0, item.fat || 0),
+                        baseQuantity: item.quantity || 100,
+                        baseUnit: item.unit || 'g',
+                        kcal: item.kcal || 100,
+                        protein: item.protein || 5,
+                        carbs: item.carbs || 10,
+                        fat: item.fat || 3,
+                        cost: item.cost || 2.00,
+                        custom: true
+                    };
+                } else {
+                    foodData = this.findFoodInDatabase(item.food);
+                    if (!foodData) {
+                        // Create basic item if not found
+                        foodData = {
+                            name: item.food,
+                            category: 'extras',
+                            baseQuantity: 100,
+                            baseUnit: 'g',
+                            kcal: 100,
+                            protein: 5,
+                            carbs: 10,
+                            fat: 3,
+                            cost: 2.00,
+                            custom: true
+                        };
+                    }
+                }
+                
+                // Create the food module
+                const dragData = {
+                    food: foodData,
+                    quantity: item.quantity || foodData.baseQuantity,
+                    unit: item.unit || foodData.baseUnit
+                };
+                
+                const module = this.createFoodModule(dragData);
+                recipeModulesContainer.appendChild(module);
+            }
+            
+            // Update all totals
+            if (window.updateRecipeTotals) {
+                window.updateRecipeTotals(recipeContainer);
+            }
+            if (window.updateMealTotals) {
+                window.updateMealTotals(targetMeal);
+            }
+            if (window.updateDayTotals) {
+                window.updateDayTotals(dayColumn);
+            }
+            
+            // Add animation
+            recipeContainer.classList.add('animate-in');
+            
+        } catch (error) {
+            console.error('Error adding recipe to planner:', error);
+        }
+    }
+    
+    async addFoodToPlanner(item) {
+        try {
+            // Find the day column
+            const dayColumn = document.querySelector(`.day-column[data-day="${item.day}"]`);
+            if (!dayColumn) {
+                console.warn(`Day column not found: ${item.day}`);
+                return;
+            }
+            
+            // Find the meal by matching meal name
+            const mealName = item.meal.toLowerCase().replace(/[-_]/g, ' ');
+            const meals = dayColumn.querySelectorAll('.meal');
+            let targetMeal = null;
+            
+            for (const meal of meals) {
+                const mealNameEl = meal.querySelector('.meal-name');
+                if (mealNameEl) {
+                    const currentMealName = mealNameEl.textContent.toLowerCase();
+                    // Check if the meal name contains our target meal
+                    if (currentMealName.includes(mealName) || 
+                        (mealName === 'morning snack' && currentMealName.includes('morning') && currentMealName.includes('snack')) ||
+                        (mealName === 'afternoon snack' && currentMealName.includes('afternoon') && currentMealName.includes('snack')) ||
+                        (mealName === 'evening snack' && currentMealName.includes('evening') && currentMealName.includes('snack'))) {
+                        targetMeal = meal;
+                        break;
+                    }
+                }
+            }
+            
+            if (!targetMeal) {
+                console.warn(`Meal not found: ${item.meal} on ${item.day}`);
+                return;
+            }
+            
+            // Check if this is a custom item
+            let foodData;
+            if (item.custom) {
+                // Create custom food item with AI-provided nutrition
+                foodData = {
+                    name: item.food,
+                    category: this.categorizeFood(item.food, item.protein, item.carbs, item.fat),
+                    baseQuantity: item.quantity || 100,
+                    baseUnit: item.unit || 'g',
+                    kcal: item.kcal || 200,
+                    protein: item.protein || 10,
+                    carbs: item.carbs || 20,
+                    fat: item.fat || 5,
+                    cost: item.cost || 3.00,
+                    custom: true
+                };
+            } else {
+                // Look up the food in our database
+                foodData = this.findFoodInDatabase(item.food);
+                if (!foodData) {
+                    // If not found, create a basic custom item
+                    foodData = {
+                        name: item.food,
+                        category: 'extras',
+                        baseQuantity: item.quantity || 100,
+                        baseUnit: item.unit || 'g',
+                        kcal: 200,
+                        protein: 10,
+                        carbs: 20,
+                        fat: 5,
+                        cost: 3.00,
+                        custom: true
+                    };
+                }
+            }
+            
+            // Create the food module data
+            const dragData = {
+                food: foodData,
+                quantity: item.quantity || foodData.baseQuantity,
+                unit: item.unit || foodData.baseUnit
+            };
+            
+            // Get the modules container
+            const modulesContainer = targetMeal.querySelector('.food-modules-container');
+            if (!modulesContainer) {
+                console.warn('Modules container not found');
+                return;
+            }
+            
+            // Create and add the food module
+            const module = this.createFoodModule(dragData);
+            modulesContainer.appendChild(module);
+            
+            // Update meal and day totals
+            if (window.updateMealTotals) {
+                window.updateMealTotals(targetMeal);
+            }
+            if (window.updateDayTotals) {
+                window.updateDayTotals(dayColumn);
+            }
+            
+            // Add a little animation
+            module.classList.add('animate-in');
+            
+        } catch (error) {
+            console.error('Error adding food to planner:', error);
+        }
+    }
+    
+    categorizeFood(foodName, protein, carbs, fat) {
+        // Smart categorization based on name and macros
+        const name = foodName.toLowerCase();
+        
+        // Check by name patterns
+        if (name.includes('smoothie') || name.includes('shake') || name.includes('juice')) return 'drinks';
+        if (name.includes('chicken') || name.includes('beef') || name.includes('fish') || name.includes('turkey') || name.includes('salmon')) return 'protein';
+        if (name.includes('salad') || name.includes('veggie') || name.includes('vegetable')) return 'veg';
+        if (name.includes('fruit') || name.includes('berry') || name.includes('apple') || name.includes('banana')) return 'fruit';
+        if (name.includes('rice') || name.includes('pasta') || name.includes('bread') || name.includes('oat')) return 'grains';
+        if (name.includes('yogurt') || name.includes('cheese') || name.includes('milk')) return 'dairy';
+        if (name.includes('cookie') || name.includes('cake') || name.includes('dessert') || name.includes('chocolate')) return 'sweets';
+        
+        // Check by macro distribution
+        const total = protein + carbs + fat;
+        if (total > 0) {
+            const proteinPercent = (protein * 4) / (protein * 4 + carbs * 4 + fat * 9);
+            const carbPercent = (carbs * 4) / (protein * 4 + carbs * 4 + fat * 9);
+            const fatPercent = (fat * 9) / (protein * 4 + carbs * 4 + fat * 9);
+            
+            if (proteinPercent > 0.4) return 'protein';
+            if (carbPercent > 0.6) return 'carbs';
+            if (fatPercent > 0.5) return 'nuts';
+        }
+        
+        return 'extras';
+    }
+    
+    findFoodInDatabase(foodName) {
+        // Access the global food database from app.js
+        if (!window.foodDatabase) {
+            console.warn('Food database not available');
+            return null;
+        }
+        
+        const searchName = foodName.toLowerCase();
+        
+        // Search through all categories
+        for (const category in window.foodDatabase) {
+            const foods = window.foodDatabase[category];
+            if (Array.isArray(foods)) {
+                const found = foods.find(food => 
+                    food.name.toLowerCase() === searchName ||
+                    food.name.toLowerCase().includes(searchName) ||
+                    searchName.includes(food.name.toLowerCase())
+                );
+                if (found) {
+                    return { ...found, category };
+                }
+            }
+        }
+        
+        // If not found, create a basic food item
+        return {
+            name: foodName,
+            category: 'extras',
+            baseQuantity: 100,
+            baseUnit: 'g',
+            kcal: 100,
+            protein: 5,
+            carbs: 10,
+            fat: 3,
+            cost: 2.00
+        };
+    }
+    
+    createFoodModule(dragData) {
+        // Use the global createFoodModule function if available
+        if (window.createFoodModule) {
+            return window.createFoodModule(dragData);
+        }
+        
+        // Fallback: create a simple module
+        const module = document.createElement('div');
+        const category = dragData.food.category || 'default';
+        module.className = `food-module food-module-${category} animate-in`;
+        module.draggable = true;
+        
+        const moduleId = `module-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const food = dragData.food;
+        const quantity = dragData.quantity;
+        const unit = dragData.unit;
+        
+        // Calculate macros based on portion
+        const ratio = quantity / food.baseQuantity;
+        
+        const moduleData = {
+            id: moduleId,
+            name: food.name,
+            category: food.category,
+            quantity: quantity,
+            unit: unit,
+            baseFood: food,
+            kcal: Math.round(food.kcal * ratio),
+            protein: food.protein * ratio,
+            carbs: food.carbs * ratio,
+            fat: food.fat * ratio,
+            cost: food.cost * ratio
+        };
+        
+        module.innerHTML = `
+            <div class="module-header">
+                <div class="module-name">${food.custom ? '✨ ' : ''}${food.name}</div>
+                <div class="module-actions">
+                    <button class="remove-module" onclick="removeModule('${moduleId}')">×</button>
+                </div>
+            </div>
+            <div class="module-controls">
+                <input type="number" class="module-portion-input" value="${quantity}" min="1" step="1" data-module-id="${moduleId}">
+                <select class="module-unit-select" data-module-id="${moduleId}">
+                    <option value="${unit}">${unit}</option>
+                </select>
+            </div>
+            <div class="module-macros">
+                <div class="macro-stats">
+                    <span class="macro kcal">${moduleData.kcal} kcal</span>
+                    <span class="macro">P: ${moduleData.protein.toFixed(1)}g</span>
+                    <span class="macro">C: ${moduleData.carbs.toFixed(1)}g</span>
+                    <span class="macro">F: ${moduleData.fat.toFixed(1)}g</span>
+                </div>
+            </div>
+        `;
+        
+        module.dataset.moduleId = moduleId;
+        module.dataset.module = JSON.stringify(moduleData);
+        
+        return module;
+    }
+}
+
+// Create global instance
+window.aiAssistant = new AIAssistantColumn();
+
+// Export for module use
+export default AIAssistantColumn;

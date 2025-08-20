@@ -1,15 +1,22 @@
 {
-  "name": "kanban",
+  "name": "hannah-health",
   "version": "1.0.0",
-  "main": "app.js",
+  "description": "AI-powered meal planning app",
   "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["meal-planning", "ai", "health", "nutrition"],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "dotenv": "^17.2.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
   }
 }

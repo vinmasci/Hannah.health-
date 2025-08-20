@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hannah.health - AI Assistant</title>
+    <link rel="stylesheet" href="/src/styles/ai-chat.css">
+    <link rel="stylesheet" href="/src/styles/additional.css">
+</head>
+<body>
+    <div class="test-wrapper">
+        <header class="app-header">
+            <h1>Hannah.health - AI Assistant</h1>
+            <button class="header-btn" onclick="window.location.href='/'">← Back to Meal Planner</button>
+        </header>
+
+        <!-- AI Chat Component -->
+        <div id="ai-chat-container" class="ai-chat-container">
+            <!-- Skip AI Button -->
+            <button id="skip-ai-btn" class="skip-ai-btn">
+                Skip AI - Plan Manually
+            </button>
+
+            <!-- Chat Messages Area -->
+            <div id="chat-messages" class="chat-messages">
+                <!-- Messages appear here -->
+            </div>
+
+            <!-- Input Area -->
+            <div id="chat-input-area" class="chat-input-area">
+                <!-- Suggestions -->
+                <div id="abc-options" class="abc-options hidden">
+                    <!-- Suggestion buttons appear here -->
+                </div>
+                <!-- Text Input -->
+                <div class="text-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="user-text-input" 
+                        class="user-text-input"
+                        placeholder="Type your message..."
+                        disabled
+                    >
+                    <button id="send-btn" class="send-btn" disabled>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mock Meal Board (for testing) -->
+        <div class="mock-meal-board">
+            <h3>Your Meal Plan</h3>
+            <div id="meal-board" class="meal-board">
+                <div class="day-column" data-day="monday">
+                    <h4>Monday</h4>
+                    <div class="meal-slots">
+                        <div class="meal-slot" data-meal="breakfast">Breakfast</div>
+                        <div class="meal-slot" data-meal="lunch">Lunch</div>
+                        <div class="meal-slot" data-meal="dinner">Dinner</div>
+                    </div>
+                </div>
+                <div class="day-column" data-day="tuesday">
+                    <h4>Tuesday</h4>
+                    <div class="meal-slots">
+                        <div class="meal-slot" data-meal="breakfast">Breakfast</div>
+                        <div class="meal-slot" data-meal="lunch">Lunch</div>
+                        <div class="meal-slot" data-meal="dinner">Dinner</div>
+                    </div>
+                </div>
+                <div class="day-column" data-day="wednesday">
+                    <h4>Wednesday</h4>
+                    <div class="meal-slots">
+                        <div class="meal-slot" data-meal="breakfast">Breakfast</div>
+                        <div class="meal-slot" data-meal="lunch">Lunch</div>
+                        <div class="meal-slot" data-meal="dinner">Dinner</div>
+                    </div>
+                </div>
+                <div class="day-column" data-day="thursday">
+                    <h4>Thursday</h4>
+                    <div class="meal-slots">
+                        <div class="meal-slot" data-meal="breakfast">Breakfast</div>
+                        <div class="meal-slot" data-meal="lunch">Lunch</div>
+                        <div class="meal-slot" data-meal="dinner">Dinner</div>
+                    </div>
+                </div>
+                <div class="day-column" data-day="friday">
+                    <h4>Friday</h4>
+                    <div class="meal-slots">
+                        <div class="meal-slot" data-meal="breakfast">Breakfast</div>
+                        <div class="meal-slot" data-meal="lunch">Lunch</div>
+                        <div class="meal-slot" data-meal="dinner">Dinner</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load the AI chat app -->
+    <script type="module" src="/src/main-ai-chat.js"></script>
+</body>
+</html>
