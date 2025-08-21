@@ -1,0 +1,113 @@
+/* Recipe Container Styles */
+
+.recipes-container {
+    margin-bottom: 8px;
+}
+
+.recipe-container {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.recipe-container:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.recipe-header {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.recipe-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.recipe-icon {
+    font-size: 18px;
+}
+
+.recipe-title {
+    font-size: 14px;
+    outline: none;
+    border: none;
+    background: transparent;
+    min-width: 100px;
+}
+
+.recipe-title:focus {
+    background: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.recipe-controls {
+    display: flex;
+    gap: 6px;
+}
+
+.recipe-control-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.recipe-control-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.recipe-modules-container {
+    padding: 6px;
+    min-height: 40px;
+    background: rgba(249, 250, 251, 0.5);
+    transition: all 0.3s ease;
+}
+
+.recipe-modules-container.drag-over {
+    background: rgba(59, 130, 246, 0.1);
+    border: 2px dashed #3b82f6;
+}
+
+.recipe-container.collapsed .recipe-modules-container {
+    display: none;
+}
+
+.recipe-totals {
+    padding: 6px 10px;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.recipe-total-calories {
+    font-weight: 600;
+    color: #1e40af;
+}
+
+.recipe-total-macros {
+    color: #6b7280;
+    font-size: 11px;
+}
+
+/* Food modules inside recipes - use default styling from food-modules.css */

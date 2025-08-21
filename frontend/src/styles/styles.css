@@ -1,0 +1,27 @@
+/* Main Styles - Imports all modules */
+
+/* Import all CSS modules */
+@import './base.css';
+@import './header.css';
+@import './categories.css';
+@import './category-items.css';
+@import './day-meal-layout.css';
+@import './food-modules.css';
+@import './recipes.css';
+@import './macros.css';
+@import './modals.css';
+@import './ai-assistant-column.css';
+@import './animations.css';
+
+/* Global styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}

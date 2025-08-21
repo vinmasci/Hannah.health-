@@ -1,6 +1,5 @@
 // Main entry point for Meal Planner with AI Recipe Search
-import './styles/styles-clean.css';
-import './styles/ai-assistant-column.css';
+import './styles/styles.css';
 
 // Import configuration first
 import './components/config.js';

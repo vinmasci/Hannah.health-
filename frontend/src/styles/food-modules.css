@@ -1,0 +1,294 @@
+/* Food Modules Styles */
+
+/* Base Food Module - WITH BORDER STROKE AND SHADOW */
+.food-module {
+    background: white;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 6px;
+    cursor: move;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Category-specific colors with gradients */
+.food-module-protein {
+    border-image: linear-gradient(135deg, #f56565, #fc8181) 1;
+    border-color: #f56565;
+}
+
+.food-module-dairy {
+    border-image: linear-gradient(135deg, #60a5fa, #93c5fd) 1;
+    border-color: #60a5fa;
+}
+
+.food-module-veg {
+    border-image: linear-gradient(135deg, #48bb78, #68d391) 1;
+    border-color: #48bb78;
+}
+
+.food-module-fruit {
+    border-image: linear-gradient(135deg, #ed8936, #f6ad55) 1;
+    border-color: #ed8936;
+}
+
+.food-module-grains {
+    border-image: linear-gradient(135deg, #a78bfa, #c4b5fd) 1;
+    border-color: #a78bfa;
+}
+
+.food-module-nuts {
+    border-image: linear-gradient(135deg, #f59e0b, #fbbf24) 1;
+    border-color: #f59e0b;
+}
+
+.food-module-carbs {
+    border-image: linear-gradient(135deg, #ecc94b, #fde047) 1;
+    border-color: #ecc94b;
+}
+
+.food-module-drinks {
+    border-image: linear-gradient(135deg, #06b6d4, #22d3ee) 1;
+    border-color: #06b6d4;
+}
+
+.food-module-sweets {
+    border-image: linear-gradient(135deg, #ec4899, #f472b6) 1;
+    border-color: #ec4899;
+}
+
+.food-module-extras {
+    border-image: linear-gradient(135deg, #9f7aea, #c084fc) 1;
+    border-color: #9f7aea;
+}
+
+/* Module States */
+.food-module:hover {
+    border-color: #1e90ff;
+    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.2), 0 8px 20px rgba(30, 144, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.food-module.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+}
+
+/* Module Header */
+.module-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.module-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: #2d3748;
+    flex: 1;
+}
+
+.module-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: center;
+}
+
+/* Module Buttons */
+.module-favorite-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    width: 24px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.module-favorite-btn:hover {
+    transform: scale(1.15);
+}
+
+.remove-module {
+    background: #fed7d7;
+    color: #c53030;
+    border: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.remove-module:hover {
+    background: #fc8181;
+    transform: scale(1.1);
+}
+
+/* Module Controls */
+.module-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.module-inputs {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.module-expand-btn {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 10px;
+    transition: transform 0.3s ease, color 0.2s ease;
+    line-height: 1;
+    display: inline-block;
+}
+
+.module-expand-btn:hover {
+    color: #667eea;
+}
+
+.food-module.expanded .module-expand-btn {
+    transform: rotate(180deg);
+}
+
+/* Module Inputs */
+.module-portion-input {
+    width: 60px;
+    padding: 4px 6px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    background: white;
+    text-align: center;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+}
+
+.module-portion-input::-webkit-inner-spin-button,
+.module-portion-input::-webkit-outer-spin-button {
+    opacity: 1;
+    height: auto;
+}
+
+.module-portion-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.module-unit-select {
+    padding: 4px 6px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    background: white;
+    cursor: pointer;
+}
+
+.module-unit-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Module Macros (Collapsible nutrition info) */
+.module-macros {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.food-module.expanded .module-macros {
+    max-height: 200px;
+    opacity: 1;
+    padding-top: 6px;
+}
+
+.module-macros .macro-bar {
+    height: 16px;
+}
+
+.module-macros .macro-labels {
+    font-size: 9px;
+}
+
+.module-macros .macro-stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+.module-macros .macro {
+    padding: 1px 4px;
+    font-size: 10px;
+}
+
+/* Macro bar container transitions */
+.food-module .macro-bar-container {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+/* Food modules container */
+.food-modules-container {
+    min-height: 60px;
+}
+
+/* Add food zone */
+.add-food-zone {
+    margin-top: 8px;
+    padding: 12px;
+    background: #f7fafc;
+    border: 2px dashed #cbd5e0;
+    border-radius: 6px;
+    text-align: center;
+    color: #718096;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.add-food-zone:hover {
+    background: #edf2f7;
+    border-color: #a0aec0;
+}
+
+.add-food-zone.drag-over {
+    background: #bee3f8;
+    border-color: #3182ce;
+    color: #2c5282;
+}
+
+/* Food modules inside recipes - use default styling */
+.recipe-modules-container .food-module:last-child {
+    margin-bottom: 0;
+}

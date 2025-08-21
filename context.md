@@ -15,6 +15,8 @@ Building the first meal planning app designed for healing, not dieting - serving
 - **Barcode Scanning**: Quick food entry via barcode recognition
 - **Favorites Management**: Save and reuse favorite meals
 - **Shopping List Generation**: Automated shopping lists from meal plans
+- **WhatsApp Integration**: Natural language food logging via WhatsApp messaging
+- **Multi-Platform Sync**: Seamless data sync between WhatsApp, web app, and AI chat
 
 ## Technical Architecture
 
@@ -119,6 +121,24 @@ Deployment: Vercel (planned)
 - **Progress Tracking**: Symptoms, mood, victories
 - **Shopping**: Lists and list items
 - **Security**: Row-level security for data isolation
+
+## Platform Integration
+
+### WhatsApp Bot
+- **Purpose**: Frictionless daily food and exercise logging
+- **Tech**: WhatsApp Business API + GPT-4o Mini
+- **Features**:
+  - Natural language food recognition
+  - Photo-based meal logging
+  - Automated reminders
+  - Daily summaries
+- **Cost**: ~$0.30/user/month for AI processing
+
+### Multi-Platform Sync
+- **Web App**: Meal planning and detailed analytics
+- **WhatsApp**: Quick logging throughout the day
+- **AI Chat**: Personalized guidance and support
+- **Data Flow**: All platforms sync via Supabase in real-time
 
 ## User Flows
 

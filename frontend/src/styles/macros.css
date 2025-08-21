@@ -1,0 +1,130 @@
+/* Macro Visualization Styles */
+
+/* Macro Bar Container */
+.macro-bar-container {
+    width: 100%;
+}
+
+/* Macro Bar */
+.macro-bar {
+    width: 100%;
+    height: 20px;
+    background: #f7fafc;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.macro-bar-segment {
+    height: 100%;
+    transition: width 0.3s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.macro-bar-segment.protein {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+}
+
+.macro-bar-segment.carbs {
+    background: linear-gradient(135deg, #ecc94b, #d69e2e);
+}
+
+.macro-bar-segment.fat {
+    background: linear-gradient(135deg, #9f7aea, #805ad5);
+}
+
+.macro-bar-segment:hover {
+    filter: brightness(1.1);
+}
+
+.macro-bar-empty {
+    width: 100%;
+    text-align: center;
+    color: #a0aec0;
+    font-size: 11px;
+    padding: 4px;
+}
+
+/* Macro Labels */
+.macro-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 10px;
+    color: #718096;
+}
+
+.macro-label {
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.macro-label.protein {
+    color: #22543d;
+    background: #f0fff4;
+}
+
+.macro-label.carbs {
+    color: #744210;
+    background: #fffdf7;
+}
+
+.macro-label.fat {
+    color: #553c9a;
+    background: #fdf5ff;
+}
+
+/* Macro Stats */
+.macro-stats {
+    display: flex;
+    gap: 6px;
+    justify-content: space-between;
+}
+
+.macro {
+    background: #f7fafc;
+    color: #4a5568;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    border: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.macro.kcal {
+    background: #f7fafc;
+    color: #4a5568;
+    border-color: #cbd5e0;
+    font-weight: 700;
+}
+
+.macro.protein {
+    background: #f0fff4;
+    color: #22543d;
+    border-color: #9ae6b4;
+}
+
+.macro.carbs {
+    background: #fffdf7;
+    color: #744210;
+    border-color: #fbd38d;
+}
+
+.macro.fat {
+    background: #fdf5ff;
+    color: #553c9a;
+    border-color: #d6bcfa;
+}
+
+.macro.cost {
+    background: #f0fdf4;
+    color: #166534;
+    border-color: #86efac;
+}

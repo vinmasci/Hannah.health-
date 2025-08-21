@@ -530,24 +530,30 @@ function createFoodItemHTML(food, category) {
     const min = food.baseUnit === 'cup' ? 0.25 : 1;
     
     const isFavorited = window.favoritesManager ? window.favoritesManager.isFavorite(foodData) : false;
+    const itemId = `food-item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     return `
-        <div class="food-item" draggable="true" data-food='${JSON.stringify(foodData)}'>
+        <div class="food-item food-item-${category}" draggable="true" data-food='${JSON.stringify(foodData)}' data-item-id="${itemId}">
             <div class="food-item-header">
                 <div class="food-name">${food.name}</div>
-                <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" 
-                        onclick="event.stopPropagation(); window.favoritesManager.toggleFavorite(this)" 
-                        title="${isFavorited ? 'Remove from favorites' : 'Add to favorites'}">
-                    ${isFavorited ? '❤️' : '🤍'}
-                </button>
+                <div class="food-item-actions">
+                    <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" 
+                            onclick="event.stopPropagation(); window.favoritesManager.toggleFavorite(this)" 
+                            title="${isFavorited ? 'Remove from favorites' : 'Add to favorites'}">
+                        ${isFavorited ? '❤️' : '🤍'}
+                    </button>
+                </div>
             </div>
             <div class="food-portion">
-                <input type="number" class="portion-input" value="${food.baseQuantity}" min="${min}" step="${step}" data-unit="${food.baseUnit}">
-                <select class="unit-select">
-                    ${units.map(unit => 
-                        `<option value="${unit}" ${unit === food.baseUnit ? 'selected' : ''}>${unit}</option>`
-                    ).join('')}
-                </select>
+                <div class="food-portion-inputs">
+                    <input type="number" class="portion-input" value="${food.baseQuantity}" min="${min}" step="${step}" data-unit="${food.baseUnit}">
+                    <select class="unit-select">
+                        ${units.map(unit => 
+                            `<option value="${unit}" ${unit === food.baseUnit ? 'selected' : ''}>${unit}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <button class="food-item-expand-btn" onclick="toggleFoodItemExpand('${itemId}')">▼</button>
             </div>
             <div class="food-macros">
                 <div class="macro-bar-container">
@@ -1324,6 +1330,13 @@ function toggleModuleExpand(moduleId) {
     module.classList.toggle('expanded');
 }
 
+function toggleFoodItemExpand(itemId) {
+    const foodItem = document.querySelector(`[data-item-id="${itemId}"]`);
+    if (!foodItem) return;
+    
+    foodItem.classList.toggle('expanded');
+}
+
 function removeModule(moduleId) {
     const module = document.querySelector(`[data-module-id="${moduleId}"]`);
     if (!module) return;
@@ -1754,6 +1767,7 @@ window.handleRecipeDrop = handleRecipeDrop;
 window.toggleRecipeCollapse = toggleRecipeCollapse;
 window.removeRecipe = removeRecipe;
 window.toggleModuleExpand = toggleModuleExpand;
+window.toggleFoodItemExpand = toggleFoodItemExpand;
 
 // Animation styles
 const animationStyles = document.createElement('style');
