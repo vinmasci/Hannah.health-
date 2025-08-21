@@ -7,16 +7,21 @@ export class ShoppingList {
         this.column = null;
         this.listContainer = null;
         this.updateDebounceTimer = null;
+        this.isMinimized = true; // Start minimized
+        this.hasAutoExpanded = false; // Track if we've auto-expanded
     }
 
     // Initialize shopping list column
     init() {
-        console.log('🛒 Initializing shopping list...');
         this.createColumn();
         this.attachToBoard();
         this.startObserving();
         this.updateList();
-        console.log('🛒 Shopping list initialized');
+        
+        // Start minimized
+        if (this.isMinimized) {
+            this.column.classList.add('minimized');
+        }
     }
 
     // Create the shopping list column HTML
@@ -24,12 +29,21 @@ export class ShoppingList {
         this.column = document.createElement('div');
         this.column.className = 'shopping-list-column';
         this.column.innerHTML = `
-            <div class="shopping-list-header">
-                <div class="shopping-list-title">
-                    <span class="shopping-list-icon">🛒</span>
-                    <span>Shopping List</span>
+            <div class="shopping-list-header" onclick="window.shoppingList.handleHeaderClick(event)">
+                <div class="shopping-list-header-content">
+                    <div class="shopping-list-title">
+                        <span class="shopping-list-icon">🛒</span>
+                        <div class="shopping-list-text-content">
+                            <h3>Shopping List</h3>
+                            <span class="shopping-list-count">0 items</span>
+                        </div>
+                    </div>
+                    <button class="btn-minimize" onclick="window.shoppingList.toggleMinimize(event)" title="Minimize">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
                 </div>
-                <div class="shopping-list-count">0 items</div>
             </div>
             
             <div class="shopping-list-container">
@@ -73,21 +87,65 @@ export class ShoppingList {
     // Attach column to the main board
     attachToBoard() {
         const mainBoard = document.querySelector('.main-board');
-        console.log('🛒 Looking for .main-board:', mainBoard);
         if (mainBoard) {
-            // Add after all day columns
-            mainBoard.appendChild(this.column);
-            console.log('🛒 Shopping list column attached to board');
-        } else {
-            console.error('🛒 Could not find .main-board element!');
+            // Add as the first column in the board
+            const firstChild = mainBoard.firstChild;
+            if (firstChild) {
+                mainBoard.insertBefore(this.column, firstChild);
+            } else {
+                mainBoard.appendChild(this.column);
+            }
+            
+            // Ensure visibility
+            this.column.style.display = 'flex';
+            this.column.style.visibility = 'visible';
         }
     }
 
     // Start observing changes to meal plan
     startObserving() {
         // Use MutationObserver to watch for changes
-        const observer = new MutationObserver(() => {
-            this.scheduleUpdate();
+        const observer = new MutationObserver((mutations) => {
+            // Only update if relevant changes occurred
+            let shouldUpdate = false;
+            
+            for (const mutation of mutations) {
+                // Ignore changes to the shopping list itself
+                if (mutation.target.closest('.shopping-list-column')) {
+                    continue;
+                }
+                
+                // Check if this is a meaningful change
+                if (mutation.type === 'childList') {
+                    // Check if food items were added/removed
+                    const hasRelevantNodes = [...mutation.addedNodes, ...mutation.removedNodes].some(node => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            return node.classList && (
+                                node.classList.contains('food-item') ||
+                                node.classList.contains('food-module') ||
+                                node.classList.contains('meal')
+                            );
+                        }
+                        return false;
+                    });
+                    
+                    if (hasRelevantNodes) {
+                        shouldUpdate = true;
+                        break;
+                    }
+                }
+                
+                // Check for quantity/unit changes
+                if (mutation.type === 'attributes' && 
+                    (mutation.attributeName === 'data-quantity' || mutation.attributeName === 'data-unit')) {
+                    shouldUpdate = true;
+                    break;
+                }
+            }
+            
+            if (shouldUpdate) {
+                this.scheduleUpdate();
+            }
         });
 
         const mainBoard = document.querySelector('.main-board');
@@ -106,7 +164,7 @@ export class ShoppingList {
         clearTimeout(this.updateDebounceTimer);
         this.updateDebounceTimer = setTimeout(() => {
             this.updateList();
-        }, 300); // Wait 300ms after last change
+        }, 500); // Wait 500ms after last change to reduce blinking
     }
 
     // Main update function - scan all meals and aggregate ingredients
@@ -132,6 +190,12 @@ export class ShoppingList {
                 this.addItemFromModule(module);
             });
         });
+        
+        // Auto-expand when first item is added
+        if (this.items.size > 0 && this.isMinimized && !this.hasAutoExpanded) {
+            this.hasAutoExpanded = true;
+            this.toggleMinimize();
+        }
         
         // Render the aggregated list
         this.render();
@@ -319,6 +383,14 @@ export class ShoppingList {
 
     // Copy list to clipboard
     copyToClipboard() {
+        // Check if user is logged in (this would check actual auth state)
+        const isLoggedIn = localStorage.getItem('userToken'); // Placeholder for actual auth
+        
+        if (!isLoggedIn) {
+            this.showSignupModal();
+            return;
+        }
+        
         let text = 'Shopping List\n\n';
         
         const grouped = this.groupByCategory();
@@ -347,6 +419,14 @@ export class ShoppingList {
 
     // Email list (opens email client)
     emailList() {
+        // Check if user is logged in
+        const isLoggedIn = localStorage.getItem('userToken');
+        
+        if (!isLoggedIn) {
+            this.showSignupModal();
+            return;
+        }
+        
         let body = 'My Shopping List from Hannah.health\n\n';
         
         const grouped = this.groupByCategory();
@@ -365,6 +445,91 @@ export class ShoppingList {
         const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         
         window.location.href = mailto;
+    }
+    
+    // Show signup modal
+    showSignupModal() {
+        // Check if modal already exists
+        let modal = document.getElementById('signup-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            return;
+        }
+        
+        // Create modal
+        modal = document.createElement('div');
+        modal.id = 'signup-modal';
+        modal.className = 'signup-modal';
+        modal.innerHTML = `
+            <div class="signup-modal-content">
+                <button class="modal-close" onclick="window.shoppingList.closeSignupModal()">×</button>
+                
+                <div class="modal-icon">🛒</div>
+                <h2>Ready to take this shopping?</h2>
+                <p class="modal-subtitle">Create a free account to unlock:</p>
+                
+                <ul class="benefits-list">
+                    <li>✓ Copy & export shopping lists</li>
+                    <li>✓ Save your meal plans</li>
+                    <li>✓ Get weekly shopping lists</li>
+                    <li>✓ Share with family</li>
+                    <li>✓ Track your nutrition</li>
+                </ul>
+                
+                <div class="signup-buttons">
+                    <button class="btn-signup-email" onclick="window.handleEmailSignup()">
+                        Sign up with Email
+                    </button>
+                    <button class="btn-signup-google" onclick="window.handleGoogleSignup()">
+                        <img src="https://www.google.com/favicon.ico" alt="Google" width="16" height="16">
+                        Continue with Google
+                    </button>
+                </div>
+                
+                <p class="login-link">
+                    Already have an account? 
+                    <a href="#" onclick="window.handleLogin()">Log in</a>
+                </p>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Show with animation
+        setTimeout(() => {
+            modal.style.display = 'flex';
+        }, 10);
+    }
+    
+    // Close signup modal
+    closeSignupModal() {
+        const modal = document.getElementById('signup-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+    
+    // Toggle minimize/maximize
+    toggleMinimize(event) {
+        if (event) {
+            event.stopPropagation();
+        }
+        
+        this.isMinimized = !this.isMinimized;
+        
+        if (this.isMinimized) {
+            this.column.classList.add('minimized');
+        } else {
+            this.column.classList.remove('minimized');
+        }
+    }
+    
+    // Handle header click
+    handleHeaderClick(event) {
+        // Only expand if minimized
+        if (this.isMinimized) {
+            this.toggleMinimize();
+        }
     }
 }
 

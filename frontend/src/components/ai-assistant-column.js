@@ -10,6 +10,7 @@ class AIAssistantColumn {
         this.aboutMeHistory = [];
         this.isProcessing = false;
         this.activeTab = 'meal-planner';
+        this.isMinimized = false;
         this.userProfile = {
             age: null,
             weight: null,
@@ -25,11 +26,21 @@ class AIAssistantColumn {
         const column = document.createElement('div');
         column.className = 'ai-assistant-column';
         column.innerHTML = `
-            <div class="ai-column-header">
+            <div class="ai-column-header" onclick="aiAssistant.handleHeaderClick(event)">
                 <div class="ai-header-gradient">
-                    <div class="ai-header-content">
-                        <h3>💬 Hannah AI</h3>
-                        <span class="ai-subtitle">Your Meal Assistant</span>
+                    <div class="ai-header-top">
+                        <div class="ai-header-content">
+                            <span class="ai-icon">💬</span>
+                            <div class="ai-text-content">
+                                <h3>Hannah AI</h3>
+                                <span class="ai-subtitle">Your Meal Assistant</span>
+                            </div>
+                        </div>
+                        <button class="btn-minimize-ai" onclick="aiAssistant.toggleMinimize(event)" title="Minimize">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
                     </div>
                 </div>
                 <div class="ai-tabs">
@@ -1051,6 +1062,30 @@ You can create custom foods with estimated nutritional values when needed. Be cr
         module.dataset.module = JSON.stringify(moduleData);
         
         return module;
+    }
+    
+    // Toggle minimize/maximize
+    toggleMinimize(event) {
+        if (event) {
+            event.stopPropagation();
+        }
+        
+        this.isMinimized = !this.isMinimized;
+        const column = document.querySelector('.ai-assistant-column');
+        
+        if (this.isMinimized) {
+            column.classList.add('minimized');
+        } else {
+            column.classList.remove('minimized');
+        }
+    }
+    
+    // Handle header click
+    handleHeaderClick(event) {
+        // Only expand if minimized
+        if (this.isMinimized) {
+            this.toggleMinimize();
+        }
     }
 }
 

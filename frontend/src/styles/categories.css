@@ -433,6 +433,95 @@
     border-left-color: #9f7aea;
 }
 
+/* AI Suggestions */
+.ai-suggestions {
+    background: #f8f9ff;
+    border-top: 2px solid #667eea;
+    padding: 12px;
+    margin-top: 8px;
+}
+
+.ai-suggestions-header {
+    margin-bottom: 12px;
+}
+
+.ai-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #667eea;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ai-suggestions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ai-suggestion-item {
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ai-suggestion-item:hover {
+    background: #f7fafc;
+    border-color: #667eea;
+    transform: translateX(2px);
+}
+
+.brand-product {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.brand-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #667eea;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.product-name {
+    font-size: 13px;
+    color: #2d3748;
+    font-weight: 500;
+}
+
+.maps-to {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #718096;
+}
+
+.arrow {
+    font-size: 14px;
+    color: #a0aec0;
+}
+
+.base-food {
+    font-size: 12px;
+    font-weight: 600;
+    color: #48bb78;
+    background: #f0fff4;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid #9ae6b4;
+}
+
 /* Responsive category items */
 @media (max-width: 640px) {
     .favorites-category-items {

@@ -157,8 +157,10 @@ export class NutritionCalculator {
         const carbsCals = food.carbs * 4;
         const fatCals = food.fat * 9;
         const totalCals = food.kcal || (proteinCals + carbsCals + fatCals);
+        const foodNameLower = food.name.toLowerCase();
         
         switch(criteria) {
+            // General filters
             case 'high-protein':
                 return (proteinCals / totalCals) > 0.2; // >20% calories from protein
             case 'low-carb':
@@ -173,6 +175,119 @@ export class NutritionCalculator {
                 return proteinPct >= 0.2 && proteinPct <= 0.4 &&
                        carbsPct >= 0.2 && carbsPct <= 0.4 &&
                        fatPct >= 0.2 && fatPct <= 0.4;
+            
+            // Protein category filters
+            case 'lean':
+                return food.fat < 5; // Less than 5g fat per 100g
+            case 'fish':
+                return foodNameLower.includes('salmon') || foodNameLower.includes('tuna') || 
+                       foodNameLower.includes('fish') || foodNameLower.includes('shrimp');
+            case 'poultry':
+                return foodNameLower.includes('chicken') || foodNameLower.includes('turkey');
+            case 'red-meat':
+                return foodNameLower.includes('beef') || foodNameLower.includes('pork') || 
+                       foodNameLower.includes('lamb');
+            
+            // Dairy category filters
+            case 'cheese':
+                return foodNameLower.includes('cheese');
+            case 'yogurt':
+                return foodNameLower.includes('yogurt');
+            case 'milk':
+                return foodNameLower.includes('milk');
+            
+            // Vegetable category filters
+            case 'leafy':
+                return foodNameLower.includes('spinach') || foodNameLower.includes('kale') || 
+                       foodNameLower.includes('lettuce') || foodNameLower.includes('arugula');
+            case 'colorful':
+                return foodNameLower.includes('pepper') || foodNameLower.includes('tomato') || 
+                       foodNameLower.includes('carrot');
+            case 'root':
+                return foodNameLower.includes('carrot') || foodNameLower.includes('potato') || 
+                       foodNameLower.includes('beet') || foodNameLower.includes('turnip');
+            
+            // Fruit category filters
+            case 'berries':
+                return foodNameLower.includes('berr') || foodNameLower.includes('strawberr') || 
+                       foodNameLower.includes('blueberr') || foodNameLower.includes('raspberr');
+            case 'citrus':
+                return foodNameLower.includes('orange') || foodNameLower.includes('lemon') || 
+                       foodNameLower.includes('lime') || foodNameLower.includes('grapefruit');
+            case 'tropical':
+                return foodNameLower.includes('mango') || foodNameLower.includes('pineapple') || 
+                       foodNameLower.includes('papaya') || foodNameLower.includes('coconut');
+            case 'low-sugar':
+                return food.carbs < 10; // Less than 10g carbs per serving
+            
+            // Grains category filters
+            case 'whole':
+                return foodNameLower.includes('whole') || foodNameLower.includes('brown') || 
+                       foodNameLower.includes('quinoa') || foodNameLower.includes('oat');
+            case 'gluten-free':
+                return foodNameLower.includes('rice') || foodNameLower.includes('quinoa') || 
+                       foodNameLower.includes('corn') || foodNameLower.includes('gluten-free');
+            case 'bread':
+                return foodNameLower.includes('bread') || foodNameLower.includes('toast');
+            case 'high-fiber':
+                return foodNameLower.includes('whole') || foodNameLower.includes('bran') || 
+                       foodNameLower.includes('oat');
+            
+            // Nuts category filters
+            case 'tree-nuts':
+                return foodNameLower.includes('almond') || foodNameLower.includes('walnut') || 
+                       foodNameLower.includes('cashew') || foodNameLower.includes('pecan');
+            case 'seeds':
+                return foodNameLower.includes('seed') || foodNameLower.includes('chia') || 
+                       foodNameLower.includes('flax') || foodNameLower.includes('pumpkin');
+            case 'butters':
+                return foodNameLower.includes('butter') && !foodNameLower.includes('dairy');
+            case 'low-salt':
+                return foodNameLower.includes('unsalted') || foodNameLower.includes('no salt');
+            
+            // Carbs category filters
+            case 'potato':
+                return foodNameLower.includes('potato') && !foodNameLower.includes('sweet');
+            case 'sweet':
+                return foodNameLower.includes('sweet potato');
+            case 'pasta':
+                return foodNameLower.includes('pasta') || foodNameLower.includes('noodle');
+            case 'rice':
+                return foodNameLower.includes('rice');
+            
+            // Drinks category filters
+            case 'zero-cal':
+                return food.kcal === 0 || foodNameLower.includes('zero') || foodNameLower.includes('diet');
+            case 'coffee':
+                return foodNameLower.includes('coffee') || foodNameLower.includes('espresso');
+            case 'tea':
+                return foodNameLower.includes('tea');
+            case 'sports':
+                return foodNameLower.includes('gatorade') || foodNameLower.includes('powerade') || 
+                       foodNameLower.includes('sports') || foodNameLower.includes('electrolyte');
+            
+            // Sweets category filters
+            case 'chocolate':
+                return foodNameLower.includes('chocolate') || foodNameLower.includes('cocoa');
+            case 'candy':
+                return foodNameLower.includes('candy') || foodNameLower.includes('gummy');
+            case 'baked':
+                return foodNameLower.includes('cake') || foodNameLower.includes('cookie') || 
+                       foodNameLower.includes('brownie') || foodNameLower.includes('muffin');
+            
+            // Extras category filters
+            case 'sauce':
+                return foodNameLower.includes('sauce') || foodNameLower.includes('dressing');
+            case 'condiment':
+                return foodNameLower.includes('ketchup') || foodNameLower.includes('mustard') || 
+                       foodNameLower.includes('mayo') || foodNameLower.includes('relish');
+            case 'oil':
+                return foodNameLower.includes('oil');
+            case 'spice':
+                return foodNameLower.includes('spice') || foodNameLower.includes('pepper') || 
+                       foodNameLower.includes('salt') || foodNameLower.includes('seasoning');
+            
+            case 'all':
             default:
                 return true;
         }

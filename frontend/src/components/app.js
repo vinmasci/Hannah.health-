@@ -315,6 +315,80 @@ function createCategoryColumn(category, insertBefore = null) {
         extras: '✨'
     };
     
+    // Category-specific filters
+    const categoryFilters = {
+        protein: `
+            <button class="filter-btn active" onclick="filterByMacro('${category}', 'all', this)">All</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'lean', this)">Lean</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'fish', this)">Fish</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'poultry', this)">Poultry</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'red-meat', this)">Red Meat</button>
+        `,
+        dairy: `
+            <button class="filter-btn active" onclick="filterByMacro('${category}', 'all', this)">All</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'low-fat', this)">Low Fat</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'cheese', this)">Cheese</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'yogurt', this)">Yogurt</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'milk', this)">Milk</button>
+        `,
+        veg: `
+            <button class="filter-btn active" onclick="filterByMacro('${category}', 'all', this)">All</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'leafy', this)">Leafy Greens</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'colorful', this)">Colorful</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'low-carb', this)">Low Carb</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'root', this)">Root Veg</button>
+        `,
+        fruit: `
+            <button class="filter-btn active" onclick="filterByMacro('${category}', 'all', this)">All</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'berries', this)">Berries</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'citrus', this)">Citrus</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'tropical', this)">Tropical</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'low-sugar', this)">Low Sugar</button>
+        `,
+        grains: `
+            <button class="filter-btn active" onclick="filterByMacro('${category}', 'all', this)">All</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'whole', this)">Whole Grain</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'gluten-free', this)">Gluten Free</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'bread', this)">Bread</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'high-fiber', this)">High Fiber</button>
+        `,
+        nuts: `
+            <button class="filter-btn active" onclick="filterByMacro('${category}', 'all', this)">All</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'tree-nuts', this)">Tree Nuts</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'seeds', this)">Seeds</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'butters', this)">Nut Butters</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'low-salt', this)">Low Salt</button>
+        `,
+        carbs: `
+            <button class="filter-btn active" onclick="filterByMacro('${category}', 'all', this)">All</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'potato', this)">Potato</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'sweet', this)">Sweet Potato</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'pasta', this)">Pasta</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'rice', this)">Rice</button>
+        `,
+        drinks: `
+            <button class="filter-btn active" onclick="filterByMacro('${category}', 'all', this)">All</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'zero-cal', this)">Zero Cal</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'coffee', this)">Coffee</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'tea', this)">Tea</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'sports', this)">Sports</button>
+        `,
+        sweets: `
+            <button class="filter-btn active" onclick="filterByMacro('${category}', 'all', this)">All</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'chocolate', this)">Chocolate</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'candy', this)">Candy</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'baked', this)">Baked</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'low-sugar', this)">Low Sugar</button>
+        `,
+        extras: `
+            <button class="filter-btn active" onclick="filterByMacro('${category}', 'all', this)">All</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'sauce', this)">Sauces</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'condiment', this)">Condiments</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'oil', this)">Oils</button>
+            <button class="filter-btn" onclick="filterByMacro('${category}', 'spice', this)">Spices</button>
+        `
+    };
+    
     column.innerHTML = `
         <div class="category-header ${category}" style="background: ${categoryColors[category]}">
             <span>${categoryEmojis[category]} ${category.charAt(0).toUpperCase() + category.slice(1)}</span>
@@ -322,19 +396,27 @@ function createCategoryColumn(category, insertBefore = null) {
         </div>
         <div class="category-search">
             <input type="text" class="search-input" placeholder="Search ${category}..." 
-                   onkeyup="filterFoodItems('${category}', this.value)">
+                   data-category="${category}"
+                   onkeyup="handleSearch('${category}', this.value)">
             <div class="filter-buttons">
-                <button class="filter-btn active" onclick="filterByMacro('${category}', 'all', this)">All</button>
-                <button class="filter-btn" onclick="filterByMacro('${category}', 'high-protein', this)">High Protein</button>
-                <button class="filter-btn" onclick="filterByMacro('${category}', 'low-carb', this)">Low Carb</button>
-                <button class="filter-btn" onclick="filterByMacro('${category}', 'low-fat', this)">Low Fat</button>
+                ${categoryFilters[category] || `
+                    <button class="filter-btn active" onclick="filterByMacro('${category}', 'all', this)">All</button>
+                    <button class="filter-btn" onclick="filterByMacro('${category}', 'high-protein', this)">High Protein</button>
+                    <button class="filter-btn" onclick="filterByMacro('${category}', 'low-carb', this)">Low Carb</button>
+                    <button class="filter-btn" onclick="filterByMacro('${category}', 'low-fat', this)">Low Fat</button>
+                `}
             </div>
         </div>
         <div class="category-items" data-category="${category}">
-            <div class="loading-popular">
-                <div class="loading-spinner"></div> Loading popular items...
+            <div class="regular-items">
+                ${categoryData.map(food => createFoodItemHTML(food, category)).join('')}
             </div>
-            ${categoryData.map(food => createFoodItemHTML(food, category)).join('')}
+            <div class="ai-suggestions" style="display: none;">
+                <div class="ai-suggestions-header">
+                    <span class="ai-label">✨ AI Suggestions</span>
+                </div>
+                <div class="ai-suggestions-list"></div>
+            </div>
         </div>
     `;
     
@@ -359,8 +441,6 @@ function createCategoryColumn(category, insertBefore = null) {
     column.addEventListener('dragover', handleColumnDragOver);
     column.addEventListener('drop', handleColumnDrop);
     
-    // Automatically load popular items
-    loadPopularItemsAutomatically(category);
     
     // Setup drag handlers for food items
     column.querySelectorAll('.food-item').forEach(item => {
@@ -476,123 +556,27 @@ function updateFoodItemMacros(foodItem, foodData, ratio) {
     `;
 }
 
-// Load popular items automatically when category column is created
-async function loadPopularItemsAutomatically(category) {
-    const column = document.querySelector(`.category-column[data-category="${category}"]`);
-    const itemsContainer = column.querySelector('.category-items');
-    const loadingDiv = itemsContainer.querySelector('.loading-popular');
-    
-    // Remove loading indicator immediately since we're using local data
-    if (loadingDiv) {
-        loadingDiv.remove();
-    }
-    
-    // Get the most popular basic items from our local database
-    const popularItems = {
-        'protein': ['Chicken Breast', 'Eggs', 'Salmon', 'Tuna'],
-        'dairy': ['Greek Yogurt', 'Milk', 'Cottage Cheese', 'Cheddar Cheese'],
-        'veg': ['Broccoli', 'Spinach', 'Bell Pepper', 'Mushrooms'],
-        'fruit': ['Apple', 'Banana', 'Berries', 'Orange'],
-        'grains': ['Brown Rice', 'Oats', 'Quinoa', 'Whole Wheat Bread'],
-        'nuts': ['Almonds', 'Walnuts', 'Chia Seeds', 'Peanuts'],
-        'carbs': ['Sweet Potato', 'Beans', 'Lentils', 'Chickpeas'],
-        'drinks': ['Water', 'Coffee', 'Green Tea', 'Protein Shake'],
-        'sweets': ['Dark Chocolate', 'Cookies', 'Ice Cream', 'Granola Bar'],
-        'extras': ['Olive Oil', 'Avocado', 'Peanut Butter', 'Honey']
-    };
-    
-    const itemNames = popularItems[category] || [];
-    const categoryData = foodDatabase[category] || [];
-    
-    const popularSection = document.createElement('div');
-    popularSection.className = 'popular-section';
-    popularSection.innerHTML = '<div class="results-header">🔥 Popular Items:</div>';
-    
-    // Add the popular items from local database
-    itemNames.forEach(itemName => {
-        const food = categoryData.find(f => f.name === itemName);
-        if (food) {
-            const foodElement = createFoodItemHTML(food, category);
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = foodElement;
-            const foodItem = tempDiv.firstChild;
-            popularSection.appendChild(foodItem);
-            
-            // Add event listeners to the new element
-            foodItem.addEventListener('dragstart', handleFoodDragStart);
-            foodItem.addEventListener('dragend', handleFoodDragEnd);
-            
-            const portionInput = foodItem.querySelector('.portion-input');
-            const unitSelect = foodItem.querySelector('.unit-select');
-            
-            if (portionInput) portionInput.addEventListener('change', handlePortionChange);
-            if (unitSelect) unitSelect.addEventListener('change', handleUnitChange);
-        }
-    });
-    
-    // Add popular items to container if any were found
-    if (popularSection.children.length > 1) { // More than just the header
-        itemsContainer.insertBefore(popularSection, itemsContainer.firstChild);
-    }
-}
 
-// Show popular items when search box is focused (kept for manual trigger if needed)
-async function showPopularItems(category, currentValue) {
-    if (currentValue && currentValue.length > 0) return; // Don't show if already typing
-    
-    const column = document.querySelector(`.category-column[data-category="${category}"]`);
-    const itemsContainer = column.querySelector('.category-items');
-    
-    // Check if we already have popular items section
-    if (itemsContainer.querySelector('.popular-section')) return;
-    
-    const popularSection = document.createElement('div');
-    popularSection.className = 'popular-section';
-    popularSection.innerHTML = '<div class="results-header">🔥 Popular Items:</div>';
-    
-    // Define popular searches per category
-    const popularByCategory = {
-        'protein': 'chicken',
-        'veg': 'broccoli',
-        'fruit': 'apple',
-        'carbs': 'rice',
-        'extras': 'olive oil'
-    };
-    
-    const searchTerm = popularByCategory[category] || 'food';
-    
-    try {
-        const results = await window.fatSecretClient.searchFoods(searchTerm, 5);
-        if (results.length > 0) {
-            results.forEach(food => {
-                food.category = category;
-                const foodElement = window.createFoodItemElement ? 
-                    window.createFoodItemElement(food, category) :
-                    createFoodItemElement(food, category);
-                popularSection.appendChild(foodElement);
-            });
-            itemsContainer.insertBefore(popularSection, itemsContainer.firstChild);
-        }
-    } catch (error) {
-        console.warn('Failed to load popular items:', error);
-    }
-}
 
-// Hide popular items when search box loses focus
-function hidePopularItems(category) {
-    setTimeout(() => {
-        const column = document.querySelector(`.category-column[data-category="${category}"]`);
-        const popularSection = column?.querySelector('.popular-section');
-        if (popularSection) {
-            popularSection.remove();
-        }
-    }, 200); // Small delay to allow clicking on items
-}
 
 // Filter food items by search text
+function handleSearch(category, searchText) {
+    const column = document.querySelector(`.category-column[data-category="${category}"]`);
+    
+    // Always perform regular search
+    filterFoodItems(category, searchText);
+    
+    // Also show AI suggestions if there's search text
+    if (searchText && searchText.length > 0) {
+        showAISuggestions(category, searchText);
+    } else {
+        hideAISuggestions(category);
+    }
+}
+
 function filterFoodItems(category, searchText) {
     const column = document.querySelector(`.category-column[data-category="${category}"]`);
-    const items = column.querySelectorAll('.food-item');
+    const items = column.querySelectorAll('.regular-items .food-item');
     
     items.forEach(item => {
         const foodName = item.querySelector('.food-name').textContent.toLowerCase();
@@ -603,6 +587,179 @@ function filterFoodItems(category, searchText) {
         }
     });
 }
+
+function hideAISuggestions(category) {
+    const column = document.querySelector(`.category-column[data-category="${category}"]`);
+    const aiSuggestions = column.querySelector('.ai-suggestions');
+    if (aiSuggestions) {
+        aiSuggestions.style.display = 'none';
+    }
+}
+
+function showAISuggestions(category, searchText) {
+    const column = document.querySelector(`.category-column[data-category="${category}"]`);
+    const aiSuggestions = column.querySelector('.ai-suggestions');
+    const aiList = column.querySelector('.ai-suggestions-list');
+    
+    if (!aiSuggestions || !aiList) return;
+    
+    // Get AI product suggestions based on search
+    const suggestions = getAIProductSuggestions(searchText, category);
+    
+    if (suggestions.length > 0) {
+        aiList.innerHTML = suggestions.map(suggestion => `
+            <div class="ai-suggestion-item">
+                <div class="brand-product">
+                    ${suggestion.brand ? `<span class="brand-name">${suggestion.brand}</span>` : ''}
+                    <span class="product-name ${!suggestion.brand ? 'no-brand' : ''}">${suggestion.product}</span>
+                </div>
+                <div class="maps-to">
+                    <span class="arrow">→</span>
+                    <span class="base-food">${suggestion.baseFood}</span>
+                </div>
+            </div>
+        `).join('');
+        aiSuggestions.style.display = 'block';
+    } else {
+        aiSuggestions.style.display = 'none';
+    }
+}
+
+function getAIProductSuggestions(searchText, category) {
+    const searchLower = searchText.toLowerCase();
+    const suggestions = [];
+    
+    // Category-specific suggestions database
+    const categorySuggestions = {
+        protein: [
+            { name: 'Bacon', matches: ['bac', 'ba'], baseFood: 'Pork' },
+            { name: 'Beef Mince', matches: ['bee', 'be', 'min'], baseFood: 'Ground Beef' },
+            { name: 'Beef Steak', matches: ['bee', 'be', 'ste'], baseFood: 'Lean Beef' },
+            { name: 'BBQ Chicken', matches: ['bb', 'bbq'], baseFood: 'Chicken Thigh' },
+            { name: 'Basa Fish', matches: ['bas', 'ba'], baseFood: 'Tilapia' },
+            { name: 'Barramundi', matches: ['bar', 'ba'], baseFood: 'Cod' },
+            { name: 'Black Beans', matches: ['bla', 'bl', 'bea'], baseFood: 'Tofu' },
+            { name: 'Bologna', matches: ['bol', 'bo'], baseFood: 'Pork' }
+        ],
+        dairy: [
+            { name: 'Brie Cheese', matches: ['bri', 'br'], baseFood: 'Cream Cheese' },
+            { name: 'Blue Cheese', matches: ['blu', 'bl'], baseFood: 'Feta Cheese' },
+            { name: 'Buttermilk', matches: ['but', 'bu'], baseFood: '2% Milk' },
+            { name: 'Bulgarian Yogurt', matches: ['bul', 'bu'], baseFood: 'Greek Yogurt' },
+            { name: 'Babybel Cheese', matches: ['bab', 'ba'], baseFood: 'Mozzarella' },
+            { name: 'Burrata', matches: ['bur', 'bu'], baseFood: 'Mozzarella' },
+            { name: 'Boursin Cheese', matches: ['bou', 'bo'], baseFood: 'Cream Cheese' }
+        ],
+        veg: [
+            { name: 'Bok Choy', matches: ['bok', 'bo'], baseFood: 'Swiss Chard' },
+            { name: 'Beetroot', matches: ['bee', 'be'], baseFood: 'Beets' },
+            { name: 'Baby Spinach', matches: ['bab', 'ba'], baseFood: 'Spinach' },
+            { name: 'Bean Sprouts', matches: ['bea', 'be'], baseFood: 'Celery' },
+            { name: 'Baby Corn', matches: ['bab', 'ba', 'cor'], baseFood: 'Corn' },
+            { name: 'Bamboo Shoots', matches: ['bam', 'ba'], baseFood: 'Asparagus' },
+            { name: 'Broad Beans', matches: ['bro', 'br', 'bea'], baseFood: 'Green Beans' },
+            { name: 'Butter Lettuce', matches: ['but', 'bu'], baseFood: 'Lettuce' },
+            { name: 'Baby Carrots', matches: ['bab', 'ba', 'car'], baseFood: 'Carrots' },
+            { name: 'Butternut Squash', matches: ['but', 'bu', 'squ'], baseFood: 'Zucchini' }
+        ],
+        fruit: [
+            { name: 'Blackberries', matches: ['bla', 'bl'], baseFood: 'Blackberries' },
+            { name: 'Blueberries', matches: ['blu', 'bl'], baseFood: 'Blueberries' },
+            { name: 'Bananas', matches: ['ban', 'ba'], baseFood: 'Banana' },
+            { name: 'Blood Orange', matches: ['blo', 'bl'], baseFood: 'Orange' },
+            { name: 'Boysenberries', matches: ['boy', 'bo'], baseFood: 'Raspberries' },
+            { name: 'Breadfruit', matches: ['bre', 'br'], baseFood: 'Pear' },
+            { name: 'Black Grapes', matches: ['bla', 'bl', 'gra'], baseFood: 'Grapes' },
+            { name: 'Black Cherries', matches: ['bla', 'bl', 'che'], baseFood: 'Cherries' },
+            { name: 'Bartlett Pear', matches: ['bar', 'ba', 'pea'], baseFood: 'Pear' }
+        ],
+        grains: [
+            { name: 'Baguette', matches: ['bag', 'ba'], baseFood: 'White Bread' },
+            { name: 'Brioche', matches: ['bri', 'br'], baseFood: 'White Bread' },
+            { name: 'Bagel', matches: ['bag', 'ba'], baseFood: 'Bagel' },
+            { name: 'Bran Flakes', matches: ['bra', 'br'], baseFood: 'Oats' },
+            { name: 'Brown Rice', matches: ['bro', 'br'], baseFood: 'Brown Rice' },
+            { name: 'Basmati Rice', matches: ['bas', 'ba'], baseFood: 'White Rice' },
+            { name: 'Buckwheat', matches: ['buc', 'bu'], baseFood: 'Buckwheat' },
+            { name: 'Bulgur', matches: ['bul', 'bu'], baseFood: 'Bulgur' },
+            { name: 'Barley', matches: ['bar', 'ba'], baseFood: 'Barley' },
+            { name: 'Breadcrumbs', matches: ['bre', 'br'], baseFood: 'Crackers' }
+        ],
+        nuts: [
+            { name: 'Brazil Nuts', matches: ['bra', 'br'], baseFood: 'Brazil Nuts' },
+            { name: 'Black Walnuts', matches: ['bla', 'bl', 'wal'], baseFood: 'Walnuts' },
+            { name: 'Blanched Almonds', matches: ['bla', 'bl', 'alm'], baseFood: 'Almonds' },
+            { name: 'Butter Pecans', matches: ['but', 'bu', 'pec'], baseFood: 'Pecans' },
+            { name: 'Boiled Peanuts', matches: ['boi', 'bo', 'pea'], baseFood: 'Peanuts' }
+        ],
+        carbs: [
+            { name: 'Baked Potato', matches: ['bak', 'ba', 'pot'], baseFood: 'Russet Potato' },
+            { name: 'Baby Potatoes', matches: ['bab', 'ba', 'pot'], baseFood: 'Red Potato' },
+            { name: 'Black Beans', matches: ['bla', 'bl', 'bea'], baseFood: 'Black Beans' },
+            { name: 'Butter Beans', matches: ['but', 'bu', 'bea'], baseFood: 'Navy Beans' },
+            { name: 'Broad Beans', matches: ['bro', 'br', 'bea'], baseFood: 'Pinto Beans' },
+            { name: 'Baked Beans', matches: ['bak', 'ba', 'bea'], baseFood: 'Navy Beans' },
+            { name: 'Black Lentils', matches: ['bla', 'bl', 'len'], baseFood: 'Brown Lentils' },
+            { name: 'Bean Pasta', matches: ['bea', 'be', 'pas'], baseFood: 'Pasta' }
+        ],
+        drinks: [
+            { name: 'Black Coffee', matches: ['bla', 'bl', 'cof'], baseFood: 'Black Coffee' },
+            { name: 'Black Tea', matches: ['bla', 'bl', 'tea'], baseFood: 'Black Tea' },
+            { name: 'Bubble Tea', matches: ['bub', 'bu'], baseFood: 'Green Tea' },
+            { name: 'Beer (Light)', matches: ['bee', 'be'], baseFood: 'Regular Soda' },
+            { name: 'Barley Water', matches: ['bar', 'ba'], baseFood: 'Coconut Water' },
+            { name: 'Beet Juice', matches: ['bee', 'be', 'jui'], baseFood: 'Cranberry Juice' },
+            { name: 'Banana Smoothie', matches: ['ban', 'ba', 'smo'], baseFood: 'Smoothie' },
+            { name: 'Berry Smoothie', matches: ['ber', 'be', 'smo'], baseFood: 'Smoothie' },
+            { name: 'Bone Broth', matches: ['bon', 'bo'], baseFood: 'Black Coffee' }
+        ],
+        sweets: [
+            { name: 'Brownies', matches: ['bro', 'br'], baseFood: 'Brownies' },
+            { name: 'Banana Bread', matches: ['ban', 'ba'], baseFood: 'Banana Bread' },
+            { name: 'Blueberry Muffin', matches: ['blu', 'bl'], baseFood: 'Blueberry Muffin' },
+            { name: 'Birthday Cake', matches: ['bir', 'bi'], baseFood: 'Chocolate Cake' },
+            { name: 'Butter Cookies', matches: ['but', 'bu'], baseFood: 'Sugar Cookies' },
+            { name: 'Biscotti', matches: ['bis', 'bi'], baseFood: 'Sugar Cookies' },
+            { name: 'Baklava', matches: ['bak', 'ba'], baseFood: 'Cheesecake' },
+            { name: 'Butterfinger', matches: ['but', 'bu'], baseFood: 'Candy Bar' },
+            { name: 'Bounty Bar', matches: ['bou', 'bo'], baseFood: 'Candy Bar' }
+        ],
+        extras: [
+            { name: 'BBQ Sauce', matches: ['bbq', 'bb'], baseFood: 'BBQ Sauce' },
+            { name: 'Balsamic Vinegar', matches: ['bal', 'ba'], baseFood: 'Balsamic Vinegar' },
+            { name: 'Butter', matches: ['but', 'bu'], baseFood: 'Butter' },
+            { name: 'Brown Sugar', matches: ['bro', 'br', 'sug'], baseFood: 'Honey' },
+            { name: 'Basil', matches: ['bas', 'ba'], baseFood: 'Black Pepper' },
+            { name: 'Bay Leaves', matches: ['bay', 'ba'], baseFood: 'Black Pepper' },
+            { name: 'Black Pepper', matches: ['bla', 'bl', 'pep'], baseFood: 'Black Pepper' },
+            { name: 'Barbecue Rub', matches: ['bar', 'ba'], baseFood: 'Garlic Powder' },
+            { name: 'Blue Cheese Dressing', matches: ['blu', 'bl'], baseFood: 'Ranch Dressing' }
+        ]
+    };
+    
+    // Get suggestions for the current category
+    const categorySuggestionsData = categorySuggestions[category] || [];
+    
+    // Filter suggestions based on search text
+    categorySuggestionsData.forEach(item => {
+        // Check if any of the match patterns match the search text
+        const matches = item.matches.some(match => 
+            searchLower.startsWith(match) || match.startsWith(searchLower)
+        );
+        
+        if (matches) {
+            suggestions.push({
+                brand: '', // No brand for generic items
+                product: item.name,
+                baseFood: item.baseFood
+            });
+        }
+    });
+    
+    // Limit to 6 suggestions
+    return suggestions.slice(0, 6);
+}
+
 
 // Filter food items by macro criteria
 function filterByMacro(category, filter, buttonElement) {
@@ -1295,9 +1452,8 @@ window.handlePillClick = handlePillClick;
 window.addNewDay = addNewDay;
 window.clearBoard = clearBoard;
 window.filterFoodItems = filterFoodItems;
+window.handleSearch = handleSearch;
 window.filterByMacro = filterByMacro;
-window.showPopularItems = showPopularItems;
-window.hidePopularItems = hidePopularItems;
 window.createCategoryColumn = createCategoryColumn;
 window.getAvailableUnits = getAvailableUnits;
 window.createMacroBar = createMacroBar;

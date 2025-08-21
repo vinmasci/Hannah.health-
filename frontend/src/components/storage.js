@@ -81,31 +81,87 @@ const MealStorage = {
         this.showNotification('🗑️ Meal plan cleared!', 'info');
     },
     
-    // Generic notification function
+    // Generic notification function - Modern snackbar style
     showNotification: function(message, type = 'success') {
+        // Remove any existing notifications first
+        const existing = document.querySelector('.snackbar-notification');
+        if (existing) {
+            existing.remove();
+        }
+        
         const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
+        notification.className = `snackbar-notification ${type}`;
         notification.style.cssText = `
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${type === 'success' ? '#48bb78' : '#667eea'};
+            bottom: 24px;
+            right: 24px;
+            background: ${type === 'success' ? 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
             color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             z-index: 10000;
-            animation: slideIn 0.3s ease;
+            animation: slideUpIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            max-width: 400px;
+            line-height: 1.4;
         `;
-        notification.textContent = message;
+        
+        // Add icon and text
+        const icon = document.createElement('span');
+        icon.style.cssText = `
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            animation: bounceIn 0.6s ease;
+        `;
+        icon.textContent = message.match(/^[✅🗑️📋🖨️]/) ? message.substring(0, 2) : (type === 'success' ? '✅' : 'ℹ️');
+        
+        const text = document.createElement('span');
+        text.style.cssText = `
+            flex: 1;
+            font-size: 14px;
+        `;
+        text.textContent = message.replace(/^[✅🗑️📋🖨️]\s*/, '');
+        
+        // Progress bar for auto-dismiss
+        const progressBar = document.createElement('div');
+        progressBar.style.cssText = `
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 0 0 12px 12px;
+            overflow: hidden;
+        `;
+        
+        const progressFill = document.createElement('div');
+        progressFill.style.cssText = `
+            height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            width: 100%;
+            animation: progressShrink 3s linear;
+        `;
+        progressBar.appendChild(progressFill);
+        
+        notification.appendChild(icon);
+        notification.appendChild(text);
+        notification.appendChild(progressBar);
         
         document.body.appendChild(notification);
         
+        // Auto dismiss after 3 seconds
         setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease';
+            notification.style.animation = 'slideDownOut 0.3s ease';
             setTimeout(() => notification.remove(), 300);
-        }, 2000);
+        }, 3000);
     }
 };
 
@@ -319,6 +375,40 @@ setInterval(() => {
 // Add styles for notifications
 const style = document.createElement('style');
 style.textContent = `
+    @keyframes slideUpIn {
+        from { 
+            transform: translateY(100%) translateX(0) scale(0.8); 
+            opacity: 0; 
+        }
+        to { 
+            transform: translateY(0) translateX(0) scale(1); 
+            opacity: 1; 
+        }
+    }
+    
+    @keyframes slideDownOut {
+        from { 
+            transform: translateY(0) translateX(0); 
+            opacity: 1; 
+        }
+        to { 
+            transform: translateY(100%) translateX(0); 
+            opacity: 0; 
+        }
+    }
+    
+    @keyframes bounceIn {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    
+    @keyframes progressShrink {
+        from { width: 100%; }
+        to { width: 0%; }
+    }
+    
+    /* Old animations kept for compatibility */
     @keyframes slideIn {
         from { transform: translateX(100%); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
