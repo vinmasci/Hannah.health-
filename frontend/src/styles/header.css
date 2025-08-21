@@ -3,9 +3,9 @@
 .header {
     background: rgba(255, 255, 255, 0.95);
     padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 6px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 12px 12px 0 0;
+    margin-bottom: 0;
+    box-shadow: none;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -26,32 +26,23 @@
 }
 
 .header-btn {
-    padding: 6px 12px;
-    background: #1e90ff;
-    color: white;
+    padding: 6px 14px;
+    background: white;
+    color: black;
     border: none;
-    border-radius: 6px;
+    border-radius: 20px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .header-btn:hover {
-    background: #1873cc;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Special style for Add Day button */
-#addDayBtn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-}
-
-#addDayBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18), 0 8px 20px rgba(0, 0, 0, 0.12);
 }

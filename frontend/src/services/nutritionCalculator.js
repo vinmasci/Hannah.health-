@@ -84,10 +84,20 @@ export class NutritionCalculator {
             return { protein: 0, carbs: 0, fat: 0 };
         }
         
+        // Calculate percentages without rounding first
+        const proteinPct = (protein / total) * 100;
+        const carbsPct = (carbs / total) * 100;
+        const fatPct = (fat / total) * 100;
+        
+        // Round first two, calculate last to ensure total is 100%
+        const proteinRounded = Math.round(proteinPct);
+        const carbsRounded = Math.round(carbsPct);
+        const fatRounded = 100 - proteinRounded - carbsRounded;
+        
         return {
-            protein: Math.round((protein / total) * 100),
-            carbs: Math.round((carbs / total) * 100),
-            fat: Math.round((fat / total) * 100)
+            protein: proteinRounded,
+            carbs: carbsRounded,
+            fat: Math.max(0, fatRounded) // Ensure non-negative
         };
     }
     

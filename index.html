@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meal Planner - Clean Design</title>
-    <link rel="stylesheet" href="styles-clean.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="frontend/src/styles/shopping-list.css">
 </head>
 <body>
     <!-- Header -->
@@ -119,5 +120,20 @@
     <script src="recipe-ai.js"></script>
     <script src="fatsecret-client.js"></script>
     <script src="barcode-scanner.js"></script>
+    <script type="module">
+        import { ShoppingList } from './frontend/src/components/ShoppingList.js';
+        // Initialize shopping list after DOM loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Override the auto-init from ShoppingList.js
+            if (window.shoppingList) {
+                // Already initialized
+            } else {
+                window.shoppingList = new ShoppingList();
+                setTimeout(() => {
+                    window.shoppingList.init();
+                }, 500);
+            }
+        });
+    </script>
 </body>
 </html>

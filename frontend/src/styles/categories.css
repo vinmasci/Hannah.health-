@@ -2,11 +2,9 @@
 
 /* Category Pills Container */
 .category-pills-container {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0 20px 20px 20px;
+    margin-top: -6px;
     display: flex;
     gap: 16px;
     align-items: center;
@@ -15,6 +13,8 @@
     white-space: nowrap;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Custom scrollbar for category pills */
@@ -76,6 +76,7 @@
 }
 
 /* All category pills have same white background with black text */
+.category-pill.favorites,
 .category-pill.protein,
 .category-pill.dairy,
 .category-pill.veg,
@@ -100,6 +101,10 @@
     border-radius: 8px;
     min-width: 320px;
     max-width: 320px;
+    height: calc(100vh - 160px);
+    max-height: 800px;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     overflow: hidden;
     animation: slideIn 0.3s ease;
@@ -251,7 +256,7 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-height: 600px;
+    flex: 1;
     overflow-y: auto;
     background: inherit;
 }

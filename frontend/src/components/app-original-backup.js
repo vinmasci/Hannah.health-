@@ -393,6 +393,63 @@ function createFoodItemHTML(food, category) {
     return FoodItem.create(food, category);
 }
 
+// Legacy function replaced by FoodItem component
+function createFoodItemHTML_OLD(food, category) {
+    const foodData = {
+        ...food,
+        category: category,
+        currentQuantity: food.baseQuantity,
+        currentUnit: food.baseUnit
+    };
+    
+    const units = getAvailableUnits(food.baseUnit);
+    const step = UnitConverter.getStepSize(food.baseUnit);
+    const min = UnitConverter.getMinValue(food.baseUnit);
+    
+    const isFavorited = window.favoritesManager ? window.favoritesManager.isFavorite(foodData) : false;
+    const itemId = `food-item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    return `
+        <div class="food-item food-item-${category}" draggable="true" data-food='${JSON.stringify(foodData)}' data-item-id="${itemId}">
+            <div class="food-item-header">
+                <div class="food-name">${food.name}</div>
+                <div class="food-item-actions">
+                    <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" 
+                            onclick="event.stopPropagation(); window.favoritesManager.toggleFavorite(this)" 
+                            title="${isFavorited ? 'Remove from favorites' : 'Add to favorites'}">
+                        ${isFavorited ? '❤️' : '🤍'}
+                    </button>
+                </div>
+            </div>
+            <div class="food-portion">
+                <div class="food-portion-inputs">
+                    <input type="number" class="portion-input" value="${food.baseQuantity}" min="${min}" step="${step}" data-unit="${food.baseUnit}">
+                    <select class="unit-select">
+                        ${units.map(unit => 
+                            `<option value="${unit}" ${unit === food.baseUnit ? 'selected' : ''}>${unit}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <button class="food-item-expand-btn" onclick="toggleFoodItemExpand('${itemId}')">▼</button>
+            </div>
+            <div class="food-macros">
+                <div class="macro-bar-container">
+                    <div class="macro-bar">
+                        ${createMacroBar(food.protein, food.carbs, food.fat)}
+                    </div>
+                    <div class="macro-labels">
+                        ${createMacroLabels(food.protein, food.carbs, food.fat)}
+                    </div>
+                    <div class="macro-stats">
+                        <span class="macro kcal" title="Calories">${food.kcal} kcal</span>
+                        <span class="macro cost" title="Cost">$${food.cost.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 // Get available units for conversion
 function getAvailableUnits(baseUnit) {
     return UnitConverter.getAvailableUnits(baseUnit);
@@ -673,19 +730,23 @@ function createDayColumn(dayName) {
             ${createMealHTML(dayName.toLowerCase(), 'Evening Snack', '20:30')}
         </div>
         <div class="day-totals">
-            <div class="day-totals-header">
-                <div class="day-totals-title">Day Total</div>
-                <div class="day-totals-quick-stats">
-                    <span class="quick-stat">0 kcal</span>
-                    <span class="quick-stat">$0.00</span>
-                </div>
-            </div>
+            <div class="day-totals-title">Day Total</div>
             <div class="macro-bar-container">
                 <div class="macro-bar day-macro-bar">
                     <div class="macro-bar-empty">No macros yet</div>
                 </div>
-                <div class="macro-labels compact">
+                <div class="macro-labels">
                     <!-- Labels will appear when macros are added -->
+                </div>
+            </div>
+            <div class="day-total-stats">
+                <div class="day-total-item">
+                    <span class="day-total-label">Calories</span>
+                    <span class="day-total-value">0 kcal</span>
+                </div>
+                <div class="day-total-item">
+                    <span class="day-total-label">Cost</span>
+                    <span class="day-total-value">$0.00</span>
                 </div>
             </div>
         </div>
@@ -697,6 +758,69 @@ function createDayColumn(dayName) {
 // Create Meal HTML (delegate to MealContainer component)
 function createMealHTML(day, mealName, time) {
     return MealContainer.create(day, mealName, time);
+}
+
+// Legacy function replaced by MealContainer component
+function createMealHTML_OLD(day, mealName, time) {
+    const mealId = `${day}-${mealName.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+    
+    // Get meal emoji based on meal name
+    const getMealEmoji = (name) => {
+        const mealLower = name.toLowerCase();
+        if (mealLower.includes('breakfast')) return '🍳';
+        if (mealLower.includes('lunch')) return '☀️';
+        if (mealLower.includes('dinner')) return '🌙';
+        if (mealLower.includes('morning') && mealLower.includes('snack')) return '🥐';
+        if (mealLower.includes('afternoon') && mealLower.includes('snack')) return '🍎';
+        if (mealLower.includes('evening') && mealLower.includes('snack')) return '🍪';
+        if (mealLower.includes('snack')) return '🥨';
+        return '🍽️'; // default meal emoji
+    };
+    
+    return `
+        <div class="meal" data-meal-id="${mealId}">
+            <div class="meal-header">
+                <div class="meal-header-top">
+                    <div class="meal-name" contenteditable="true" onclick="handleMealNameClick(event)" onblur="handleMealNameBlur(event, '${mealId}')" onkeydown="handleMealNameKeydown(event)">${getMealEmoji(mealName)} ${mealName}</div>
+                    <div class="meal-time" contenteditable="true" onclick="handleMealTimeClick(event)" onblur="handleMealTimeBlur(event, '${mealId}')" onkeydown="handleMealTimeKeydown(event)">⏰ ${time}</div>
+                </div>
+                <div class="meal-header-bottom">
+                    <div class="meal-controls">
+                        <button class="meal-control-btn minimize-btn" onclick="toggleMealMinimize('${mealId}')" title="Minimize">
+                            <span class="chevron">▼</span>
+                        </button>
+                        <button class="meal-control-btn" onclick="deleteMeal('${mealId}')">🗑️</button>
+                    </div>
+                </div>
+            </div>
+            <div class="meal-drop-zone" data-meal-id="${mealId}">
+                <div class="recipes-container">
+                    <!-- Recipe containers will be added here -->
+                </div>
+                <div class="food-modules-container" ondragover="handleMealDragOver(event)" ondrop="handleMealDrop(event)" ondragleave="handleMealDragLeave(event)">
+                    <!-- Standalone food modules (not in recipes) will be added here -->
+                </div>
+                <div class="add-food-zone" ondragover="handleMealDragOver(event)" ondrop="handleMealDrop(event)" ondragleave="handleMealDragLeave(event)">
+                    <span class="add-food-text">+ Add food or recipe</span>
+                </div>
+            </div>
+            <div class="meal-totals" style="display: none;">
+                <div class="meal-total">
+                    <span class="meal-total-label">Total:</span>
+                    <span class="meal-total-value">0 kcal</span>
+                </div>
+                <div class="meal-total">
+                    <span class="meal-total-value">0g P</span>
+                </div>
+                <div class="meal-total">
+                    <span class="meal-total-value">0g C</span>
+                </div>
+                <div class="meal-total">
+                    <span class="meal-total-value">0g F</span>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // Meal Drop Handlers
@@ -788,9 +912,147 @@ function createRecipeContainer(recipeName, recipeId = null) {
     return RecipeContainer.create(recipeName, recipeId);
 }
 
+// Legacy function replaced by RecipeContainer component
+function createRecipeContainer_OLD(recipeName, recipeId = null) {
+    const id = recipeId || `recipe-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const container = document.createElement('div');
+    container.className = 'recipe-container';
+    container.dataset.recipeId = id;
+    
+    container.innerHTML = `
+        <div class="recipe-header">
+            <div class="recipe-name">
+                <span class="recipe-icon">📖</span>
+                <span class="recipe-title" contenteditable="true">${recipeName}</span>
+            </div>
+            <div class="recipe-controls">
+                <button class="recipe-control-btn" onclick="toggleRecipeCollapse('${id}')" title="Collapse">
+                    <span class="chevron">▼</span>
+                </button>
+                <button class="recipe-control-btn" onclick="removeRecipe('${id}')" title="Remove Recipe">×</button>
+            </div>
+        </div>
+        <div class="recipe-modules-container" ondragover="handleRecipeDragOver(event)" ondrop="handleRecipeDrop(event)">
+            <!-- Food modules for this recipe go here -->
+        </div>
+        <div class="recipe-totals">
+            <span class="recipe-total-calories">0 kcal</span>
+            <span class="recipe-total-macros">0g P • 0g C • 0g F</span>
+        </div>
+    `;
+    
+    return container;
+}
+
 // Create Food Module (delegate to FoodModule component)
 function createFoodModule(dragData, isPartOfRecipe = false) {
     return FoodModule.create(dragData, isPartOfRecipe);
+}
+
+// Legacy function replaced by FoodModule component
+function createFoodModule_OLD(dragData, isPartOfRecipe = false) {
+    const module = document.createElement('div');
+    const category = dragData.food.category || 'default';
+    module.className = `food-module food-module-${category} animate-in`;
+    module.draggable = true;
+    
+    const moduleId = `module-${Date.now()}`;
+    const food = dragData.food;
+    const quantity = dragData.quantity;
+    const unit = dragData.unit;
+    
+    // Calculate macros based on portion
+    const baseQuantityInUnit = convertUnit(food.baseQuantity, food.baseUnit, unit);
+    const ratio = quantity / baseQuantityInUnit;
+    
+    const moduleData = {
+        id: moduleId,
+        name: food.name,
+        category: food.category,
+        quantity: quantity,
+        unit: unit,
+        baseFood: food,
+        kcal: Math.round(food.kcal * ratio),
+        protein: food.protein * ratio,
+        carbs: food.carbs * ratio,
+        fat: food.fat * ratio,
+        cost: food.cost * ratio
+    };
+    
+    const units = getAvailableUnits(food.baseUnit);
+    
+    const isFavorited = window.favoritesManager ? window.favoritesManager.isFavorite(food) : false;
+    
+    const categoryColors = {
+        protein: '#ef4444',
+        dairy: '#3b82f6',
+        veg: '#22c55e',
+        fruit: '#fb923c',
+        grains: '#a855f7',
+        nuts: '#fbbf24',
+        carbs: '#facc15',
+        drinks: '#06b6d4',
+        sweets: '#ec4899',
+        extras: '#a855f7'
+    };
+    
+    const categoryInitial = food.category ? food.category.charAt(0).toUpperCase() : '';
+    
+    module.innerHTML = `
+        <div class="module-category-badge" style="background: ${categoryColors[food.category] || '#9ca3af'}">${categoryInitial}</div>
+        <div class="module-header">
+            <div class="module-name">${food.name}</div>
+            <div class="module-actions">
+                <button class="module-favorite-btn ${isFavorited ? 'favorited' : ''}" 
+                        onclick="event.stopPropagation(); toggleModuleFavorite('${moduleId}')" 
+                        title="${isFavorited ? 'Remove from favorites' : 'Add to favorites'}">
+                    ${isFavorited ? '❤️' : '🤍'}
+                </button>
+                <button class="remove-module" onclick="removeModule('${moduleId}')">×</button>
+            </div>
+        </div>
+        <div class="module-controls">
+            <div class="module-inputs">
+                <input type="number" class="module-portion-input" value="${quantity}" min="${unit === 'cup' ? 0.25 : 1}" step="${unit === 'cup' ? 0.25 : 1}" data-module-id="${moduleId}" data-unit="${unit}">
+                <select class="module-unit-select" data-module-id="${moduleId}">
+                    ${units.map(u => 
+                        `<option value="${u}" ${u === unit ? 'selected' : ''}>${u}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <button class="module-expand-btn" onclick="toggleModuleExpand('${moduleId}')">▼</button>
+        </div>
+        <div class="module-macros">
+            <div class="macro-bar-container">
+                <div class="macro-bar">
+                    ${createMacroBar(moduleData.protein, moduleData.carbs, moduleData.fat)}
+                </div>
+                <div class="macro-labels">
+                    ${createMacroLabels(moduleData.protein, moduleData.carbs, moduleData.fat)}
+                </div>
+            </div>
+            <div class="macro-stats">
+                <span class="macro kcal">${moduleData.kcal} kcal</span>
+                <span class="macro cost">$${moduleData.cost.toFixed(2)}</span>
+            </div>
+        </div>
+    `;
+    
+    module.dataset.moduleId = moduleId;
+    module.dataset.module = JSON.stringify(moduleData);
+    
+    // Setup event handlers
+    module.addEventListener('dragstart', handleModuleDragStart);
+    module.addEventListener('dragend', handleModuleDragEnd);
+    
+    // Setup portion and unit change handlers
+    const portionInput = module.querySelector('.module-portion-input');
+    const unitSelect = module.querySelector('.module-unit-select');
+    
+    portionInput.addEventListener('change', (e) => updateModulePortion(moduleId, e.target.value));
+    unitSelect.addEventListener('change', (e) => updateModuleUnit(moduleId, e.target.value));
+    
+    return module;
 }
 
 // Update Module Portion
@@ -965,6 +1227,54 @@ function updateMealTotals(meal) {
     return MealContainer.updateTotals(meal);
 }
 
+// Legacy function replaced by MealContainer component
+function updateMealTotals_OLD(meal) {
+    if (!meal) return;
+    
+    // Get all modules - both in recipes and standalone
+    const modules = meal.querySelectorAll('.food-module');
+    const totalsDiv = meal.querySelector('.meal-totals');
+    
+    if (modules.length === 0) {
+        totalsDiv.style.display = 'none';
+        return;
+    }
+    
+    let totals = {
+        kcal: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        cost: 0
+    };
+    
+    modules.forEach(module => {
+        const moduleData = JSON.parse(module.dataset.module);
+        totals.kcal += moduleData.kcal;
+        totals.protein += moduleData.protein;
+        totals.carbs += moduleData.carbs;
+        totals.fat += moduleData.fat;
+        totals.cost += moduleData.cost;
+    });
+    
+    totalsDiv.style.display = 'block';
+    totalsDiv.innerHTML = `
+        <div class="meal-total-header">Meal Total</div>
+        <div class="macro-bar-container">
+            <div class="macro-bar">
+                ${createMacroBar(totals.protein, totals.carbs, totals.fat)}
+            </div>
+            <div class="macro-labels">
+                ${createMacroLabels(totals.protein, totals.carbs, totals.fat)}
+            </div>
+        </div>
+        <div class="meal-total-stats">
+            <span class="meal-total-stat">${totals.kcal} kcal</span>
+            <span class="meal-total-stat">$${totals.cost.toFixed(2)}</span>
+        </div>
+    `;
+}
+
 // Update Day Totals
 function updateDayTotals(dayColumn) {
     if (!dayColumn) return;
@@ -1019,21 +1329,24 @@ function updateDayTotals(dayColumn) {
     }
     
     totalsDiv.innerHTML = `
-        <div class="day-totals-header">
-            <div class="day-totals-title">Day Total</div>
-            <div class="day-totals-quick-stats">
-                <span class="quick-stat">${dayTotals.kcal} kcal</span>
-                <span class="quick-stat">$${dayTotals.cost.toFixed(2)}</span>
-            </div>
-        </div>
+        <div class="day-totals-title">Day Total</div>
+        ${macroDescription}
         <div class="macro-bar-container">
             <div class="macro-bar day-macro-bar">
                 ${createMacroBar(dayTotals.protein, dayTotals.carbs, dayTotals.fat)}
             </div>
-            <div class="macro-labels compact">
-                <span class="macro-label protein">P: ${dayTotals.protein.toFixed(0)}g</span>
-                <span class="macro-label carbs">C: ${dayTotals.carbs.toFixed(0)}g</span>
-                <span class="macro-label fat">F: ${dayTotals.fat.toFixed(0)}g</span>
+            <div class="macro-labels">
+                ${createMacroLabels(dayTotals.protein, dayTotals.carbs, dayTotals.fat)}
+            </div>
+        </div>
+        <div class="day-total-stats">
+            <div class="day-total-item">
+                <span class="day-total-label">Calories</span>
+                <span class="day-total-value">${dayTotals.kcal} kcal</span>
+            </div>
+            <div class="day-total-item">
+                <span class="day-total-label">Cost</span>
+                <span class="day-total-value">$${dayTotals.cost.toFixed(2)}</span>
             </div>
         </div>
     `;
@@ -1240,6 +1553,26 @@ function handleRecipeDrop(e) {
 // Update Recipe Totals (delegate to RecipeContainer component)
 function updateRecipeTotals(recipeContainer) {
     return RecipeContainer.updateTotals(recipeContainer);
+}
+
+// Legacy function replaced by RecipeContainer component
+function updateRecipeTotals_OLD(recipeContainer) {
+    const modules = recipeContainer.querySelectorAll('.food-module');
+    let totals = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+    
+    modules.forEach(module => {
+        const moduleData = JSON.parse(module.dataset.module);
+        totals.kcal += moduleData.kcal;
+        totals.protein += moduleData.protein;
+        totals.carbs += moduleData.carbs;
+        totals.fat += moduleData.fat;
+    });
+    
+    const totalsDiv = recipeContainer.querySelector('.recipe-totals');
+    totalsDiv.innerHTML = `
+        <span class="recipe-total-calories">${totals.kcal} kcal</span>
+        <span class="recipe-total-macros">${totals.protein.toFixed(1)}g P • ${totals.carbs.toFixed(1)}g C • ${totals.fat.toFixed(1)}g F</span>
+    `;
 }
 
 function toggleRecipeCollapse(recipeId) {

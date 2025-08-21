@@ -23,21 +23,21 @@ export class MealContainer {
                              onkeydown="MealContainer.handleNameKeydown(event)">
                             ${emoji} ${mealName}
                         </div>
-                        <div class="meal-time" contenteditable="true" 
-                             onclick="MealContainer.handleTimeClick(event)" 
-                             onblur="MealContainer.handleTimeBlur(event, '${mealId}')" 
-                             onkeydown="MealContainer.handleTimeKeydown(event)">
-                            ⏰ ${time}
-                        </div>
-                    </div>
-                    <div class="meal-header-bottom">
-                        <div class="meal-controls">
-                            <button class="meal-control-btn minimize-btn" 
-                                    onclick="MealContainer.toggleMinimize('${mealId}')" 
-                                    title="Minimize">
-                                <span class="chevron">▼</span>
-                            </button>
-                            <button class="meal-control-btn" onclick="MealContainer.delete('${mealId}')">🗑️</button>
+                        <div class="meal-header-actions">
+                            <div class="meal-time" contenteditable="true" 
+                                 onclick="MealContainer.handleTimeClick(event)" 
+                                 onblur="MealContainer.handleTimeBlur(event, '${mealId}')" 
+                                 onkeydown="MealContainer.handleTimeKeydown(event)">
+                                ⏰ ${time}
+                            </div>
+                            <div class="meal-controls">
+                                <button class="meal-control-btn minimize-btn" 
+                                        onclick="MealContainer.toggleMinimize('${mealId}')" 
+                                        title="Minimize">
+                                    <span class="chevron">▼</span>
+                                </button>
+                                <button class="meal-control-btn" onclick="MealContainer.delete('${mealId}')">🗑️</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -154,21 +154,58 @@ export class MealContainer {
         });
         
         totalsDiv.style.display = 'block';
+        const mealId = meal.dataset.mealId;
+        
+        // Set minimized by default if not already set
+        if (!totalsDiv.classList.contains('minimized') && !totalsDiv.classList.contains('expanded')) {
+            totalsDiv.classList.add('minimized');
+        }
+        const isMinimized = totalsDiv.classList.contains('minimized');
+        
         totalsDiv.innerHTML = `
-            <div class="meal-total-header">Meal Total</div>
-            <div class="macro-bar-container">
-                <div class="macro-bar">
-                    ${NutritionCalculator.createMacroBarHTML(totals.protein, totals.carbs, totals.fat)}
-                </div>
-                <div class="macro-labels">
-                    ${NutritionCalculator.createMacroLabelsHTML(totals.protein, totals.carbs, totals.fat)}
-                </div>
+            <div class="meal-total-header">
+                <span>Nutrition</span>
+                <button class="meal-total-toggle" onclick="MealContainer.toggleTotalsMinimize('${mealId}')">
+                    <span class="chevron">▼</span>
+                </button>
             </div>
-            <div class="meal-total-stats">
-                <span class="meal-total-stat">${totals.kcal} kcal</span>
-                <span class="meal-total-stat">$${totals.cost.toFixed(2)}</span>
+            <div class="meal-total-content" ${isMinimized ? 'style="display: none;"' : ''}>
+                <div class="macro-bar-container">
+                    <div class="macro-bar">
+                        ${NutritionCalculator.createMacroBarHTML(totals.protein, totals.carbs, totals.fat)}
+                    </div>
+                    <div class="macro-labels">
+                        ${NutritionCalculator.createMacroLabelsHTML(totals.protein, totals.carbs, totals.fat)}
+                    </div>
+                </div>
+                <div class="meal-total-stats">
+                    <span class="meal-total-stat">${totals.kcal} kcal</span>
+                    <span class="meal-total-stat">$${totals.cost.toFixed(2)}</span>
+                </div>
             </div>
         `;
+    }
+    
+    /**
+     * Toggle meal totals minimize state
+     * @param {string} mealId - Meal ID
+     */
+    static toggleTotalsMinimize(mealId) {
+        const meal = document.querySelector(`[data-meal-id="${mealId}"]`);
+        if (!meal) return;
+        
+        const totalsDiv = meal.querySelector('.meal-totals');
+        const content = totalsDiv.querySelector('.meal-total-content');
+        
+        if (totalsDiv.classList.contains('minimized')) {
+            // Expand
+            totalsDiv.classList.remove('minimized');
+            content.style.display = 'block';
+        } else {
+            // Minimize
+            totalsDiv.classList.add('minimized');
+            content.style.display = 'none';
+        }
     }
     
     /**

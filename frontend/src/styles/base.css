@@ -39,6 +39,7 @@ body {
     display: flex;
     gap: 24px;
     padding: 24px;
+    margin-top: 12px;
     min-height: calc(100vh - 200px);
     overflow-x: auto;
 }

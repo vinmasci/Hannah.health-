@@ -89,13 +89,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 4px;
 }
 
-.meal-header-bottom {
+.meal-header-actions {
     display: flex;
-    justify-content: flex-end;
     align-items: center;
+    gap: 8px;
 }
 
 .meal-name {
@@ -119,14 +118,15 @@
 }
 
 .meal-time {
-    font-size: 12px;
+    font-size: 11px;
     color: #718096;
     font-weight: 500;
     background: white;
-    padding: 2px 8px;
+    padding: 2px 6px;
     border-radius: 12px;
     cursor: text;
     transition: all 0.2s;
+    white-space: nowrap;
 }
 
 .meal-time:hover {
@@ -141,7 +141,7 @@
 
 .meal-controls {
     display: flex;
-    gap: 4px;
+    gap: 2px;
 }
 
 .meal-control-btn {
@@ -212,6 +212,35 @@
     text-transform: uppercase;
     font-size: 10px;
     letter-spacing: 0.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.meal-total-toggle {
+    background: none;
+    border: none;
+    color: #718096;
+    cursor: pointer;
+    padding: 2px 4px;
+    font-size: 10px;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.meal-total-toggle:hover {
+    color: #667eea;
+}
+
+.meal-total-toggle .chevron {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    font-size: 10px;
+    line-height: 1;
+}
+
+.meal-totals.minimized .meal-total-toggle .chevron {
+    transform: rotate(-90deg);
 }
 
 .meal-totals .macro-bar {
@@ -255,19 +284,39 @@
 /* Day Totals - Separate Box */
 .day-totals {
     background: white;
-    padding: 12px;
-    border-radius: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06);
     margin: 0 8px 0 8px;
 }
 
+.day-totals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
 .day-totals-title {
     font-weight: 700;
-    font-size: 11px;
+    font-size: 10px;
     color: #2d3748;
-    margin-bottom: 8px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.day-totals-quick-stats {
+    display: flex;
+    gap: 8px;
+}
+
+.quick-stat {
+    font-size: 11px;
+    font-weight: 600;
+    color: #4a5568;
+    padding: 2px 6px;
+    background: #f7fafc;
+    border-radius: 4px;
 }
 
 .macro-description {
@@ -283,45 +332,26 @@
 }
 
 .day-macro-bar {
-    height: 24px;
+    height: 18px;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .day-totals .macro-labels {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
 }
 
-.day-total-stats {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #e2e8f0;
-    gap: 16px;
-}
-
-.day-total-item {
-    background: #f7fafc;
-    padding: 8px 10px;
-    border-radius: 8px;
+.day-totals .macro-labels.compact {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    border: 1px solid #e2e8f0;
+    margin-top: 4px;
 }
 
-.day-total-label {
-    font-size: 11px;
-    color: #718096;
-    font-weight: 500;
+.day-totals .macro-labels.compact .macro-label {
+    padding: 1px 4px;
+    font-size: 9px;
 }
 
-.day-total-value {
-    font-size: 13px;
-    font-weight: 700;
-    color: #2d3748;
-}
 
 /* Drop indicators for columns */
 .day-column.drop-indicator-left::before {
@@ -373,19 +403,24 @@
     display: block;
 }
 
-/* Add food zone - BIGGER */
-.add-food-zone {
-    margin: 8px;
-    padding: 14px 16px;
-    background: #f7fafc;
-    border: 2px dashed #cbd5e0;
-    border-radius: 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 12px;
-    line-height: 1.4;
-    font-weight: 600;
+/* Add food zone - SUPER TALL */
+.meal-drop-zone .add-food-zone {
+    margin: 8px !important;
+    padding: 36px 20px !important;
+    min-height: 86px !important;
+    height: 86px !important;
+    background: #f7fafc !important;
+    border: 2px dashed #cbd5e0 !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    font-weight: 700 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .add-food-zone:hover {
@@ -399,9 +434,9 @@
 }
 
 .add-food-text {
-    color: #718096;
-    font-size: 12px;
+    color: #4a5568;
+    font-size: 10px !important;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
 }
