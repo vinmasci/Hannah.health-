@@ -6,11 +6,11 @@
     border-radius: 8px;
     min-width: 380px;
     max-width: 380px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
     height: calc(100vh - 160px);
     max-height: 800px;
+    padding-bottom: 8px;
 }
 
 .day-header {
@@ -52,7 +52,8 @@
     flex: 1;
     padding: 12px;
     overflow-y: auto;
-    background: #1e90ff !important;
+    background: #e6f3ff !important;
+    margin-bottom: 8px;
 }
 
 /* Meal */
@@ -176,19 +177,24 @@
     transform: rotate(-90deg);
 }
 
-/* Meal Drop Zone */
+/* Meal Drop Zone - NO WHITESPACE */
 .meal-drop-zone {
-    padding: 12px;
-    min-height: 100px;
+    padding: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
     transition: all 0.3s ease;
     background: white;
     transform-origin: top;
+    display: flex;
+    flex-direction: column;
 }
 
 .meal-drop-zone.drag-over {
     background: rgba(102, 126, 234, 0.05);
     border: 2px dashed #667eea;
     border-radius: 6px;
+    min-height: 80px;
+    padding: 12px;
 }
 
 /* Meal Totals */
@@ -246,19 +252,20 @@
     font-weight: 700;
 }
 
-/* Day Totals */
+/* Day Totals - Separate Box */
 .day-totals {
-    background: linear-gradient(135deg, #edf2f7, #e2e8f0);
-    padding: 10px 12px;
-    border-top: 2px solid #cbd5e0;
-    border-radius: 0 0 8px 8px;
+    background: white;
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06);
+    margin: 0 8px 0 8px;
 }
 
 .day-totals-title {
     font-weight: 700;
     font-size: 11px;
     color: #2d3748;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -288,16 +295,16 @@
 .day-total-stats {
     display: flex;
     justify-content: space-around;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid #cbd5e0;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
     gap: 16px;
 }
 
 .day-total-item {
-    background: white;
+    background: #f7fafc;
     padding: 8px 10px;
-    border-radius: 6px;
+    border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -343,19 +350,42 @@
 
 /* Food modules container */
 .food-modules-container {
-    min-height: 60px;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: none;
 }
 
-/* Add food zone */
+.food-modules-container:has(.food-module) {
+    display: block;
+}
+
+/* Hide empty recipes container */
+.recipes-container {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    display: none;
+}
+
+.recipes-container:has(.recipe-container) {
+    display: block;
+}
+
+/* Add food zone - BIGGER */
 .add-food-zone {
-    margin-top: 8px;
-    padding: 12px;
+    margin: 8px;
+    padding: 14px 16px;
     background: #f7fafc;
     border: 2px dashed #cbd5e0;
-    border-radius: 6px;
+    border-radius: 8px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 600;
 }
 
 .add-food-zone:hover {
@@ -371,7 +401,7 @@
 .add-food-text {
     color: #718096;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }

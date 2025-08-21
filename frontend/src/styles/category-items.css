@@ -3,59 +3,19 @@
 /* Food Items - matching food module styling */
 .food-item {
     background: white;
-    border: 3px solid #667eea;
+    border: none;
     border-radius: 16px;
-    padding: 8px;
+    padding: 10px;
     margin-bottom: 6px;
     cursor: move;
     transition: all 0.2s;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
-/* Category-specific border colors with gradients for food items */
-.food-item-protein {
-    border-image: radial-gradient(circle at top left, #dc2626, #fca5a5, #ef4444) 1;
-}
-
-.food-item-dairy {
-    border-image: radial-gradient(circle at top left, #2563eb, #bfdbfe, #3b82f6) 1;
-}
-
-.food-item-veg {
-    border-image: radial-gradient(circle at top left, #16a34a, #bbf7d0, #22c55e) 1;
-}
-
-.food-item-fruit {
-    border-image: radial-gradient(circle at top left, #ea580c, #fed7aa, #fb923c) 1;
-}
-
-.food-item-grains {
-    border-image: radial-gradient(circle at top left, #7c3aed, #e9d5ff, #a855f7) 1;
-}
-
-.food-item-nuts {
-    border-image: radial-gradient(circle at top left, #d97706, #fef3c7, #fbbf24) 1;
-}
-
-.food-item-carbs {
-    border-image: radial-gradient(circle at top left, #ca8a04, #fef9c3, #facc15) 1;
-}
-
-.food-item-drinks {
-    border-image: radial-gradient(circle at top left, #0891b2, #cffafe, #06b6d4) 1;
-}
-
-.food-item-sweets {
-    border-image: radial-gradient(circle at top left, #db2777, #fce7f3, #ec4899) 1;
-}
-
-.food-item-extras {
-    border-image: radial-gradient(circle at top left, #7c3aed, #f3e8ff, #a855f7) 1;
-}
+/* Category-specific colors - removed gradients */
 
 .food-item:hover {
-    border-image: radial-gradient(circle at top left, #0066ff, #66b3ff, #1e90ff) 1;
-    box-shadow: 0 6px 20px rgba(30, 144, 255, 0.3), 0 12px 32px rgba(30, 144, 255, 0.15), 0 2px 8px rgba(30, 144, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.15), 0 8px 20px rgba(30, 144, 255, 0.1);
     transform: translateY(-2px);
 }
 
@@ -78,18 +38,42 @@
     margin-bottom: 4px;
 }
 
+/* Food item expand button with rotation animation */
+.food-item-expand-btn {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 10px;
+    transition: transform 0.3s ease, color 0.2s ease;
+    line-height: 1;
+    display: inline-block;
+}
+
+.food-item-expand-btn:hover {
+    color: #667eea;
+}
+
+.food-item.expanded .food-item-expand-btn {
+    transform: rotate(180deg);
+}
+
 .food-portion-inputs {
     display: flex;
     gap: 4px;
     align-items: center;
 }
 
-.portion-input {
-    width: 60px;
-    padding: 6px;
+/* Unified Input Styling */
+.portion-input,
+.unit-select {
+    width: 55px;
+    height: 24px;
+    padding: 2px 4px;
     border: 1px solid #e2e8f0;
     border-radius: 4px;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 500;
     background: white;
     text-align: center;
@@ -97,6 +81,8 @@
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: textfield;
+    cursor: pointer;
+    box-sizing: border-box;
 }
 
 .portion-input::-webkit-inner-spin-button,
@@ -105,27 +91,11 @@
     height: auto;
 }
 
-.portion-input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.unit-select {
-    padding: 6px;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 500;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
+.portion-input:focus,
 .unit-select:focus {
     outline: none;
     border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
 .food-macros {
@@ -143,16 +113,21 @@
 }
 
 .food-item.expanded .macro-bar-container {
-    max-height: 60px;
+    max-height: 100px;
     opacity: 1;
     margin-bottom: 8px;
 }
 
-/* Always show the macro stats (kcal and cost) */
+/* Hide macro stats in collapsed state, show in expanded */
 .food-item .macro-stats {
+    display: none;
+}
+
+.food-item.expanded .macro-stats {
     display: flex;
     justify-content: space-between;
     gap: 6px;
+    margin-top: 8px;
 }
 
 /* Macro Bar Visualization */

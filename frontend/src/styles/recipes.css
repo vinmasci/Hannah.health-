@@ -1,7 +1,8 @@
 /* Recipe Container Styles */
 
 .recipes-container {
-    margin-bottom: 8px;
+    margin: 0;
+    padding: 0;
 }
 
 .recipe-container {

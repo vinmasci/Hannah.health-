@@ -2,11 +2,11 @@
 
 /* Category Pills Container */
 .category-pills-container {
-    background: rgba(255, 255, 255, 0.95);
+    background: white;
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.08);
     display: flex;
     gap: 16px;
     align-items: center;
@@ -58,14 +58,16 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background: white;
+    color: black;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
     user-select: none;
     flex-shrink: 0;
 }
 
 .category-pill:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18), 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .category-pill.dragging {
@@ -73,54 +75,19 @@
     transform: rotate(2deg);
 }
 
-.category-pill.protein {
-    background: #f0fff4;
-    color: #22543d;
-}
-
-.category-pill.dairy {
-    background: #dbeafe;
-    color: #1e3a8a;
-}
-
-.category-pill.veg {
-    background: #f0fdf4;
-    color: #166534;
-}
-
-.category-pill.fruit {
-    background: #fff5f5;
-    color: #c53030;
-}
-
-.category-pill.grains {
-    background: #ede9fe;
-    color: #581c87;
-}
-
-.category-pill.nuts {
-    background: #fef3c7;
-    color: #78350f;
-}
-
-.category-pill.carbs {
-    background: #fffdf7;
-    color: #744210;
-}
-
-.category-pill.drinks {
-    background: #cffafe;
-    color: #083344;
-}
-
-.category-pill.sweets {
-    background: #fce7f3;
-    color: #831843;
-}
-
+/* All category pills have same white background with black text */
+.category-pill.protein,
+.category-pill.dairy,
+.category-pill.veg,
+.category-pill.fruit,
+.category-pill.grains,
+.category-pill.nuts,
+.category-pill.carbs,
+.category-pill.drinks,
+.category-pill.sweets,
 .category-pill.extras {
-    background: #fdf5ff;
-    color: #553c9a;
+    background: white;
+    color: black;
 }
 
 .category-pill span:first-child {

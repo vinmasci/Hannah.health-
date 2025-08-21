@@ -1076,7 +1076,23 @@ function createFoodModule(dragData) {
     
     const isFavorited = window.favoritesManager ? window.favoritesManager.isFavorite(food) : false;
     
+    const categoryColors = {
+        protein: '#ef4444',
+        dairy: '#3b82f6',
+        veg: '#22c55e',
+        fruit: '#fb923c',
+        grains: '#a855f7',
+        nuts: '#fbbf24',
+        carbs: '#facc15',
+        drinks: '#06b6d4',
+        sweets: '#ec4899',
+        extras: '#a855f7'
+    };
+    
+    const categoryInitial = food.category ? food.category.charAt(0).toUpperCase() : '';
+    
     module.innerHTML = `
+        <div class="module-category-badge" style="background: ${categoryColors[food.category] || '#9ca3af'}">${categoryInitial}</div>
         <div class="module-header">
             <div class="module-name">${food.name}</div>
             <div class="module-actions">

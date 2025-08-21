@@ -1,120 +1,14 @@
 // Meal Planner Application JavaScript
 
-// Food database with base values
-const foodDatabase = {
-    protein: [
-        { name: 'Chicken Breast', baseQuantity: 100, baseUnit: 'g', kcal: 165, protein: 31, carbs: 0, fat: 3.6, cost: 3.50 },
-        { name: 'Salmon', baseQuantity: 100, baseUnit: 'g', kcal: 206, protein: 22, carbs: 0, fat: 13, cost: 5.75 },
-        { name: 'Tuna', baseQuantity: 100, baseUnit: 'g', kcal: 130, protein: 29, carbs: 0, fat: 1, cost: 3.00 },
-        { name: 'Lean Beef', baseQuantity: 100, baseUnit: 'g', kcal: 217, protein: 26, carbs: 0, fat: 12, cost: 4.50 },
-        { name: 'Turkey', baseQuantity: 100, baseUnit: 'g', kcal: 135, protein: 30, carbs: 0, fat: 1, cost: 3.25 },
-        { name: 'Tofu', baseQuantity: 100, baseUnit: 'g', kcal: 96, protein: 10, carbs: 2.3, fat: 5.8, cost: 1.50 },
-        { name: 'Eggs', baseQuantity: 1, baseUnit: 'large', kcal: 78, protein: 6.5, carbs: 0.6, fat: 5.5, cost: 0.60 },
-        { name: 'Shrimp', baseQuantity: 100, baseUnit: 'g', kcal: 99, protein: 24, carbs: 0.2, fat: 0.3, cost: 6.00 }
-    ],
-    dairy: [
-        { name: 'Greek Yogurt', baseQuantity: 100, baseUnit: 'g', kcal: 97, protein: 9, carbs: 4, fat: 5, cost: 2.00 },
-        { name: 'Milk', baseQuantity: 250, baseUnit: 'ml', kcal: 103, protein: 8, carbs: 12, fat: 2.4, cost: 1.00 },
-        { name: 'Cottage Cheese', baseQuantity: 100, baseUnit: 'g', kcal: 98, protein: 11, carbs: 3.4, fat: 4.3, cost: 2.50 },
-        { name: 'Cheddar Cheese', baseQuantity: 28, baseUnit: 'g', kcal: 113, protein: 7, carbs: 0.4, fat: 9, cost: 1.00 },
-        { name: 'Mozzarella', baseQuantity: 28, baseUnit: 'g', kcal: 85, protein: 6, carbs: 1, fat: 6, cost: 1.25 },
-        { name: 'Butter', baseQuantity: 1, baseUnit: 'tbsp', kcal: 102, protein: 0.1, carbs: 0, fat: 11.5, cost: 0.30 }
-    ],
-    veg: [
-        { name: 'Broccoli', baseQuantity: 100, baseUnit: 'g', kcal: 34, protein: 2.8, carbs: 6.6, fat: 0.4, cost: 1.25 },
-        { name: 'Spinach', baseQuantity: 100, baseUnit: 'g', kcal: 23, protein: 2.9, carbs: 3.6, fat: 0.4, cost: 1.00 },
-        { name: 'Kale', baseQuantity: 100, baseUnit: 'g', kcal: 35, protein: 2.9, carbs: 4.4, fat: 1.5, cost: 1.50 },
-        { name: 'Bell Pepper', baseQuantity: 1, baseUnit: 'unit', kcal: 24, protein: 1, carbs: 6, fat: 0, cost: 1.50 },
-        { name: 'Carrots', baseQuantity: 100, baseUnit: 'g', kcal: 41, protein: 0.9, carbs: 10, fat: 0.2, cost: 0.75 },
-        { name: 'Tomatoes', baseQuantity: 100, baseUnit: 'g', kcal: 18, protein: 0.9, carbs: 3.9, fat: 0.2, cost: 1.00 },
-        { name: 'Cucumber', baseQuantity: 100, baseUnit: 'g', kcal: 16, protein: 0.7, carbs: 3.6, fat: 0.1, cost: 0.75 },
-        { name: 'Mushrooms', baseQuantity: 100, baseUnit: 'g', kcal: 22, protein: 3.1, carbs: 3.3, fat: 0.3, cost: 1.75 }
-    ],
-    fruit: [
-        { name: 'Apple', baseQuantity: 1, baseUnit: 'medium', kcal: 95, protein: 0.5, carbs: 25, fat: 0.3, cost: 0.50 },
-        { name: 'Banana', baseQuantity: 1, baseUnit: 'medium', kcal: 105, protein: 1.3, carbs: 27, fat: 0.4, cost: 0.35 },
-        { name: 'Orange', baseQuantity: 1, baseUnit: 'medium', kcal: 62, protein: 1.2, carbs: 15.4, fat: 0.2, cost: 0.75 },
-        { name: 'Berries', baseQuantity: 100, baseUnit: 'g', kcal: 57, protein: 0.7, carbs: 14.5, fat: 0.3, cost: 3.00 },
-        { name: 'Strawberries', baseQuantity: 100, baseUnit: 'g', kcal: 32, protein: 0.7, carbs: 7.7, fat: 0.3, cost: 2.50 },
-        { name: 'Blueberries', baseQuantity: 100, baseUnit: 'g', kcal: 57, protein: 0.7, carbs: 14.5, fat: 0.3, cost: 4.00 },
-        { name: 'Mango', baseQuantity: 100, baseUnit: 'g', kcal: 60, protein: 0.8, carbs: 15, fat: 0.4, cost: 2.00 },
-        { name: 'Pineapple', baseQuantity: 100, baseUnit: 'g', kcal: 50, protein: 0.5, carbs: 13, fat: 0.1, cost: 1.50 }
-    ],
-    grains: [
-        { name: 'Brown Rice', baseQuantity: 100, baseUnit: 'g', kcal: 111, protein: 2.6, carbs: 23, fat: 0.9, cost: 1.00 },
-        { name: 'White Rice', baseQuantity: 100, baseUnit: 'g', kcal: 130, protein: 2.7, carbs: 28, fat: 0.3, cost: 0.75 },
-        { name: 'Quinoa', baseQuantity: 100, baseUnit: 'g', kcal: 120, protein: 4.1, carbs: 21.3, fat: 1.9, cost: 2.00 },
-        { name: 'Oats', baseQuantity: 100, baseUnit: 'g', kcal: 379, protein: 13.2, carbs: 67.7, fat: 6.5, cost: 1.50 },
-        { name: 'Whole Wheat Bread', baseQuantity: 1, baseUnit: 'slice', kcal: 81, protein: 4, carbs: 13.8, fat: 1.1, cost: 0.30 },
-        { name: 'Pasta', baseQuantity: 100, baseUnit: 'g', kcal: 131, protein: 5, carbs: 25, fat: 1.1, cost: 1.00 },
-        { name: 'Barley', baseQuantity: 100, baseUnit: 'g', kcal: 123, protein: 2.3, carbs: 28.2, fat: 0.4, cost: 1.25 }
-    ],
-    nuts: [
-        { name: 'Almonds', baseQuantity: 28, baseUnit: 'g', kcal: 164, protein: 6, carbs: 6, fat: 14, cost: 1.50 },
-        { name: 'Walnuts', baseQuantity: 28, baseUnit: 'g', kcal: 185, protein: 4.3, carbs: 3.9, fat: 18.5, cost: 1.75 },
-        { name: 'Cashews', baseQuantity: 28, baseUnit: 'g', kcal: 157, protein: 5.2, carbs: 8.6, fat: 12.4, cost: 2.00 },
-        { name: 'Peanuts', baseQuantity: 28, baseUnit: 'g', kcal: 161, protein: 7.3, carbs: 4.6, fat: 14, cost: 0.75 },
-        { name: 'Chia Seeds', baseQuantity: 28, baseUnit: 'g', kcal: 138, protein: 4.7, carbs: 12, fat: 8.7, cost: 2.50 },
-        { name: 'Flax Seeds', baseQuantity: 28, baseUnit: 'g', kcal: 150, protein: 5.2, carbs: 8.2, fat: 12, cost: 1.50 },
-        { name: 'Pumpkin Seeds', baseQuantity: 28, baseUnit: 'g', kcal: 151, protein: 7, carbs: 5, fat: 13, cost: 2.00 }
-    ],
-    carbs: [
-        { name: 'Sweet Potato', baseQuantity: 100, baseUnit: 'g', kcal: 86, protein: 1.6, carbs: 20, fat: 0.1, cost: 0.75 },
-        { name: 'Potato', baseQuantity: 100, baseUnit: 'g', kcal: 77, protein: 2, carbs: 17, fat: 0.1, cost: 0.50 },
-        { name: 'Corn', baseQuantity: 100, baseUnit: 'g', kcal: 86, protein: 3.3, carbs: 19, fat: 1.4, cost: 0.75 },
-        { name: 'Beans', baseQuantity: 100, baseUnit: 'g', kcal: 127, protein: 8.7, carbs: 22.8, fat: 0.5, cost: 1.00 },
-        { name: 'Lentils', baseQuantity: 100, baseUnit: 'g', kcal: 116, protein: 9, carbs: 20, fat: 0.4, cost: 1.25 },
-        { name: 'Chickpeas', baseQuantity: 100, baseUnit: 'g', kcal: 164, protein: 8.9, carbs: 27.4, fat: 2.6, cost: 1.00 }
-    ],
-    drinks: [
-        { name: 'Water', baseQuantity: 250, baseUnit: 'ml', kcal: 0, protein: 0, carbs: 0, fat: 0, cost: 0.00 },
-        { name: 'Coffee', baseQuantity: 250, baseUnit: 'ml', kcal: 2, protein: 0.3, carbs: 0, fat: 0, cost: 0.50 },
-        { name: 'Green Tea', baseQuantity: 250, baseUnit: 'ml', kcal: 2, protein: 0, carbs: 0, fat: 0, cost: 0.25 },
-        { name: 'Orange Juice', baseQuantity: 250, baseUnit: 'ml', kcal: 112, protein: 1.7, carbs: 26, fat: 0.5, cost: 1.50 },
-        { name: 'Smoothie', baseQuantity: 250, baseUnit: 'ml', kcal: 150, protein: 3, carbs: 35, fat: 1, cost: 3.00 },
-        { name: 'Protein Shake', baseQuantity: 250, baseUnit: 'ml', kcal: 160, protein: 25, carbs: 8, fat: 3, cost: 2.50 },
-        { name: 'Coconut Water', baseQuantity: 250, baseUnit: 'ml', kcal: 45, protein: 2, carbs: 9, fat: 0.5, cost: 2.00 },
-        { name: 'Almond Milk', baseQuantity: 250, baseUnit: 'ml', kcal: 40, protein: 1, carbs: 3, fat: 3, cost: 1.00 }
-    ],
-    sweets: [
-        { name: 'Dark Chocolate', baseQuantity: 28, baseUnit: 'g', kcal: 155, protein: 1.4, carbs: 17, fat: 9, cost: 1.25 },
-        { name: 'Cookies', baseQuantity: 2, baseUnit: 'pieces', kcal: 140, protein: 2, carbs: 20, fat: 6, cost: 0.75 },
-        { name: 'Ice Cream', baseQuantity: 100, baseUnit: 'g', kcal: 207, protein: 3.5, carbs: 24, fat: 11, cost: 1.50 },
-        { name: 'Brownies', baseQuantity: 1, baseUnit: 'piece', kcal: 240, protein: 3, carbs: 35, fat: 10, cost: 1.00 },
-        { name: 'Fruit Sorbet', baseQuantity: 100, baseUnit: 'g', kcal: 120, protein: 0.5, carbs: 30, fat: 0, cost: 2.00 },
-        { name: 'Muffin', baseQuantity: 1, baseUnit: 'piece', kcal: 180, protein: 3, carbs: 25, fat: 7, cost: 1.50 },
-        { name: 'Granola Bar', baseQuantity: 1, baseUnit: 'bar', kcal: 120, protein: 2, carbs: 18, fat: 5, cost: 0.75 },
-        { name: 'Yogurt Parfait', baseQuantity: 150, baseUnit: 'g', kcal: 140, protein: 6, carbs: 22, fat: 3, cost: 2.50 }
-    ],
-    extras: [
-        { name: 'Olive Oil', baseQuantity: 1, baseUnit: 'tbsp', kcal: 119, protein: 0, carbs: 0, fat: 14, cost: 0.25 },
-        { name: 'Coconut Oil', baseQuantity: 1, baseUnit: 'tbsp', kcal: 117, protein: 0, carbs: 0, fat: 14, cost: 0.30 },
-        { name: 'Avocado', baseQuantity: 100, baseUnit: 'g', kcal: 160, protein: 2, carbs: 8.5, fat: 14.7, cost: 2.00 },
-        { name: 'Peanut Butter', baseQuantity: 2, baseUnit: 'tbsp', kcal: 191, protein: 7, carbs: 8, fat: 16, cost: 0.50 },
-        { name: 'Almond Butter', baseQuantity: 2, baseUnit: 'tbsp', kcal: 196, protein: 7, carbs: 6, fat: 18, cost: 1.00 },
-        { name: 'Honey', baseQuantity: 1, baseUnit: 'tbsp', kcal: 64, protein: 0.1, carbs: 17.3, fat: 0, cost: 0.50 },
-        { name: 'Maple Syrup', baseQuantity: 1, baseUnit: 'tbsp', kcal: 52, protein: 0, carbs: 13.4, fat: 0, cost: 0.75 }
-    ]
-};
-
-// Unit conversion factors
-const unitConversions = {
-    'g': { 'oz': 0.035274, 'lb': 0.00220462, 'kg': 0.001, 'cup': 0.00423, 'tbsp': 0.0667, 'tsp': 0.2 },
-    'oz': { 'g': 28.3495, 'lb': 0.0625, 'kg': 0.0283495, 'cup': 0.12, 'tbsp': 1.89, 'tsp': 5.67 },
-    'lb': { 'g': 453.592, 'oz': 16, 'kg': 0.453592, 'cup': 1.92, 'tbsp': 30.24, 'tsp': 90.72 },
-    'kg': { 'g': 1000, 'oz': 35.274, 'lb': 2.20462, 'cup': 4.23, 'tbsp': 66.7, 'tsp': 200 },
-    'cup': { 'g': 236.588, 'oz': 8.33, 'lb': 0.521, 'kg': 0.237, 'tbsp': 16, 'tsp': 48, 'ml': 236.588 },
-    'tbsp': { 'g': 14.787, 'oz': 0.529, 'lb': 0.0326, 'kg': 0.0148, 'cup': 0.0625, 'tsp': 3, 'ml': 14.787 },
-    'tsp': { 'g': 4.929, 'oz': 0.176, 'lb': 0.0109, 'kg': 0.00493, 'cup': 0.0208, 'tbsp': 0.333, 'ml': 4.929 },
-    'ml': { 'cup': 0.00423, 'tbsp': 0.0676, 'tsp': 0.203, 'fl oz': 0.0338 },
-    'fl oz': { 'ml': 29.574, 'cup': 0.125, 'tbsp': 2, 'tsp': 6 },
-    'unit': { 'unit': 1 },
-    'medium': { 'small': 1.5, 'large': 0.75, 'medium': 1 },
-    'large': { 'small': 2, 'medium': 1.33, 'large': 1 },
-    'small': { 'medium': 0.67, 'large': 0.5, 'small': 1 },
-    'slice': { 'slice': 1 },
-    'piece': { 'piece': 1 }
-};
+// Import data and constants
+import { foodDatabase, categoryMetadata, getFoodByName, getAllFoods, getFoodsByCategory } from '../data/foodDatabase.js';
+import { unitConversions, MEAL_TYPES, DAYS, DEFAULT_PORTIONS, MACRO_COLORS, INPUT_CONSTRAINTS, STORAGE_KEYS } from '../utils/constants.js';
+import { NutritionCalculator } from '../services/nutritionCalculator.js';
+import { UnitConverter } from '../services/unitConverter.js';
+import { FoodItem } from './FoodItem.js';
+import { FoodModule } from './FoodModule.js';
+import { MealContainer } from './MealContainer.js';
+import { RecipeContainer } from './RecipeContainer.js';
 
 // DOM Elements
 let mainBoard, categoryPillsContainer;
@@ -486,38 +380,21 @@ function createCategoryColumn(category, insertBefore = null) {
 
 // Create macro bar visualization
 function createMacroBar(protein, carbs, fat) {
-    const total = protein + carbs + fat;
-    if (total === 0) return '<div class="macro-bar-empty">No macros</div>';
-    
-    const proteinPercent = (protein / total) * 100;
-    const carbsPercent = (carbs / total) * 100;
-    const fatPercent = (fat / total) * 100;
-    
-    return `
-        <div class="macro-bar-segment protein" style="width: ${proteinPercent}%" title="Protein: ${protein.toFixed(1)}g (${proteinPercent.toFixed(0)}%)"></div>
-        <div class="macro-bar-segment carbs" style="width: ${carbsPercent}%" title="Carbs: ${carbs.toFixed(1)}g (${carbsPercent.toFixed(0)}%)"></div>
-        <div class="macro-bar-segment fat" style="width: ${fatPercent}%" title="Fat: ${fat.toFixed(1)}g (${fatPercent.toFixed(0)}%)"></div>
-    `;
+    return NutritionCalculator.createMacroBarHTML(protein, carbs, fat);
 }
 
 // Create macro labels with percentages
 function createMacroLabels(protein, carbs, fat) {
-    const total = protein + carbs + fat;
-    if (total === 0) return '';
-    
-    const proteinPercent = ((protein / total) * 100).toFixed(0);
-    const carbsPercent = ((carbs / total) * 100).toFixed(0);
-    const fatPercent = ((fat / total) * 100).toFixed(0);
-    
-    return `
-        <span class="macro-label protein">Protein: ${protein.toFixed(1)}g (${proteinPercent}%)</span>
-        <span class="macro-label carbs">Carbs: ${carbs.toFixed(1)}g (${carbsPercent}%)</span>
-        <span class="macro-label fat">Fat: ${fat.toFixed(1)}g (${fatPercent}%)</span>
-    `;
+    return NutritionCalculator.createMacroLabelsHTML(protein, carbs, fat);
 }
 
-// Create Food Item HTML
+// Create Food Item HTML (delegate to FoodItem component)
 function createFoodItemHTML(food, category) {
+    return FoodItem.create(food, category);
+}
+
+// Legacy function replaced by FoodItem component
+function createFoodItemHTML_OLD(food, category) {
     const foodData = {
         ...food,
         category: category,
@@ -526,8 +403,8 @@ function createFoodItemHTML(food, category) {
     };
     
     const units = getAvailableUnits(food.baseUnit);
-    const step = food.baseUnit === 'cup' ? 0.25 : 1;
-    const min = food.baseUnit === 'cup' ? 0.25 : 1;
+    const step = UnitConverter.getStepSize(food.baseUnit);
+    const min = UnitConverter.getMinValue(food.baseUnit);
     
     const isFavorited = window.favoritesManager ? window.favoritesManager.isFavorite(foodData) : false;
     const itemId = `food-item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -563,10 +440,10 @@ function createFoodItemHTML(food, category) {
                     <div class="macro-labels">
                         ${createMacroLabels(food.protein, food.carbs, food.fat)}
                     </div>
-                </div>
-                <div class="macro-stats">
-                    <span class="macro kcal" title="Calories">${food.kcal} kcal</span>
-                    <span class="macro cost" title="Cost">$${food.cost.toFixed(2)}</span>
+                    <div class="macro-stats">
+                        <span class="macro kcal" title="Calories">${food.kcal} kcal</span>
+                        <span class="macro cost" title="Cost">$${food.cost.toFixed(2)}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -575,15 +452,7 @@ function createFoodItemHTML(food, category) {
 
 // Get available units for conversion
 function getAvailableUnits(baseUnit) {
-    const weightUnits = ['g', 'oz', 'lb', 'kg'];
-    const volumeUnits = ['cup', 'tbsp', 'tsp', 'ml', 'fl oz'];
-    const countUnits = ['unit', 'small', 'medium', 'large', 'slice', 'piece'];
-    
-    // For weight units, also include cup for common cooking conversions
-    if (weightUnits.includes(baseUnit)) return [...weightUnits, 'cup'];
-    if (volumeUnits.includes(baseUnit)) return volumeUnits;
-    if (countUnits.includes(baseUnit)) return countUnits;
-    return [baseUnit];
+    return UnitConverter.getAvailableUnits(baseUnit);
 }
 
 // Handle portion change
@@ -636,18 +505,7 @@ function handleUnitChange(e) {
 
 // Convert units
 function convertUnit(quantity, fromUnit, toUnit) {
-    if (fromUnit === toUnit) return quantity;
-    
-    if (unitConversions[fromUnit] && unitConversions[fromUnit][toUnit]) {
-        return quantity * unitConversions[fromUnit][toUnit];
-    }
-    
-    // Try reverse conversion
-    if (unitConversions[toUnit] && unitConversions[toUnit][fromUnit]) {
-        return quantity / unitConversions[toUnit][fromUnit];
-    }
-    
-    return quantity;
+    return UnitConverter.convert(quantity, fromUnit, toUnit);
 }
 
 // Update food item macros display
@@ -816,26 +674,7 @@ function filterByMacro(category, filter, buttonElement) {
         const foodData = JSON.parse(item.dataset.food);
         let show = true;
         
-        switch(filter) {
-            case 'high-protein':
-                // Show if protein is > 20% of calories (protein has 4 cal/g)
-                const proteinCals = foodData.protein * 4;
-                show = (proteinCals / foodData.kcal) > 0.2;
-                break;
-            case 'low-carb':
-                // Show if carbs are < 30% of calories (carbs have 4 cal/g)
-                const carbCals = foodData.carbs * 4;
-                show = (carbCals / foodData.kcal) < 0.3;
-                break;
-            case 'low-fat':
-                // Show if fat is < 30% of calories (fat has 9 cal/g)
-                const fatCals = foodData.fat * 9;
-                show = (fatCals / foodData.kcal) < 0.3;
-                break;
-            case 'all':
-            default:
-                show = true;
-        }
+        show = NutritionCalculator.meetsMacroCriteria(foodData, filter);
         
         item.style.display = show ? 'block' : 'none';
     });
@@ -916,8 +755,13 @@ function createDayColumn(dayName) {
     mainBoard.appendChild(column);
 }
 
-// Create Meal HTML
+// Create Meal HTML (delegate to MealContainer component)
 function createMealHTML(day, mealName, time) {
+    return MealContainer.create(day, mealName, time);
+}
+
+// Legacy function replaced by MealContainer component
+function createMealHTML_OLD(day, mealName, time) {
     const mealId = `${day}-${mealName.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
     
     // Get meal emoji based on meal name
@@ -1063,8 +907,13 @@ function getDragAfterElement(container, y) {
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
-// Create Recipe Container
+// Create Recipe Container (delegate to RecipeContainer component)
 function createRecipeContainer(recipeName, recipeId = null) {
+    return RecipeContainer.create(recipeName, recipeId);
+}
+
+// Legacy function replaced by RecipeContainer component
+function createRecipeContainer_OLD(recipeName, recipeId = null) {
     const id = recipeId || `recipe-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const container = document.createElement('div');
     container.className = 'recipe-container';
@@ -1095,8 +944,13 @@ function createRecipeContainer(recipeName, recipeId = null) {
     return container;
 }
 
-// Create Food Module
+// Create Food Module (delegate to FoodModule component)
 function createFoodModule(dragData, isPartOfRecipe = false) {
+    return FoodModule.create(dragData, isPartOfRecipe);
+}
+
+// Legacy function replaced by FoodModule component
+function createFoodModule_OLD(dragData, isPartOfRecipe = false) {
     const module = document.createElement('div');
     const category = dragData.food.category || 'default';
     module.className = `food-module food-module-${category} animate-in`;
@@ -1129,7 +983,23 @@ function createFoodModule(dragData, isPartOfRecipe = false) {
     
     const isFavorited = window.favoritesManager ? window.favoritesManager.isFavorite(food) : false;
     
+    const categoryColors = {
+        protein: '#ef4444',
+        dairy: '#3b82f6',
+        veg: '#22c55e',
+        fruit: '#fb923c',
+        grains: '#a855f7',
+        nuts: '#fbbf24',
+        carbs: '#facc15',
+        drinks: '#06b6d4',
+        sweets: '#ec4899',
+        extras: '#a855f7'
+    };
+    
+    const categoryInitial = food.category ? food.category.charAt(0).toUpperCase() : '';
+    
     module.innerHTML = `
+        <div class="module-category-badge" style="background: ${categoryColors[food.category] || '#9ca3af'}">${categoryInitial}</div>
         <div class="module-header">
             <div class="module-name">${food.name}</div>
             <div class="module-actions">
@@ -1352,8 +1222,13 @@ function removeModule(moduleId) {
     }, 300);
 }
 
-// Update Meal Totals
+// Update Meal Totals (delegate to MealContainer component)
 function updateMealTotals(meal) {
+    return MealContainer.updateTotals(meal);
+}
+
+// Legacy function replaced by MealContainer component
+function updateMealTotals_OLD(meal) {
     if (!meal) return;
     
     // Get all modules - both in recipes and standalone
@@ -1675,7 +1550,13 @@ function handleRecipeDrop(e) {
     }
 }
 
+// Update Recipe Totals (delegate to RecipeContainer component)
 function updateRecipeTotals(recipeContainer) {
+    return RecipeContainer.updateTotals(recipeContainer);
+}
+
+// Legacy function replaced by RecipeContainer component
+function updateRecipeTotals_OLD(recipeContainer) {
     const modules = recipeContainer.querySelectorAll('.food-module');
     let totals = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
     
@@ -1735,14 +1616,14 @@ window.removeCategoryColumn = removeCategoryColumn;
 window.removeModule = removeModule;
 window.toggleModuleFavorite = toggleModuleFavorite;
 window.addMeal = addMeal;
-window.deleteMeal = deleteMeal;
-window.toggleMealMinimize = toggleMealMinimize;
-window.handleMealNameClick = handleMealNameClick;
-window.handleMealNameBlur = handleMealNameBlur;
-window.handleMealNameKeydown = handleMealNameKeydown;
-window.handleMealTimeClick = handleMealTimeClick;
-window.handleMealTimeBlur = handleMealTimeBlur;
-window.handleMealTimeKeydown = handleMealTimeKeydown;
+window.deleteMeal = (mealId) => MealContainer.delete(mealId);
+window.toggleMealMinimize = (mealId) => MealContainer.toggleMinimize(mealId);
+window.handleMealNameClick = MealContainer.handleNameClick;
+window.handleMealNameBlur = MealContainer.handleNameBlur;
+window.handleMealNameKeydown = MealContainer.handleNameKeydown;
+window.handleMealTimeClick = MealContainer.handleTimeClick;
+window.handleMealTimeBlur = MealContainer.handleTimeBlur;
+window.handleMealTimeKeydown = MealContainer.handleTimeKeydown;
 window.handlePillClick = handlePillClick;
 window.addNewDay = addNewDay;
 window.clearBoard = clearBoard;
@@ -1764,10 +1645,10 @@ window.createRecipeContainer = createRecipeContainer;
 window.updateRecipeTotals = updateRecipeTotals;
 window.handleRecipeDragOver = handleRecipeDragOver;
 window.handleRecipeDrop = handleRecipeDrop;
-window.toggleRecipeCollapse = toggleRecipeCollapse;
-window.removeRecipe = removeRecipe;
-window.toggleModuleExpand = toggleModuleExpand;
-window.toggleFoodItemExpand = toggleFoodItemExpand;
+window.toggleRecipeCollapse = (recipeId) => RecipeContainer.toggleCollapse(recipeId);
+window.removeRecipe = (recipeId) => RecipeContainer.remove(recipeId);
+window.toggleModuleExpand = (moduleId) => FoodModule.toggleExpand(moduleId);
+window.toggleFoodItemExpand = (itemId) => FoodItem.toggleExpand(itemId);
 
 // Animation styles
 const animationStyles = document.createElement('style');

@@ -9,14 +9,34 @@
     margin-bottom: 6px;
     cursor: move;
     transition: all 0.2s;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06);
+    position: relative;
+}
+
+/* Category Badge Indicator */
+.module-category-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    z-index: 1;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Category-specific colors - removed gradients */
 
 /* Module States */
 .food-module:hover {
-    box-shadow: 0 6px 20px rgba(30, 144, 255, 0.3), 0 12px 32px rgba(30, 144, 255, 0.15), 0 2px 8px rgba(30, 144, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.15), 0 8px 20px rgba(30, 144, 255, 0.1);
     transform: translateY(-2px);
 }
 
@@ -31,6 +51,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 4px;
+    padding-left: 24px;
 }
 
 .module-name {
@@ -94,6 +115,7 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 4px;
+    padding-left: 24px;
 }
 
 .module-inputs {
@@ -122,19 +144,23 @@
     transform: rotate(180deg);
 }
 
-/* Module Inputs */
-.module-portion-input {
-    width: 60px;
-    padding: 4px 6px;
+/* Module Inputs - Unified Styling */
+.module-portion-input,
+.module-unit-select {
+    width: 55px;
+    height: 24px;
+    padding: 2px 4px;
     border: 1px solid #e2e8f0;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     background: white;
     text-align: center;
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: textfield;
+    cursor: pointer;
+    box-sizing: border-box;
 }
 
 .module-portion-input::-webkit-inner-spin-button,
@@ -143,26 +169,11 @@
     height: auto;
 }
 
-.module-portion-input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.module-unit-select {
-    padding: 4px 6px;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-    background: white;
-    cursor: pointer;
-}
-
+.module-portion-input:focus,
 .module-unit-select:focus {
     outline: none;
     border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
 /* Module Macros (Collapsible nutrition info) */
@@ -174,6 +185,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+    padding-left: 24px;
 }
 
 .food-module.expanded .module-macros {
