@@ -7,7 +7,18 @@ class AIAssistantColumn {
     constructor() {
         this.aiService = new AIService();
         this.conversationHistory = [];
+        this.aboutMeHistory = [];
         this.isProcessing = false;
+        this.activeTab = 'meal-planner';
+        this.userProfile = {
+            age: null,
+            weight: null,
+            height: null,
+            activityLevel: null,
+            goals: null,
+            restrictions: null,
+            tdee: null
+        };
     }
     
     createColumn() {
@@ -21,30 +32,74 @@ class AIAssistantColumn {
                         <span class="ai-subtitle">Your Meal Assistant</span>
                     </div>
                 </div>
+                <div class="ai-tabs">
+                    <button class="ai-tab active" data-tab="meal-planner" onclick="aiAssistant.switchTab('meal-planner')">
+                        🍽️ Meal Planner
+                    </button>
+                    <button class="ai-tab" data-tab="about-me" onclick="aiAssistant.switchTab('about-me')">
+                        👤 About Me
+                    </button>
+                </div>
             </div>
             
             <div class="ai-column-body">
-                <!-- Quick action badges -->
-                <div class="ai-quick-actions">
-                    <button class="ai-quick-badge primary" onclick="aiAssistant.quickPlan()">
-                        🚀 Quick meal plan!
-                    </button>
-                    <button class="ai-quick-badge secondary" onclick="aiAssistant.askForHelp()">
-                        💡 Meal ideas
-                    </button>
-                </div>
-                
-                <!-- Chat messages area -->
-                <div class="ai-chat-messages" id="ai-chat-messages">
-                    <div class="ai-welcome-message">
-                        <div class="hannah-avatar">H</div>
-                        <div class="message-bubble">
-                            Hi! I'm Hannah, your meal planning assistant. How can I help you today?
+                <div class="ai-tab-content" id="meal-planner-content">
+                    <div class="ai-quick-actions">
+                        <button class="ai-quick-badge secondary small" onclick="aiAssistant.quickPlan()">
+                            🚀 Quick meal plan
+                        </button>
+                    </div>
+                    
+                    <div class="ai-chat-messages" id="ai-chat-messages">
+                        <div class="ai-welcome-message">
+                            <div class="hannah-avatar">H</div>
+                            <div class="message-bubble">
+                                Hi! I'm Hannah, your meal planning assistant. How can I help you plan your meals today?
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Input area -->
+                <div class="ai-tab-content" id="about-me-content" style="display: none;">
+                    <div class="ai-chat-messages" id="about-me-messages">
+                        <div class="ai-welcome-message">
+                            <div class="hannah-avatar">H</div>
+                            <div class="message-bubble">
+                                Tell me about yourself! Share your age, weight, height, activity level, goals, and any dietary restrictions. This helps me create better meal plans for you! 💪
+                            </div>
+                        </div>
+                        <div class="user-stats-display" id="user-stats" style="display: none;">
+                            <div class="stats-card">
+                                <h4>Your Profile</h4>
+                                <div class="stat-item">
+                                    <span class="stat-label">Age:</span>
+                                    <span class="stat-value" id="stat-age">-</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Weight:</span>
+                                    <span class="stat-value" id="stat-weight">-</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Height:</span>
+                                    <span class="stat-value" id="stat-height">-</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Activity:</span>
+                                    <span class="stat-value" id="stat-activity">-</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Goal:</span>
+                                    <span class="stat-value" id="stat-goal">-</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">TDEE:</span>
+                                    <span class="stat-value" id="stat-tdee">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="ai-chat-input-area">
                     <input 
                         type="text" 
@@ -65,6 +120,30 @@ class AIAssistantColumn {
         return column;
     }
     
+    switchTab(tabName) {
+        // Update active tab
+        this.activeTab = tabName;
+        
+        // Update tab buttons
+        document.querySelectorAll('.ai-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.tab === tabName);
+        });
+        
+        // Show/hide content
+        document.getElementById('meal-planner-content').style.display = 
+            tabName === 'meal-planner' ? 'flex' : 'none';
+        document.getElementById('about-me-content').style.display = 
+            tabName === 'about-me' ? 'flex' : 'none';
+            
+        // Update placeholder
+        const input = document.getElementById('ai-text-input');
+        if (tabName === 'about-me') {
+            input.placeholder = "Tell me about your health stats...";
+        } else {
+            input.placeholder = "Type a message...";
+        }
+    }
+    
     async handleUserInput() {
         const input = document.getElementById('ai-text-input');
         const userText = input.value.trim();
@@ -73,15 +152,44 @@ class AIAssistantColumn {
         // Clear input
         input.value = '';
         
-        // Add user message
-        this.addMessage(userText, 'user');
+        // Determine which tab we're in
+        const isAboutMe = this.activeTab === 'about-me';
+        const messagesAreaId = isAboutMe ? 'about-me-messages' : 'ai-chat-messages';
+        
+        // Add user message to the appropriate chat
+        this.addMessage(userText, 'user', messagesAreaId);
         
         // Process with AI
         this.isProcessing = true;
-        this.showTypingIndicator();
+        this.showTypingIndicator(messagesAreaId);
         
         try {
-            const context = {
+            let context;
+            
+            if (isAboutMe) {
+                // About Me context - for collecting user stats
+                context = {
+                    systemPrompt: `You are Hannah from Hannah.health. You're helping the user share their health information to create personalized meal plans.
+
+Extract and remember these details when users share them:
+- Age
+- Weight (kg or lbs)
+- Height (cm or ft/in)
+- Activity level (sedentary, lightly active, moderately active, very active, extremely active)
+- Goals (lose weight, gain muscle, maintain, etc.)
+- Dietary restrictions (vegetarian, vegan, allergies, etc.)
+- Daily steps or exercise routine
+
+Calculate their TDEE when you have enough information.
+Be conversational and encouraging. Ask follow-up questions to get complete information.
+Store this information to use when creating meal plans.
+
+Current user profile: ${JSON.stringify(this.userProfile)}`,
+                    conversationHistory: this.aboutMeHistory.slice(-3)
+                };
+            } else {
+                // Meal planner context - include user profile for personalization
+                context = {
                 systemPrompt: `You are Hannah, an AI assistant for Hannah.health meal planning app. You're helpful, knowledgeable about nutrition, and can help users plan their meals.
 
 You have multiple abilities to manage the user's meal planner:
@@ -148,6 +256,12 @@ IMPORTANT: When creating recipes, ALWAYS include:
 - Side items (rice, pasta, etc.)
 - Garnishes if relevant
 
+QUANTITY RULES:
+- For items measured in "medium", "large", "small", "unit", "slice", "piece": use quantity 1-3 typically
+- For items measured in "g", "oz", "lb": use realistic gram amounts (50-200g typically)
+- For items measured in "ml", "cup", "tbsp", "tsp": use realistic volumes
+- Examples: Banana quantity=1 unit="medium", NOT quantity=100
+
 For custom ingredients not in the database (like sauces), create them with estimated nutrition.
 
 2. ADD MEALS - To add individual items (not as a recipe), include this in your response:
@@ -202,15 +316,30 @@ Example: If user says "I don't like carrots, change my snack":
 
 Be a normal, helpful AI assistant. Have conversations. Answer questions. Be natural and conversational.
 
+RECIPE GUIDELINES:
+- When users ask for meals like "pasta", "stir fry", "salad", etc., create them as RECIPES with all ingredients
+- Include realistic portions for each ingredient
+- A recipe should have 4-8 ingredients typically
+- Examples of what should be recipes:
+  * "Chicken Caesar Salad" → Recipe with chicken, romaine lettuce, croutons, parmesan, caesar dressing
+  * "Spaghetti Bolognese" → Recipe with pasta, ground beef, tomato sauce, onions, garlic, olive oil
+  * "Protein Smoothie" → Recipe with protein powder, banana, berries, almond milk, peanut butter
+  * "Buddha Bowl" → Recipe with quinoa, chickpeas, vegetables, tahini dressing
+  
+- Single items like "apple", "yogurt", "chicken breast" (alone) should be added as individual items, not recipes
+
+When suggesting recipes, think like a chef - include all the components that make the dish complete and delicious!
+
 You can create custom foods with estimated nutritional values when needed. Be creative with meal suggestions when asked.`,
-                conversationHistory: this.conversationHistory.slice(-3)
-            };
+                    conversationHistory: this.conversationHistory.slice(-3)
+                };
+            }
             
             const response = await this.aiService.chat(userText, context);
             
             // Simulate typing delay
             await this.delay(1000);
-            this.hideTypingIndicator();
+            this.hideTypingIndicator(messagesAreaId);
             
             // Parse response for actions - can have multiple action blocks
             const actionMatches = response.message.matchAll(/\*\*ACTION_START\*\*([\s\S]*?)\*\*ACTION_END\*\*/g);
@@ -244,12 +373,17 @@ You can create custom foods with estimated nutritional values when needed. Be cr
             // Show response without the action blocks
             const cleanMessage = response.message.replace(/\*\*ACTION_START\*\*[\s\S]*?\*\*ACTION_END\*\*/g, '').trim();
             if (cleanMessage) {
-                this.addMessage(cleanMessage, 'hannah');
+                this.addMessage(cleanMessage, 'hannah', messagesAreaId);
             }
             
             if (!hasActions && response.message) {
                 // No action, just show the message
-                this.addMessage(response.message, 'hannah');
+                this.addMessage(response.message, 'hannah', messagesAreaId);
+            }
+            
+            // If in About Me tab, parse and store user stats
+            if (isAboutMe) {
+                this.parseUserStats(response.message);
             }
             
             // Save to history
@@ -260,8 +394,8 @@ You can create custom foods with estimated nutritional values when needed. Be cr
             
         } catch (error) {
             console.error('AI error:', error);
-            this.hideTypingIndicator();
-            this.addMessage("I'm having trouble connecting right now. Please try again in a moment.", 'hannah');
+            this.hideTypingIndicator(messagesAreaId);
+            this.addMessage("I'm having trouble connecting right now. Please try again in a moment.", 'hannah', messagesAreaId);
         }
         
         this.isProcessing = false;
@@ -386,8 +520,8 @@ You can create custom foods with estimated nutritional values when needed. Be cr
         }
     }
     
-    addMessage(text, sender) {
-        const messagesArea = document.getElementById('ai-chat-messages');
+    addMessage(text, sender, messagesAreaId = 'ai-chat-messages') {
+        const messagesArea = document.getElementById(messagesAreaId);
         const messageDiv = document.createElement('div');
         messageDiv.className = `ai-message ${sender}`;
         
@@ -406,11 +540,11 @@ You can create custom foods with estimated nutritional values when needed. Be cr
         messagesArea.scrollTop = messagesArea.scrollHeight;
     }
     
-    showTypingIndicator() {
-        const messagesArea = document.getElementById('ai-chat-messages');
+    showTypingIndicator(messagesAreaId = 'ai-chat-messages') {
+        const messagesArea = document.getElementById(messagesAreaId);
         const typing = document.createElement('div');
         typing.className = 'ai-typing-indicator';
-        typing.id = 'ai-typing';
+        typing.id = `ai-typing-${messagesAreaId}`;
         typing.innerHTML = `
             <div class="hannah-avatar">H</div>
             <div class="typing-dots">
@@ -421,13 +555,74 @@ You can create custom foods with estimated nutritional values when needed. Be cr
         messagesArea.scrollTop = messagesArea.scrollHeight;
     }
     
-    hideTypingIndicator() {
-        const typing = document.getElementById('ai-typing');
+    hideTypingIndicator(messagesAreaId = 'ai-chat-messages') {
+        const typing = document.getElementById(`ai-typing-${messagesAreaId}`);
         if (typing) typing.remove();
     }
     
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    parseUserStats(message) {
+        // Try to extract user stats from AI response
+        const lowerMessage = message.toLowerCase();
+        
+        // Parse age
+        const ageMatch = lowerMessage.match(/(\d+)\s*(?:years?\s*old|yo)/);
+        if (ageMatch) {
+            this.userProfile.age = parseInt(ageMatch[1]);
+        }
+        
+        // Parse weight
+        const weightMatch = lowerMessage.match(/(\d+(?:\.\d+)?)\s*(?:kg|kilograms?|lbs?|pounds?)/);
+        if (weightMatch) {
+            this.userProfile.weight = parseFloat(weightMatch[1]);
+            this.userProfile.weightUnit = lowerMessage.includes('kg') ? 'kg' : 'lbs';
+        }
+        
+        // Parse height
+        const heightMatch = lowerMessage.match(/(\d+(?:\.\d+)?)\s*(?:cm|centimeters?|ft|feet|')/);
+        if (heightMatch) {
+            this.userProfile.height = parseFloat(heightMatch[1]);
+            this.userProfile.heightUnit = lowerMessage.includes('cm') ? 'cm' : 'ft';
+        }
+        
+        // Parse activity level
+        if (lowerMessage.includes('sedentary')) this.userProfile.activityLevel = 'sedentary';
+        else if (lowerMessage.includes('lightly active')) this.userProfile.activityLevel = 'lightly active';
+        else if (lowerMessage.includes('moderately active')) this.userProfile.activityLevel = 'moderately active';
+        else if (lowerMessage.includes('very active')) this.userProfile.activityLevel = 'very active';
+        else if (lowerMessage.includes('extremely active')) this.userProfile.activityLevel = 'extremely active';
+        
+        // Parse goals
+        if (lowerMessage.includes('lose weight') || lowerMessage.includes('weight loss')) {
+            this.userProfile.goals = 'weight loss';
+        } else if (lowerMessage.includes('gain muscle') || lowerMessage.includes('bulk')) {
+            this.userProfile.goals = 'muscle gain';
+        } else if (lowerMessage.includes('maintain')) {
+            this.userProfile.goals = 'maintain';
+        }
+        
+        // Update display if we have stats
+        this.updateStatsDisplay();
+    }
+    
+    updateStatsDisplay() {
+        const statsDiv = document.getElementById('user-stats');
+        if (this.userProfile.age || this.userProfile.weight || this.userProfile.height) {
+            statsDiv.style.display = 'block';
+            
+            document.getElementById('stat-age').textContent = this.userProfile.age || '-';
+            document.getElementById('stat-weight').textContent = 
+                this.userProfile.weight ? `${this.userProfile.weight} ${this.userProfile.weightUnit || 'kg'}` : '-';
+            document.getElementById('stat-height').textContent = 
+                this.userProfile.height ? `${this.userProfile.height} ${this.userProfile.heightUnit || 'cm'}` : '-';
+            document.getElementById('stat-activity').textContent = this.userProfile.activityLevel || '-';
+            document.getElementById('stat-goal').textContent = this.userProfile.goals || '-';
+            document.getElementById('stat-tdee').textContent = 
+                this.userProfile.tdee ? `${this.userProfile.tdee} kcal` : '-';
+        }
     }
     
     async clearMeal(day, meal) {
@@ -594,9 +789,10 @@ You can create custom foods with estimated nutritional values when needed. Be cr
                 }
                 
                 // Create the food module
+                // Use the item's quantity if provided, otherwise use the food's base quantity
                 const dragData = {
                     food: foodData,
-                    quantity: item.quantity || foodData.baseQuantity,
+                    quantity: item.quantity !== undefined ? item.quantity : foodData.baseQuantity,
                     unit: item.unit || foodData.baseUnit
                 };
                 
@@ -694,9 +890,10 @@ You can create custom foods with estimated nutritional values when needed. Be cr
             }
             
             // Create the food module data
+            // Use the item's quantity if provided, otherwise use the food's base quantity
             const dragData = {
                 food: foodData,
-                quantity: item.quantity || foodData.baseQuantity,
+                quantity: item.quantity !== undefined ? item.quantity : foodData.baseQuantity,
                 unit: item.unit || foodData.baseUnit
             };
             

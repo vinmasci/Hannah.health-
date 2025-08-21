@@ -1136,12 +1136,15 @@ function createFoodModule(dragData, isPartOfRecipe = false) {
             </div>
         </div>
         <div class="module-controls">
-            <input type="number" class="module-portion-input" value="${quantity}" min="${unit === 'cup' ? 0.25 : 1}" step="${unit === 'cup' ? 0.25 : 1}" data-module-id="${moduleId}" data-unit="${unit}">
-            <select class="module-unit-select" data-module-id="${moduleId}">
-                ${units.map(u => 
-                    `<option value="${u}" ${u === unit ? 'selected' : ''}>${u}</option>`
-                ).join('')}
-            </select>
+            <div class="module-inputs">
+                <input type="number" class="module-portion-input" value="${quantity}" min="${unit === 'cup' ? 0.25 : 1}" step="${unit === 'cup' ? 0.25 : 1}" data-module-id="${moduleId}" data-unit="${unit}">
+                <select class="module-unit-select" data-module-id="${moduleId}">
+                    ${units.map(u => 
+                        `<option value="${u}" ${u === unit ? 'selected' : ''}>${u}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <button class="module-expand-btn" onclick="toggleModuleExpand('${moduleId}')">▼</button>
         </div>
         <div class="module-macros">
             <div class="macro-bar-container">
@@ -1314,6 +1317,13 @@ function toggleModuleFavorite(moduleId) {
 }
 
 // Remove Module
+function toggleModuleExpand(moduleId) {
+    const module = document.querySelector(`[data-module-id="${moduleId}"]`);
+    if (!module) return;
+    
+    module.classList.toggle('expanded');
+}
+
 function removeModule(moduleId) {
     const module = document.querySelector(`[data-module-id="${moduleId}"]`);
     if (!module) return;
@@ -1743,6 +1753,7 @@ window.handleRecipeDragOver = handleRecipeDragOver;
 window.handleRecipeDrop = handleRecipeDrop;
 window.toggleRecipeCollapse = toggleRecipeCollapse;
 window.removeRecipe = removeRecipe;
+window.toggleModuleExpand = toggleModuleExpand;
 
 // Animation styles
 const animationStyles = document.createElement('style');

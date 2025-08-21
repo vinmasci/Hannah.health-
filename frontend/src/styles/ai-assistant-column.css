@@ -1,5 +1,96 @@
 /* AI Assistant Column Styles - Beautiful Purple Theme */
 
+/* Tabs styling */
+.ai-tabs {
+    display: flex;
+    background: white;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.ai-tab {
+    flex: 1;
+    padding: 12px;
+    background: white;
+    border: none;
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.ai-tab:hover {
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.ai-tab.active {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.08);
+}
+
+.ai-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* Tab content */
+.ai-tab-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* User stats display */
+.user-stats-display {
+    margin: 12px;
+    animation: fadeIn 0.3s ease;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.stats-card h4 {
+    margin: 0 0 12px 0;
+    color: #667eea;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.stat-value {
+    color: #1f2937;
+    font-size: 12px;
+    font-weight: 600;
+}
+
 .ai-assistant-column {
     min-width: 380px;
     max-width: 380px;
@@ -9,8 +100,8 @@
     box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 140px);
-    max-height: 720px;
+    height: calc(100vh - 220px);
+    max-height: 500px;
     position: relative;
 }
 
@@ -79,14 +170,14 @@
 /* Quick action badges */
 .ai-quick-actions {
     display: flex;
+    justify-content: center;
     gap: 8px;
-    padding: 12px;
+    padding: 8px;
     background: white;
     border-bottom: 1px solid #e5e7eb;
 }
 
 .ai-quick-badge {
-    flex: 1;
     padding: 8px 12px;
     border-radius: 20px;
     border: 2px solid #e5e7eb;
@@ -96,6 +187,12 @@
     font-weight: 600;
     transition: all 0.3s ease;
     text-align: center;
+}
+
+.ai-quick-badge.small {
+    padding: 6px 10px;
+    font-size: 11px;
+    border-width: 1px;
 }
 
 .ai-quick-badge:hover {
@@ -111,12 +208,14 @@
 
 .ai-quick-badge.secondary {
     background: white;
-    color: #667eea;
-    border-color: #667eea;
+    color: #9ca3af;
+    border-color: #e5e7eb;
 }
 
 .ai-quick-badge.secondary:hover {
     background: rgba(102, 126, 234, 0.05);
+    color: #667eea;
+    border-color: #667eea;
 }
 
 /* Chat messages area */
