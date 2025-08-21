@@ -85,7 +85,7 @@
 }
 
 .macro {
-    background: #f7fafc;
+    background: transparent;
     color: #4a5568;
     padding: 2px 6px;
     border-radius: 12px;
@@ -99,32 +99,32 @@
 }
 
 .macro.kcal {
-    background: #f7fafc;
+    background: transparent;
     color: #4a5568;
     border-color: #cbd5e0;
     font-weight: 700;
 }
 
 .macro.protein {
-    background: #f0fff4;
+    background: transparent;
     color: #22543d;
     border-color: #9ae6b4;
 }
 
 .macro.carbs {
-    background: #fffdf7;
+    background: transparent;
     color: #744210;
     border-color: #fbd38d;
 }
 
 .macro.fat {
-    background: #fdf5ff;
+    background: transparent;
     color: #553c9a;
     border-color: #d6bcfa;
 }
 
 .macro.cost {
-    background: #f0fdf4;
+    background: transparent;
     color: #166534;
     border-color: #86efac;
 }

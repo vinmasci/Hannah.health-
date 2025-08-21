@@ -265,6 +265,11 @@ export class FoodModule {
                 btn.classList.add('favorited');
                 btn.title = 'Remove from favorites';
             }
+            
+            // Refresh the favorites column if it exists
+            if (window.favoritesManager.refreshFavoritesColumn) {
+                window.favoritesManager.refreshFavoritesColumn();
+            }
         }
     }
     

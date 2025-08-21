@@ -11,6 +11,54 @@
     height: calc(100vh - 160px);
     max-height: 800px;
     padding-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+/* Minimized Day Column */
+.day-column.minimized {
+    min-width: 60px;
+    max-width: 60px;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.day-column.minimized:hover {
+    background: #d4e9ff !important;
+}
+
+.day-column.minimized .day-header {
+    padding: 12px 8px;
+    height: 100%;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+}
+
+.day-column.minimized .day-header-content {
+    flex-direction: column-reverse;
+    gap: 12px;
+    align-items: center;
+}
+
+.day-column.minimized .day-name {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+}
+
+.day-column.minimized .btn-minimize-day {
+    flex-shrink: 0;
+}
+
+.day-column.minimized .add-meal-btn {
+    display: none;
+}
+
+.day-column.minimized .meals-container,
+.day-column.minimized .day-totals {
+    display: none;
 }
 
 .day-header {
@@ -21,13 +69,41 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.day-header-content {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .day-name {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.06em;
+}
+
+.btn-minimize-day {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-minimize-day:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
 }
 
 .add-meal-btn {
@@ -37,8 +113,9 @@
     padding: 6px 12px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
     transition: all 0.2s;
 }
 

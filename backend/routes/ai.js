@@ -6,6 +6,9 @@ router.post('/chat', async (req, res) => {
   try {
     const { message, context, conversationHistory } = req.body;
     
+    console.log('Received conversation history:', JSON.stringify(conversationHistory, null, 2));
+    console.log('Context received:', context?.systemPrompt ? 'Yes with system prompt' : 'No system prompt');
+    
     if (!process.env.CLAUDE_API_KEY) {
       throw new Error('Claude API key not configured');
     }
@@ -15,24 +18,32 @@ router.post('/chat', async (req, res) => {
     
     // Add conversation history if provided
     if (conversationHistory && Array.isArray(conversationHistory)) {
-      conversationHistory.forEach(exchange => {
-        if (exchange.user) {
+      console.log(`Processing ${conversationHistory.length} history items`);
+      conversationHistory.forEach((exchange, idx) => {
+        // Support both formats for backward compatibility
+        if (exchange.role && exchange.content) {
+          messages.push({ role: exchange.role, content: exchange.content });
+          console.log(`Added history item ${idx}: ${exchange.role}`);
+        } else if (exchange.user) {
           messages.push({ role: 'user', content: exchange.user });
-        }
-        if (exchange.hannah) {
-          messages.push({ role: 'assistant', content: exchange.hannah });
+        } else if (exchange.hannah || exchange.assistant) {
+          messages.push({ role: 'assistant', content: exchange.hannah || exchange.assistant });
         }
       });
     }
     
+    console.log(`Total messages before adding current: ${messages.length}`);
+    
     // Add current user message
     messages.push({ role: 'user', content: message });
+    
+    console.log(`Final messages array (${messages.length} total):`, JSON.stringify(messages, null, 2));
 
     // Build request body with system as top-level parameter
     const requestBody = {
       model: 'claude-3-5-sonnet-20241022',  // Updated to current model
       messages: messages,
-      max_tokens: 1000,  // Increased for JSON responses
+      max_tokens: 4000,  // Max tokens for complete meal plans with all meals
       temperature: 0.7
     };
     

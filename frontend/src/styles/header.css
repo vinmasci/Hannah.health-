@@ -1,7 +1,7 @@
 /* Header Styles */
 
 .header {
-    background: rgba(255, 255, 255, 0.95);
+    background: transparent;
     padding: 20px;
     border-radius: 12px 12px 0 0;
     margin-bottom: 0;
@@ -12,12 +12,13 @@
 }
 
 .header-title {
-    color: #2d3748;
-    font-size: 28px;
-    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 24px;
+    font-weight: 700;
     display: flex;
     align-items: center;
     gap: 10px;
+    letter-spacing: -0.03em;
 }
 
 .header-controls {
@@ -26,14 +27,15 @@
 }
 
 .header-btn {
-    padding: 6px 14px;
+    padding: 8px 16px;
     background: white;
-    color: black;
+    color: #1a1a1a;
     border: none;
     border-radius: 20px;
     cursor: pointer;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
+    letter-spacing: -0.01em;
     transition: all 0.2s ease;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
     white-space: nowrap;

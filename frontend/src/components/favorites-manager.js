@@ -365,6 +365,56 @@ class FavoritesManager {
         if (document.getElementById('favoritesModal')) {
             this.refreshFavoritesModal();
         }
+        
+        // Update the favorites column if it exists
+        this.refreshFavoritesColumn();
+    }
+    
+    /**
+     * Refresh the favorites column if it exists
+     */
+    refreshFavoritesColumn() {
+        const favColumn = document.querySelector('.category-column.favorites');
+        if (!favColumn) return;
+        
+        const itemsContainer = favColumn.querySelector('.category-items');
+        if (!itemsContainer) return;
+        
+        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        
+        if (favorites.length > 0) {
+            // Update items with FoodItem component
+            itemsContainer.innerHTML = favorites.map(item => {
+                if (window.FoodItem) {
+                    return window.FoodItem.createHTML(item);
+                }
+                // Fallback if FoodItem not available
+                return `<div class="food-item" draggable="true" data-food='${JSON.stringify(item)}'>
+                    <div class="food-item-header">
+                        <div class="food-name">${item.name}</div>
+                        <button class="favorite-btn favorited" 
+                                onclick="event.stopPropagation(); window.favoritesManager.toggleFavorite(this)" 
+                                title="Remove from favorites">❤️</button>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            // Re-attach event handlers
+            itemsContainer.querySelectorAll('.food-item').forEach(item => {
+                item.addEventListener('dragstart', window.handleFoodDragStart);
+                item.addEventListener('dragend', window.handleFoodDragEnd);
+            });
+            
+            itemsContainer.querySelectorAll('.portion-input').forEach(input => {
+                input.addEventListener('change', window.handlePortionChange);
+            });
+            
+            itemsContainer.querySelectorAll('.unit-select').forEach(select => {
+                select.addEventListener('change', window.handleUnitChange);
+            });
+        } else {
+            itemsContainer.innerHTML = '<div class="empty-favorites" style="padding: 20px; text-align: center; color: #999;">No favorites yet!<br>Click the ❤️ on any food item to add it here.</div>';
+        }
     }
 
     /**

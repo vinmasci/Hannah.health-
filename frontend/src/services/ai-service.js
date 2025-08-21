@@ -7,6 +7,7 @@ class AIService {
     
     async chat(userInput, context) {
         try {
+            console.log('Sending to AI with history:', context.conversationHistory);
             const response = await fetch(`${this.apiUrl}/ai/chat`, {
                 method: 'POST',
                 headers: {

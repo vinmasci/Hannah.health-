@@ -403,10 +403,23 @@
     border-radius: 16px;
     background: white;
     font-size: 13px;
-    line-height: 1.5;
+    line-height: 1.6;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     word-wrap: break-word;
     overflow-wrap: break-word;
+}
+
+.message-bubble p {
+    margin: 0 0 8px 0;
+}
+
+.message-bubble p:last-child {
+    margin-bottom: 0;
+}
+
+.message-bubble strong {
+    font-weight: 600;
+    color: #1a202c;
 }
 
 .ai-message.user .message-bubble {

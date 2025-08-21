@@ -342,7 +342,7 @@ const ShoppingListGenerator = {
             <head>
                 <title>Shopping List - Hannah Health</title>
                 <style>
-                    body { font-family: -apple-system, sans-serif; padding: 20px; }
+                    body { font-family: 'Inter', -apple-system, sans-serif; padding: 20px; }
                     h1 { color: #2d3748; }
                     .item { padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
                     .total { margin-top: 20px; font-size: 18px; font-weight: bold; }

@@ -55,10 +55,11 @@
 }
 
 .module-name {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 13px;
-    color: #2d3748;
+    color: #1a1a1a;
     flex: 1;
+    letter-spacing: -0.01em;
 }
 
 .module-actions {
