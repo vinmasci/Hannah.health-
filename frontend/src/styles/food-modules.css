@@ -1,72 +1,22 @@
 /* Food Modules Styles */
 
-/* Base Food Module - WITH BORDER STROKE AND SHADOW */
+/* Base Food Module */
 .food-module {
     background: white;
-    border: 2px solid #667eea;
-    border-radius: 8px;
-    padding: 8px;
+    border: none;
+    border-radius: 16px;
+    padding: 10px;
     margin-bottom: 6px;
     cursor: move;
     transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* Category-specific colors with gradients */
-.food-module-protein {
-    border-image: linear-gradient(135deg, #f56565, #fc8181) 1;
-    border-color: #f56565;
-}
-
-.food-module-dairy {
-    border-image: linear-gradient(135deg, #60a5fa, #93c5fd) 1;
-    border-color: #60a5fa;
-}
-
-.food-module-veg {
-    border-image: linear-gradient(135deg, #48bb78, #68d391) 1;
-    border-color: #48bb78;
-}
-
-.food-module-fruit {
-    border-image: linear-gradient(135deg, #ed8936, #f6ad55) 1;
-    border-color: #ed8936;
-}
-
-.food-module-grains {
-    border-image: linear-gradient(135deg, #a78bfa, #c4b5fd) 1;
-    border-color: #a78bfa;
-}
-
-.food-module-nuts {
-    border-image: linear-gradient(135deg, #f59e0b, #fbbf24) 1;
-    border-color: #f59e0b;
-}
-
-.food-module-carbs {
-    border-image: linear-gradient(135deg, #ecc94b, #fde047) 1;
-    border-color: #ecc94b;
-}
-
-.food-module-drinks {
-    border-image: linear-gradient(135deg, #06b6d4, #22d3ee) 1;
-    border-color: #06b6d4;
-}
-
-.food-module-sweets {
-    border-image: linear-gradient(135deg, #ec4899, #f472b6) 1;
-    border-color: #ec4899;
-}
-
-.food-module-extras {
-    border-image: linear-gradient(135deg, #9f7aea, #c084fc) 1;
-    border-color: #9f7aea;
-}
+/* Category-specific colors - removed gradients */
 
 /* Module States */
 .food-module:hover {
-    border-color: #1e90ff;
-    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.2), 0 8px 20px rgba(30, 144, 255, 0.1);
+    box-shadow: 0 6px 20px rgba(30, 144, 255, 0.3), 0 12px 32px rgba(30, 144, 255, 0.15), 0 2px 8px rgba(30, 144, 255, 0.2);
     transform: translateY(-2px);
 }
 

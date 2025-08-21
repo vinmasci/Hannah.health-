@@ -3,69 +3,59 @@
 /* Food Items - matching food module styling */
 .food-item {
     background: white;
-    border: 2px solid #667eea;
-    border-radius: 8px;
+    border: 3px solid #667eea;
+    border-radius: 16px;
     padding: 8px;
     margin-bottom: 6px;
     cursor: move;
     transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* Category-specific border colors with gradients for food items */
 .food-item-protein {
-    border-image: linear-gradient(135deg, #f56565, #fc8181) 1;
-    border-color: #f56565;
+    border-image: radial-gradient(circle at top left, #dc2626, #fca5a5, #ef4444) 1;
 }
 
 .food-item-dairy {
-    border-image: linear-gradient(135deg, #60a5fa, #93c5fd) 1;
-    border-color: #60a5fa;
+    border-image: radial-gradient(circle at top left, #2563eb, #bfdbfe, #3b82f6) 1;
 }
 
 .food-item-veg {
-    border-image: linear-gradient(135deg, #48bb78, #68d391) 1;
-    border-color: #48bb78;
+    border-image: radial-gradient(circle at top left, #16a34a, #bbf7d0, #22c55e) 1;
 }
 
 .food-item-fruit {
-    border-image: linear-gradient(135deg, #ed8936, #f6ad55) 1;
-    border-color: #ed8936;
+    border-image: radial-gradient(circle at top left, #ea580c, #fed7aa, #fb923c) 1;
 }
 
 .food-item-grains {
-    border-image: linear-gradient(135deg, #a78bfa, #c4b5fd) 1;
-    border-color: #a78bfa;
+    border-image: radial-gradient(circle at top left, #7c3aed, #e9d5ff, #a855f7) 1;
 }
 
 .food-item-nuts {
-    border-image: linear-gradient(135deg, #f59e0b, #fbbf24) 1;
-    border-color: #f59e0b;
+    border-image: radial-gradient(circle at top left, #d97706, #fef3c7, #fbbf24) 1;
 }
 
 .food-item-carbs {
-    border-image: linear-gradient(135deg, #ecc94b, #fde047) 1;
-    border-color: #ecc94b;
+    border-image: radial-gradient(circle at top left, #ca8a04, #fef9c3, #facc15) 1;
 }
 
 .food-item-drinks {
-    border-image: linear-gradient(135deg, #06b6d4, #22d3ee) 1;
-    border-color: #06b6d4;
+    border-image: radial-gradient(circle at top left, #0891b2, #cffafe, #06b6d4) 1;
 }
 
 .food-item-sweets {
-    border-image: linear-gradient(135deg, #ec4899, #f472b6) 1;
-    border-color: #ec4899;
+    border-image: radial-gradient(circle at top left, #db2777, #fce7f3, #ec4899) 1;
 }
 
 .food-item-extras {
-    border-image: linear-gradient(135deg, #9f7aea, #c084fc) 1;
-    border-color: #9f7aea;
+    border-image: radial-gradient(circle at top left, #7c3aed, #f3e8ff, #a855f7) 1;
 }
 
 .food-item:hover {
-    border-color: #1e90ff;
-    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.2), 0 8px 20px rgba(30, 144, 255, 0.1);
+    border-image: radial-gradient(circle at top left, #0066ff, #66b3ff, #1e90ff) 1;
+    box-shadow: 0 6px 20px rgba(30, 144, 255, 0.3), 0 12px 32px rgba(30, 144, 255, 0.15), 0 2px 8px rgba(30, 144, 255, 0.2);
     transform: translateY(-2px);
 }
 
