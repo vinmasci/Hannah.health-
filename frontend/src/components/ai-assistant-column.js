@@ -2,10 +2,12 @@
 // Beautiful purple gradient design matching ai-chat-simple
 
 import AIService from '../services/ai-service.js';
+import { OpenMojiService } from '../services/openmoji-service.js';
 
 class AIAssistantColumn {
     constructor() {
         this.aiService = new AIService();
+        this.openMojiService = new OpenMojiService();
         this.conversationHistory = [];
         this.aboutMeHistory = [];
         this.isProcessing = false;
@@ -45,22 +47,16 @@ class AIAssistantColumn {
                 </div>
                 <div class="ai-tabs">
                     <button class="ai-tab active" data-tab="meal-planner" onclick="aiAssistant.switchTab('meal-planner')">
-                        🍽️ Meal Planner
+                        <img src="${this.openMojiService.getEmojiUrl('1F37D')}" width="20" height="20" class="openmoji-icon" alt="meal"> Meal Planner
                     </button>
                     <button class="ai-tab" data-tab="about-me" onclick="aiAssistant.switchTab('about-me')">
-                        👤 About Me
+                        <img src="${this.openMojiService.getEmojiUrl('1F977')}" width="20" height="20" class="openmoji-icon" alt="ninja"> About Me
                     </button>
                 </div>
             </div>
             
             <div class="ai-column-body">
                 <div class="ai-tab-content" id="meal-planner-content">
-                    <div class="ai-quick-actions">
-                        <button class="ai-quick-badge secondary small" onclick="aiAssistant.quickPlan()">
-                            🚀 Quick meal plan
-                        </button>
-                    </div>
-                    
                     <div class="ai-chat-messages" id="ai-chat-messages">
                         <div class="ai-welcome-message">
                             <div class="hannah-avatar">H</div>
@@ -72,39 +68,84 @@ class AIAssistantColumn {
                 </div>
                 
                 <div class="ai-tab-content" id="about-me-content" style="display: none;">
-                    <div class="ai-chat-messages" id="about-me-messages">
-                        <div class="ai-welcome-message">
-                            <div class="hannah-avatar">H</div>
-                            <div class="message-bubble">
-                                Tell me about yourself! Share your age, weight, height, activity level, goals, and any dietary restrictions. This helps me create better meal plans for you! 💪
+                    <div class="user-profile-form">
+                        <div class="profile-section">
+                            <h4>What's Your Goal?</h4>
+                            <textarea id="user-goal" class="profile-textarea" placeholder="I want to lose 10kg for my wedding in 6 months..." onchange="aiAssistant.saveUserProfile()"></textarea>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <h4>Physical Stats</h4>
+                            <div class="profile-row-half">
+                                <div class="profile-field">
+                                    <label>Weight (kg)</label>
+                                    <input type="number" id="user-weight" class="profile-input" placeholder="70" onchange="aiAssistant.saveUserProfile()">
+                                </div>
+                                <div class="profile-field">
+                                    <label>Height (cm)</label>
+                                    <input type="number" id="user-height" class="profile-input" placeholder="170" onchange="aiAssistant.saveUserProfile()">
+                                </div>
+                            </div>
+                            <div class="profile-row-half">
+                                <div class="profile-field">
+                                    <label>Age</label>
+                                    <input type="number" id="user-age" class="profile-input" placeholder="30" onchange="aiAssistant.saveUserProfile()">
+                                </div>
+                                <div class="profile-field">
+                                    <label>Gender</label>
+                                    <select id="user-gender" class="profile-input" onchange="aiAssistant.saveUserProfile()">
+                                        <option value="">Select...</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="non-binary">Non-binary</option>
+                                        <option value="other">Other</option>
+                                        <option value="prefer-not-to-say">Prefer not to say</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                        <div class="user-stats-display" id="user-stats" style="display: none;">
-                            <div class="stats-card">
-                                <h4>Your Profile</h4>
-                                <div class="stat-item">
-                                    <span class="stat-label">Age:</span>
-                                    <span class="stat-value" id="stat-age">-</span>
+                        
+                        <div class="profile-section">
+                            <h4>Describe Your Lifestyle</h4>
+                            <textarea id="user-lifestyle" class="profile-textarea" placeholder="Office worker during the week, gym 3 times after work. Ride bikes on weekends with family. Usually walk the dog twice a day..." onchange="aiAssistant.saveUserProfile()"></textarea>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <h4>Any Health Conditions or Dietary Restrictions?</h4>
+                            <textarea id="user-health" class="profile-textarea" placeholder="Type 2 diabetes, lactose intolerant, trying to lower cholesterol..." onchange="aiAssistant.saveUserProfile()"></textarea>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <h4>What Does a Typical Day of Eating Look Like?</h4>
+                            <textarea id="user-typical-diet" class="profile-textarea" placeholder="Usually skip breakfast, coffee with milk. Sandwich for lunch. Dinner is usually meat and vegetables. Snack on chocolate in the afternoon..." onchange="aiAssistant.saveUserProfile()"></textarea>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <h4>Biggest Challenges?</h4>
+                            <textarea id="user-challenges" class="profile-textarea" placeholder="Late night snacking, weekend binge eating, no time for meal prep, hate vegetables..." onchange="aiAssistant.saveUserProfile()"></textarea>
+                        </div>
+                        
+                        <div class="profile-section calculated-stats">
+                            <h4>AI Analysis</h4>
+                            <button class="analyze-profile-btn" onclick="aiAssistant.analyzeProfile()">
+                                <span class="btn-icon">🤖</span>
+                                Analyze My Profile
+                            </button>
+                            <div class="stats-display" id="ai-analysis" style="display: none;">
+                                <div class="stat-card full-width">
+                                    <span class="stat-label">Recommended Daily Calories</span>
+                                    <span class="stat-value" id="calc-target">-</span>
                                 </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Weight:</span>
-                                    <span class="stat-value" id="stat-weight">-</span>
+                                <div class="stat-card">
+                                    <span class="stat-label">BMI</span>
+                                    <span class="stat-value" id="calc-bmi">-</span>
                                 </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Height:</span>
-                                    <span class="stat-value" id="stat-height">-</span>
+                                <div class="stat-card">
+                                    <span class="stat-label">TDEE</span>
+                                    <span class="stat-value" id="calc-tdee">-</span>
                                 </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Activity:</span>
-                                    <span class="stat-value" id="stat-activity">-</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Goal:</span>
-                                    <span class="stat-value" id="stat-goal">-</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">TDEE:</span>
-                                    <span class="stat-value" id="stat-tdee">-</span>
+                                <div class="analysis-summary" id="analysis-summary">
+                                    <!-- AI analysis will appear here -->
                                 </div>
                             </div>
                         </div>
@@ -146,11 +187,14 @@ class AIAssistantColumn {
         document.getElementById('about-me-content').style.display = 
             tabName === 'about-me' ? 'flex' : 'none';
             
-        // Update placeholder
-        const input = document.getElementById('ai-text-input');
+        // Update input area visibility
+        const inputArea = document.querySelector('.ai-chat-input-area');
         if (tabName === 'about-me') {
-            input.placeholder = "Tell me about your health stats...";
+            inputArea.style.display = 'none';
+            this.loadUserProfile();
         } else {
+            inputArea.style.display = 'flex';
+            const input = document.getElementById('ai-text-input');
             input.placeholder = "Type a message...";
         }
     }
@@ -196,12 +240,19 @@ Be conversational and encouraging. Ask follow-up questions to get complete infor
 Store this information to use when creating meal plans.
 
 Current user profile: ${JSON.stringify(this.userProfile)}`,
-                    conversationHistory: this.aboutMeHistory.slice(-3)
+                    conversationHistory: this.aboutMeHistory.slice(-10)
                 };
             } else {
                 // Meal planner context - include user profile for personalization
                 context = {
                 systemPrompt: `You are Hannah from Hannah.health, a friendly and knowledgeable meal planning assistant.
+
+IMPORTANT RULES:
+1. You have full web search capabilities through Brave Search API
+2. When users ask for recipes, you MUST search the web for real recipes with actual instructions and ingredients
+3. NEVER make up or invent recipes - always search for and provide real recipes from actual websites
+4. Include the source URL when sharing recipes so users can follow the full instructions
+5. You CAN and DO search the web automatically for nutrition data, recipes, and food information
 
 When adding meals to the planner, use this format:
 **ACTION_START**
@@ -225,11 +276,17 @@ Guidelines:
 - Meals: breakfast, morning snack, lunch, afternoon snack, dinner, evening snack
 
 When creating full day plans, add ALL meals in one response with multiple ACTION blocks if needed.`,
-                    conversationHistory: this.conversationHistory.slice(-3)
+                    conversationHistory: this.conversationHistory.slice(-10)
                 };
             }
             
             const response = await this.aiService.chat(userText, context);
+            
+            // Show search status if web search was performed
+            if (response.searchStatus) {
+                this.showSearchStatus(response.searchStatus, messagesAreaId);
+                await this.delay(1500);
+            }
             
             // Simulate typing delay
             await this.delay(1000);
@@ -268,23 +325,26 @@ When creating full day plans, add ALL meals in one response with multiple ACTION
             const cleanMessage = response.message.replace(/\*\*ACTION_START\*\*[\s\S]*?\*\*ACTION_END\*\*/g, '').trim();
             if (cleanMessage) {
                 this.addMessage(cleanMessage, 'hannah', messagesAreaId);
-            }
-            
-            if (!hasActions && response.message) {
-                // No action, just show the message
+            } else if (!hasActions && response.message) {
+                // Only show original message if no clean message and no actions
                 this.addMessage(response.message, 'hannah', messagesAreaId);
             }
             
             // If in About Me tab, parse and store user stats
             if (isAboutMe) {
                 this.parseUserStats(response.message);
+                // Save to About Me history
+                this.aboutMeHistory.push(
+                    { role: 'user', content: userText },
+                    { role: 'assistant', content: cleanMessage || response.message }
+                );
+            } else {
+                // Save to conversation history with proper format for API
+                this.conversationHistory.push(
+                    { role: 'user', content: userText },
+                    { role: 'assistant', content: cleanMessage || response.message }
+                );
             }
-            
-            // Save to history
-            this.conversationHistory.push({
-                user: userText,
-                hannah: response.message.replace(/\*\*ACTION_START\*\*[\s\S]*?\*\*ACTION_END\*\*/, '').trim()
-            });
             
         } catch (error) {
             console.error('AI error:', error);
@@ -419,8 +479,14 @@ When creating full day plans, add ALL meals in one response with multiple ACTION
         const messageDiv = document.createElement('div');
         messageDiv.className = `ai-message ${sender}`;
         
+        // Convert URLs to clickable links
+        let formattedText = text.replace(
+            /(https?:\/\/[^\s<]+)/g,
+            '<a href="$1" target="_blank" rel="noopener noreferrer" class="chat-link">$1</a>'
+        );
+        
         // Convert line breaks and format lists
-        let formattedText = text
+        formattedText = formattedText
             .replace(/\n\n/g, '</p><p>')  // Double line breaks to paragraphs
             .replace(/\n/g, '<br>')        // Single line breaks to <br>
             .replace(/^- /gm, '• ')        // Convert dashes to bullets
@@ -464,6 +530,26 @@ When creating full day plans, add ALL meals in one response with multiple ACTION
     hideTypingIndicator(messagesAreaId = 'ai-chat-messages') {
         const typing = document.getElementById(`ai-typing-${messagesAreaId}`);
         if (typing) typing.remove();
+    }
+    
+    showSearchStatus(status, messagesAreaId = 'ai-chat-messages') {
+        const messagesArea = document.getElementById(messagesAreaId);
+        const searchStatus = document.createElement('div');
+        searchStatus.className = 'ai-search-status';
+        searchStatus.innerHTML = `
+            <div class="search-status-content">
+                <span class="search-icon">🔍</span>
+                <span class="search-text">${status}</span>
+            </div>
+        `;
+        messagesArea.appendChild(searchStatus);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+        
+        // Auto-remove after a delay
+        setTimeout(() => {
+            searchStatus.style.animation = 'fadeOut 0.5s ease';
+            setTimeout(() => searchStatus.remove(), 500);
+        }, 2000);
     }
     
     delay(ms) {
@@ -980,6 +1066,141 @@ When creating full day plans, add ALL meals in one response with multiple ACTION
         // Only expand if minimized
         if (this.isMinimized) {
             this.toggleMinimize();
+        }
+    }
+    
+    loadUserProfile() {
+        // Load saved profile from localStorage
+        const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        
+        // Populate form fields
+        if (profile.goal) document.getElementById('user-goal').value = profile.goal;
+        if (profile.weight) document.getElementById('user-weight').value = profile.weight;
+        if (profile.height) document.getElementById('user-height').value = profile.height;
+        if (profile.age) document.getElementById('user-age').value = profile.age;
+        if (profile.gender) document.getElementById('user-gender').value = profile.gender;
+        if (profile.lifestyle) document.getElementById('user-lifestyle').value = profile.lifestyle;
+        if (profile.health) document.getElementById('user-health').value = profile.health;
+        if (profile.typicalDiet) document.getElementById('user-typical-diet').value = profile.typicalDiet;
+        if (profile.challenges) document.getElementById('user-challenges').value = profile.challenges;
+        
+        // Calculate basic stats if we have the numbers
+        if (profile.weight && profile.height) {
+            this.calculateBasicStats();
+        }
+    }
+    
+    saveUserProfile() {
+        // Gather all form data
+        const profile = {
+            goal: document.getElementById('user-goal').value,
+            weight: parseFloat(document.getElementById('user-weight').value) || 0,
+            height: parseFloat(document.getElementById('user-height').value) || 0,
+            age: parseInt(document.getElementById('user-age').value) || 0,
+            gender: document.getElementById('user-gender').value,
+            lifestyle: document.getElementById('user-lifestyle').value,
+            health: document.getElementById('user-health').value,
+            typicalDiet: document.getElementById('user-typical-diet').value,
+            challenges: document.getElementById('user-challenges').value
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('userProfile', JSON.stringify(profile));
+        
+        // Recalculate basic stats if we have the numbers
+        if (profile.weight && profile.height) {
+            this.calculateBasicStats();
+        }
+    }
+    
+    calculateBasicStats() {
+        const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        
+        if (profile.weight && profile.height) {
+            // Calculate BMI
+            const heightInM = profile.height / 100;
+            const bmi = profile.weight / (heightInM * heightInM);
+            document.getElementById('calc-bmi').textContent = bmi.toFixed(1);
+            
+            // Store basic stats
+            this.userStats = {
+                bmi,
+                profile
+            };
+        }
+    }
+    
+    async analyzeProfile() {
+        const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        
+        // Show the analysis section
+        document.getElementById('ai-analysis').style.display = 'grid';
+        
+        // Show loading state
+        const summaryEl = document.getElementById('analysis-summary');
+        summaryEl.innerHTML = '<div style="text-align: center;">🤖 Analyzing your profile...</div>';
+        
+        // Build a comprehensive prompt for AI analysis
+        const prompt = `Analyze this user profile and calculate their ideal daily calories and macros:
+        
+        Goal: ${profile.goal || 'Not specified'}
+        Physical Stats: ${profile.weight}kg, ${profile.height}cm, Age ${profile.age}, ${profile.gender}
+        Lifestyle: ${profile.lifestyle || 'Not specified'}
+        Health Conditions: ${profile.health || 'None specified'}
+        Typical Diet: ${profile.typicalDiet || 'Not specified'}
+        Challenges: ${profile.challenges || 'Not specified'}
+        
+        Based on this information:
+        1. Calculate their TDEE considering their described activity level
+        2. Recommend daily calories based on their goal
+        3. Suggest macro split (protein/carbs/fat)
+        4. Provide 2-3 specific recommendations for their situation
+        
+        Format the response clearly with numbers and bullet points.`;
+        
+        try {
+            // Call the AI API
+            const response = await fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: prompt,
+                    context: {
+                        systemPrompt: 'You are a professional nutritionist analyzing a client profile. Provide specific, actionable advice based on their goals and lifestyle.'
+                    }
+                })
+            });
+            
+            if (!response.ok) throw new Error('AI analysis failed');
+            
+            const data = await response.json();
+            
+            // Parse the AI response to extract numbers
+            const aiText = data.message;
+            
+            // Try to extract TDEE and target calories from the response
+            const tdeeMatch = aiText.match(/TDEE[:\s]+(\d+)/i);
+            const targetMatch = aiText.match(/(?:recommend|target|daily calories)[:\s]+(\d+)/i);
+            
+            if (tdeeMatch) {
+                document.getElementById('calc-tdee').textContent = tdeeMatch[1] + ' kcal';
+            }
+            
+            if (targetMatch) {
+                document.getElementById('calc-target').textContent = targetMatch[1] + ' kcal';
+            }
+            
+            // Display the full analysis
+            summaryEl.innerHTML = `
+                <h5 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600;">Personalized Analysis</h5>
+                <div style="white-space: pre-line;">${aiText}</div>
+            `;
+            
+        } catch (error) {
+            console.error('Profile analysis error:', error);
+            summaryEl.innerHTML = '<div style="color: rgba(255,255,255,0.8);">Unable to analyze profile. Please try again.</div>';
         }
     }
 }

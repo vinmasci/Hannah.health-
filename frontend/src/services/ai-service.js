@@ -26,9 +26,10 @@ class AIService {
             
             const data = await response.json();
             
-            // Return in expected format
+            // Return in expected format with search status
             return {
-                message: data.message || "Let me think about that..."
+                message: data.message || "Let me think about that...",
+                searchStatus: data.searchStatus || null
             };
             
         } catch (error) {

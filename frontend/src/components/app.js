@@ -10,6 +10,8 @@ import { FoodModule } from './FoodModule.js';
 import { MealContainer } from './MealContainer.js';
 import { RecipeContainer } from './RecipeContainer.js';
 import AIService from '../services/ai-service.js';
+import { OpenMojiService } from '../services/openmoji-service.js';
+import { EmojiReplacer } from './emoji-replacer.js';
 
 // DOM Elements
 let mainBoard, categoryPillsContainer;
@@ -22,11 +24,17 @@ let lastActiveDay = null; // Track the last active day column
 const aiService = new AIService();
 let aiSearchConversationHistory = [];
 
+// OpenMoji Service for emojis
+const openMojiService = new OpenMojiService();
+const emojiReplacer = new EmojiReplacer();
+
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
     initializeElements();
     setupEventListeners();
     createInitialDayColumns();
+    openMojiService.initializeStyles();
+    emojiReplacer.init();
 });
 
 function initializeElements() {
@@ -792,12 +800,13 @@ async function sendAISearchRequest() {
     // Clear input
     input.value = '';
     
-    // Show AI is thinking
+    // Show AI is thinking with unique ID for updates
+    const thinkingId = `thinking-${Date.now()}`;
     chatArea.innerHTML += `
-        <div class="ai-message thinking">
+        <div class="ai-message thinking" id="${thinkingId}">
             <div class="hannah-avatar">H</div>
             <div class="message-bubble">
-                <span class="thinking-dots">Searching for nutritional data<span>.</span><span>.</span><span>.</span></span>
+                <span class="thinking-dots">Thinking<span>.</span><span>.</span><span>.</span></span>
             </div>
         </div>
     `;
@@ -811,14 +820,16 @@ async function sendAISearchRequest() {
         
         // Use REAL AI to understand the food request
         const context = {
-            systemPrompt: `You are a smart food search assistant helping users find EXACT food items to add to their meal plan.
+            systemPrompt: `You are a smart food search assistant with REAL-TIME WEB SEARCH capabilities helping users find EXACT food items to add to their meal plan.
 
 CRITICAL RULES:
 1. Be CONCISE and NATURAL - no numbered lists, no formal language
 2. IDENTIFY the exact product they want
-3. Use the user's location (${userLocation}) for restaurant menus
-4. Ask clarifying questions in a natural, conversational way
-5. Once you have the exact item, provide data in this format:
+3. You have access to current nutrition data through web search - use it!
+4. Use the user's location (${userLocation}) for restaurant menus
+5. Ask clarifying questions in a natural, conversational way
+6. If user says "add", "also", "another", they want to ADD a food item - provide nutrition data
+7. Once you have the exact item, search for and provide REAL data in this format:
 
 [NUTRITION]
 Name: [Exact product name]
@@ -832,6 +843,12 @@ Serving: [size/amount]
 GOOD examples:
 User: "big mac"
 You: "Got it - Big Mac from McDonald's ${userLocation}?"
+
+User: "add nuggets"
+You: [Provide McNuggets nutrition data immediately in NUTRITION block]
+
+User: "also add a coke"
+You: [Provide Coca-Cola nutrition data immediately in NUTRITION block]
 
 User: "coffee"
 You: "What kind of coffee? Like a Starbucks latte, or just regular black coffee?"
@@ -849,9 +866,28 @@ Keep it SHORT and FRIENDLY. No explanations about why you need info.`,
         
         const aiResponse = await aiService.chat(foodRequest, context);
         
-        // Remove thinking message
-        const thinkingMsg = chatArea.querySelector('.ai-message.thinking');
-        if (thinkingMsg) thinkingMsg.remove();
+        // Update thinking message with actual search status if available
+        const thinkingElement = document.getElementById(thinkingId);
+        if (thinkingElement && aiResponse.searchStatus) {
+            const dotsElement = thinkingElement.querySelector('.thinking-dots');
+            if (dotsElement) {
+                // Show what the AI actually did
+                dotsElement.innerHTML = aiResponse.searchStatus;
+                dotsElement.style.animation = 'none'; // Stop the dots animation
+                // Keep it visible for a moment so user can read it
+                setTimeout(() => {
+                    if (document.getElementById(thinkingId)) {
+                        document.getElementById(thinkingId).remove();
+                    }
+                }, 1500);
+            }
+        } else {
+            // Remove thinking message immediately if no status
+            if (thinkingElement) thinkingElement.remove();
+        }
+        
+        // Don't proceed until status message is handled
+        await new Promise(resolve => setTimeout(resolve, aiResponse.searchStatus ? 1600 : 0));
         
         // Add AI response to history with proper structure
         aiSearchConversationHistory.push({ 
@@ -867,54 +903,107 @@ Keep it SHORT and FRIENDLY. No explanations about why you need info.`,
             </div>
         `;
         
-        // Parse the AI response to extract food data or show search results
-        const foodData = extractFoodFromAIResponse(foodRequest, aiResponse.message);
+        // Parse the AI response to extract food data ONLY if there's a nutrition block
+        const hasNutritionBlock = aiResponse.message.includes('[NUTRITION]');
+        const foodData = hasNutritionBlock ? extractFoodFromAIResponse(foodRequest, aiResponse.message) : null;
         
-        if (foodData && foodData.length > 0) {
-            // Show results as regular food items
-            resultsArea.innerHTML = foodData.map(food => {
+        // Check if there's already a food item displayed
+        const hasExistingFood = resultsArea.querySelector('.food-item') !== null;
+        
+        // Check user intent - if there's existing food and they mention a new food without "change/replace", assume they want to ADD
+        const lowerRequest = foodRequest.toLowerCase();
+        const isJustAFoodName = !lowerRequest.includes('change') && 
+                                !lowerRequest.includes('replace') && 
+                                !lowerRequest.includes('instead') &&
+                                !lowerRequest.includes('clear') &&
+                                !lowerRequest.includes('remove');
+        
+        const userWantsToAdd = lowerRequest.includes('add') || 
+                              lowerRequest.includes('also') ||
+                              lowerRequest.includes('another') ||
+                              lowerRequest.includes('more') ||
+                              lowerRequest.includes('plus') ||
+                              lowerRequest.includes('and also') ||
+                              (lowerRequest.startsWith('and ') && hasExistingFood) ||
+                              (hasExistingFood && isJustAFoodName && hasNutritionBlock); // If food exists and they just name another food, ADD it
+        
+        const userWantsChange = foodRequest.toLowerCase().includes('change') || 
+                               foodRequest.toLowerCase().includes('clear') || 
+                               foodRequest.toLowerCase().includes('remove') ||
+                               foodRequest.toLowerCase().includes('replace') ||
+                               foodRequest.toLowerCase().includes('update') ||
+                               foodRequest.toLowerCase().includes('instead');
+        
+        console.log('🔍 Food search debug:', {
+            hasNutritionBlock,
+            hasExistingFood,
+            userWantsToAdd,
+            userWantsChange,
+            shouldShowNewFood: !hasExistingFood || userWantsChange,
+            shouldAddNewFood: hasExistingFood && userWantsToAdd,
+            foodDataLength: foodData?.length || 0,
+            foodRequest: foodRequest.substring(0, 50)
+        });
+        
+        // Decide what to do with the food item
+        const shouldShowNewFood = !hasExistingFood || userWantsChange;
+        const shouldAddNewFood = hasExistingFood && userWantsToAdd;
+        
+        if (foodData && foodData.length > 0 && (shouldShowNewFood || shouldAddNewFood)) {
+            // Either replace all items or add to existing ones
+            const newFoodHTML = foodData.map(food => {
                 const category = food.suggestedCategory || 'extras';
                 return createFoodItemHTML(food, category);
             }).join('');
             
-            // Setup drag handlers
+            if (shouldAddNewFood) {
+                console.log('✅ ADDING new food item to existing ones');
+                // ADD to existing food items without breaking existing drag data
+                // Create a temporary container to parse the new HTML
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = newFoodHTML;
+                
+                // Append each new food item individually to preserve existing items
+                const newItems = tempDiv.querySelectorAll('.food-item');
+                console.log(`📦 Found ${newItems.length} new items to add`);
+                newItems.forEach(newItem => {
+                    resultsArea.appendChild(newItem);
+                });
+                console.log(`📊 Total items now: ${resultsArea.querySelectorAll('.food-item').length}`);
+            } else {
+                console.log('🔄 REPLACING all food items');
+                // REPLACE all food items
+                resultsArea.innerHTML = newFoodHTML;
+            }
+            
+            // Setup drag handlers for ALL items (including newly added ones)
             resultsArea.querySelectorAll('.food-item').forEach(item => {
+                // Remove old listeners first to avoid duplicates
+                item.removeEventListener('dragstart', handleFoodDragStart);
+                item.removeEventListener('dragend', handleFoodDragEnd);
+                
+                // Add fresh listeners
                 item.addEventListener('dragstart', handleFoodDragStart);
                 item.addEventListener('dragend', handleFoodDragEnd);
                 
                 const portionInput = item.querySelector('.portion-input');
                 if (portionInput) {
+                    portionInput.removeEventListener('change', handlePortionChange);
                     portionInput.addEventListener('change', handlePortionChange);
                 }
                 
                 const unitSelect = item.querySelector('.unit-select');
                 if (unitSelect) {
+                    unitSelect.removeEventListener('change', handleUnitChange);
                     unitSelect.addEventListener('change', handleUnitChange);
                 }
             });
+        } else if ((foodRequest.toLowerCase().includes('clear') || foodRequest.toLowerCase().includes('remove')) && !hasNutritionBlock) {
+            // User explicitly wants to clear/remove the food item (and no new food was provided)
+            resultsArea.innerHTML = '';
         } else {
-            // If AI couldn't find specific data, use our estimation
-            const searchResults = searchAIFoods(foodRequest);
-            resultsArea.innerHTML = searchResults.map(food => {
-                const category = food.suggestedCategory || 'extras';
-                return createFoodItemHTML(food, category);
-            }).join('');
-            
-            // Setup drag handlers
-            resultsArea.querySelectorAll('.food-item').forEach(item => {
-                item.addEventListener('dragstart', handleFoodDragStart);
-                item.addEventListener('dragend', handleFoodDragEnd);
-                
-                const portionInput = item.querySelector('.portion-input');
-                if (portionInput) {
-                    portionInput.addEventListener('change', handlePortionChange);
-                }
-                
-                const unitSelect = item.querySelector('.unit-select');
-                if (unitSelect) {
-                    unitSelect.addEventListener('change', handleUnitChange);
-                }
-            });
+            // No change requested - keep the existing food item displayed
+            // The results area keeps whatever was there before
         }
         
         chatArea.scrollTop = chatArea.scrollHeight;
@@ -1341,18 +1430,25 @@ function performWebSearch(query, analysis) {
                 `;
             }
             
-            // Setup drag handlers
+            // Setup drag handlers for ALL items (including newly added ones)
             resultsArea.querySelectorAll('.food-item').forEach(item => {
+                // Remove old listeners first to avoid duplicates
+                item.removeEventListener('dragstart', handleFoodDragStart);
+                item.removeEventListener('dragend', handleFoodDragEnd);
+                
+                // Add fresh listeners
                 item.addEventListener('dragstart', handleFoodDragStart);
                 item.addEventListener('dragend', handleFoodDragEnd);
                 
                 const portionInput = item.querySelector('.portion-input');
                 if (portionInput) {
+                    portionInput.removeEventListener('change', handlePortionChange);
                     portionInput.addEventListener('change', handlePortionChange);
                 }
                 
                 const unitSelect = item.querySelector('.unit-select');
                 if (unitSelect) {
+                    unitSelect.removeEventListener('change', handleUnitChange);
                     unitSelect.addEventListener('change', handleUnitChange);
                 }
             });

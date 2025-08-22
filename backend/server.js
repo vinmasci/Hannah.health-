@@ -18,8 +18,15 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 
+// Log all requests
+app.use((req, res, next) => {
+  console.log(`📍 ${req.method} ${req.path}`);
+  next();
+});
+
 // API routes
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/brave', require('./routes/brave-search'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -43,4 +50,5 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`🚀 Hannah backend server running on port ${PORT}`);
   console.log(`🔑 OpenAI API key loaded: ${process.env.OPENAI_API_KEY ? 'Yes' : 'No'}`);
+  console.log(`🔍 Brave API key loaded: ${process.env.BRAVE_API_KEY ? 'Yes' : 'No'}`);
 });

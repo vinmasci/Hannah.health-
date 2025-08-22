@@ -1,7 +1,10 @@
 // MealContainer component - represents a meal within a day column
 import { NutritionCalculator } from '../services/nutritionCalculator.js';
+import { OpenMojiService } from '../services/openmoji-service.js';
 
 export class MealContainer {
+    static openMojiService = new OpenMojiService();
+    
     /**
      * Create a meal container HTML
      * @param {string} day - Day name
@@ -11,7 +14,16 @@ export class MealContainer {
      */
     static create(day, mealName, time = '12:00') {
         const mealId = `${day}-${mealName.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
-        const emoji = this.getMealEmoji(mealName);
+        const emojiCode = this.getMealEmojiCode(mealName);
+        const emojiUrl = this.openMojiService.getEmojiUrl(emojiCode);
+        
+        // Adjust emoji sizes for better visual balance
+        const mealLower = mealName.toLowerCase();
+        let emojiSize = 20; // default
+        if (mealLower.includes('breakfast')) emojiSize = 28;
+        else if (mealLower.includes('morning') && mealLower.includes('snack')) emojiSize = 24;
+        else if (mealLower.includes('dinner')) emojiSize = 24;
+        const sizeClass = `size-${emojiSize}`;
         
         return `
             <div class="meal" data-meal-id="${mealId}">
@@ -21,7 +33,7 @@ export class MealContainer {
                              onclick="MealContainer.handleNameClick(event)" 
                              onblur="MealContainer.handleNameBlur(event, '${mealId}')" 
                              onkeydown="MealContainer.handleNameKeydown(event)">
-                            ${emoji} ${mealName}
+                            <img src="${emojiUrl}" width="${emojiSize}" height="${emojiSize}" class="meal-emoji openmoji-icon ${sizeClass}" alt="${mealName}"> ${mealName}
                         </div>
                         <div class="meal-header-actions">
                             <div class="meal-time" contenteditable="true" 
@@ -36,7 +48,9 @@ export class MealContainer {
                                         title="Minimize">
                                     <span class="chevron">▼</span>
                                 </button>
-                                <button class="meal-control-btn" onclick="MealContainer.delete('${mealId}')">🗑️</button>
+                                <button class="meal-control-btn" onclick="MealContainer.delete('${mealId}')" title="Delete">
+                                    <img src="${this.openMojiService.getEmojiUrl('1F5D1')}" width="16" height="16" class="openmoji-icon" alt="delete">
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -78,7 +92,24 @@ export class MealContainer {
     }
     
     /**
-     * Get emoji for meal based on name
+     * Get OpenMoji code for meal based on name
+     * @param {string} name - Meal name
+     * @returns {string} OpenMoji code
+     */
+    static getMealEmojiCode(name) {
+        const mealLower = name.toLowerCase();
+        if (mealLower.includes('breakfast')) return '1F95E'; // pancakes
+        if (mealLower.includes('lunch')) return '1F96A'; // sandwich
+        if (mealLower.includes('dinner')) return '1F35D'; // spaghetti
+        if (mealLower.includes('morning') && mealLower.includes('snack')) return '1F950'; // croissant
+        if (mealLower.includes('afternoon') && mealLower.includes('snack')) return '1F36A'; // cookie
+        if (mealLower.includes('evening') && mealLower.includes('snack')) return '1F36B'; // chocolate bar
+        if (mealLower.includes('snack')) return '1F968'; // pretzel
+        return '1F37D'; // fork and knife with plate (default)
+    }
+    
+    /**
+     * Get emoji for meal based on name (for backward compatibility)
      * @param {string} name - Meal name
      * @returns {string} Emoji
      */
@@ -273,17 +304,28 @@ export class MealContainer {
     static handleNameBlur(event, mealId) {
         const element = event.target;
         const text = element.textContent.trim();
-        // Extract emoji and name
-        const emojiMatch = text.match(/^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}]/u);
-        const emoji = emojiMatch ? emojiMatch[0] : '';
-        const mealName = text.replace(emoji, '').trim();
+        // Remove any existing emoji image and extract text
+        const existingEmoji = element.querySelector('.meal-emoji');
+        if (existingEmoji) {
+            existingEmoji.remove();
+        }
+        const mealName = text.trim();
         
         if (!mealName) {
-            element.textContent = element.dataset.originalText;
+            element.innerHTML = element.dataset.originalText;
             return;
         }
         
-        element.textContent = `${this.getMealEmoji(mealName)} ${mealName}`;
+        // Create new OpenMoji emoji with appropriate size
+        const emojiCode = this.getMealEmojiCode(mealName);
+        const emojiUrl = this.openMojiService.getEmojiUrl(emojiCode);
+        const mealLower = mealName.toLowerCase();
+        let emojiSize = 20; // default
+        if (mealLower.includes('breakfast')) emojiSize = 28;
+        else if (mealLower.includes('morning') && mealLower.includes('snack')) emojiSize = 24;
+        else if (mealLower.includes('dinner')) emojiSize = 24;
+        const sizeClass = `size-${emojiSize}`;
+        element.innerHTML = `<img src="${emojiUrl}" width="${emojiSize}" height="${emojiSize}" class="meal-emoji openmoji-icon ${sizeClass}" alt="${mealName}"> ${mealName}`;
     }
     
     static handleNameKeydown(event) {

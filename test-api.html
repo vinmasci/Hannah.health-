@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Hannah API</title>
+</head>
+<body>
+    <h1>Test Hannah API</h1>
+    <button onclick="testChat()">Test Chat (Recipe)</button>
+    <button onclick="testChatNoRecipe()">Test Chat (Normal)</button>
+    <div id="result"></div>
+    
+    <script>
+    async function testChat() {
+        const result = document.getElementById('result');
+        result.innerHTML = 'Testing...';
+        
+        try {
+            const response = await fetch('http://localhost:3001/api/ai/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: 'give me a frittata recipe',
+                    context: {},
+                    conversationHistory: []
+                })
+            });
+            
+            const data = await response.json();
+            result.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            console.log('Response:', data);
+        } catch (error) {
+            result.innerHTML = `Error: ${error.message}`;
+            console.error('Error:', error);
+        }
+    }
+    
+    async function testChatNoRecipe() {
+        const result = document.getElementById('result');
+        result.innerHTML = 'Testing...';
+        
+        try {
+            const response = await fetch('http://localhost:3001/api/ai/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: 'hello',
+                    context: {},
+                    conversationHistory: []
+                })
+            });
+            
+            const data = await response.json();
+            result.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            console.log('Response:', data);
+        } catch (error) {
+            result.innerHTML = `Error: ${error.message}`;
+            console.error('Error:', error);
+        }
+    }
+    </script>
+</body>
+</html>

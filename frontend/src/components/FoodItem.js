@@ -25,11 +25,17 @@ export class FoodItem {
             window.favoritesManager.isFavorite(foodData) : false;
         const itemId = `food-item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         
+        // Escape the JSON for safe HTML attribute use - this fixes the McDonald's apostrophe issue!
+        const escapedFoodData = JSON.stringify(foodData).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        
         return `
             <div class="food-item food-item-${category}" draggable="true" 
-                 data-food='${JSON.stringify(foodData)}' data-item-id="${itemId}">
+                 data-food="${escapedFoodData}" data-item-id="${itemId}">
                 <div class="food-item-header">
-                    <div class="food-name">${food.name}</div>
+                    <div class="food-name">
+                        <span class="food-emoji-placeholder" data-food-name="${food.name}" data-category="${category}"></span>
+                        ${food.name}
+                    </div>
                     <div class="food-item-actions">
                         <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" 
                                 onclick="event.stopPropagation(); window.favoritesManager.toggleFavorite(this)" 
