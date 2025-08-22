@@ -42,5 +42,5 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Hannah backend server running on port ${PORT}`);
-  console.log(`🔑 Claude API key loaded: ${process.env.CLAUDE_API_KEY ? 'Yes' : 'No'}`);
+  console.log(`🔑 OpenAI API key loaded: ${process.env.OPENAI_API_KEY ? 'Yes' : 'No'}`);
 });

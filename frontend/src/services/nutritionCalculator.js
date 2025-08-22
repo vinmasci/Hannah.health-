@@ -334,4 +334,5 @@ export class NutritionCalculator {
             <span class="macro-label fat">Fat: ${fat.toFixed(1)}g (${percentages.fat}%)</span>
         `;
     }
+    
 }

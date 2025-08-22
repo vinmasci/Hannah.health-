@@ -9,10 +9,9 @@ import './components/config.js';
 import './components/ai-assistant-column.js';
 
 // Import meal planner components
-import './components/storage.js';
+import './services/storageService.js';
 import './components/favorites-manager.js';
 import './components/app.js';
-import './components/recipe-ai.js';
 
 // Import Shopping List
 import './components/ShoppingList.js';

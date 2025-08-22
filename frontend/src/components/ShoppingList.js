@@ -39,8 +39,8 @@ export class ShoppingList {
                         </div>
                     </div>
                     <button class="btn-minimize" onclick="window.shoppingList.toggleMinimize(event)" title="Minimize">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 12H5"/>
                         </svg>
                     </button>
                 </div>

@@ -413,7 +413,26 @@ class FavoritesManager {
                 select.addEventListener('change', window.handleUnitChange);
             });
         } else {
-            itemsContainer.innerHTML = '<div class="empty-favorites" style="padding: 20px; text-align: center; color: #999;">No favorites yet!<br>Click the ❤️ on any food item to add it here.</div>';
+            itemsContainer.style.background = 'white';
+            itemsContainer.innerHTML = `
+                <div class="empty-favorites" style="
+                    padding: 40px 20px;
+                    text-align: center;
+                    color: #999;
+                    background: white;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                ">
+                    <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;">❤️</div>
+                    <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">No favorites yet</div>
+                    <div style="font-size: 12px; line-height: 1.5;">
+                        Click the heart icon on any food item<br>to add it to your favorites
+                    </div>
+                </div>
+            `;
         }
     }
 

@@ -69,14 +69,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-direction: column;
-    gap: 12px;
 }
 
 .day-header-content {
     width: 100%;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+}
+
+.day-header-buttons {
+    display: flex;
+    gap: 8px;
     align-items: center;
 }
 
@@ -110,13 +114,16 @@
     background: rgba(255,255,255,0.2);
     border: 1px solid rgba(255,255,255,0.3);
     color: white;
-    padding: 6px 12px;
+    padding: 5px 10px;
+    height: 28px;
     border-radius: 6px;
     cursor: pointer;
     font-size: 12px;
     font-weight: 500;
     letter-spacing: -0.01em;
     transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
 }
 
 .add-meal-btn:hover {

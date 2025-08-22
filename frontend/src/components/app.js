@@ -492,26 +492,12 @@ function createCategoryColumn(category, insertBefore = null) {
     });
 }
 
-// Create macro bar visualization
-function createMacroBar(protein, carbs, fat) {
-    return NutritionCalculator.createMacroBarHTML(protein, carbs, fat);
-}
-
-// Create macro labels with percentages
-function createMacroLabels(protein, carbs, fat) {
-    return NutritionCalculator.createMacroLabelsHTML(protein, carbs, fat);
-}
-
 // Create Food Item HTML (delegate to FoodItem component)
 function createFoodItemHTML(food, category) {
     return FoodItem.create(food, category);
 }
 
 // Get available units for conversion
-function getAvailableUnits(baseUnit) {
-    return UnitConverter.getAvailableUnits(baseUnit);
-}
-
 // Handle portion change
 function handlePortionChange(e) {
     const foodItem = e.target.closest('.food-item');
@@ -536,7 +522,7 @@ function handleUnitChange(e) {
     const currentQuantity = parseFloat(quantityInput.value);
     
     // Convert quantity
-    const newQuantity = convertUnit(currentQuantity, currentUnit, newUnit);
+    const newQuantity = UnitConverter.convert(currentQuantity, currentUnit, newUnit);
     quantityInput.value = newQuantity.toFixed(2);
     
     // Update step and min based on unit
@@ -554,17 +540,13 @@ function handleUnitChange(e) {
     foodItem.dataset.food = JSON.stringify(foodData);
     
     // Calculate ratio for macros
-    const baseQuantityInNewUnit = convertUnit(foodData.baseQuantity, foodData.baseUnit, newUnit);
+    const baseQuantityInNewUnit = UnitConverter.convert(foodData.baseQuantity, foodData.baseUnit, newUnit);
     const ratio = newQuantity / baseQuantityInNewUnit;
     
     updateFoodItemMacros(foodItem, foodData, ratio);
 }
 
 // Convert units
-function convertUnit(quantity, fromUnit, toUnit) {
-    return UnitConverter.convert(quantity, fromUnit, toUnit);
-}
-
 // Update food item macros display
 function updateFoodItemMacros(foodItem, foodData, ratio) {
     const protein = foodData.protein * ratio;
@@ -577,10 +559,10 @@ function updateFoodItemMacros(foodItem, foodData, ratio) {
     macrosDiv.innerHTML = `
         <div class="macro-bar-container">
             <div class="macro-bar">
-                ${createMacroBar(protein, carbs, fat)}
+                ${NutritionCalculator.createMacroBarHTML(protein, carbs, fat)}
             </div>
             <div class="macro-labels">
-                ${createMacroLabels(protein, carbs, fat)}
+                ${NutritionCalculator.createMacroLabelsHTML(protein, carbs, fat)}
             </div>
         </div>
         <div class="macro-stats">
@@ -839,6 +821,7 @@ CRITICAL RULES:
 5. Once you have the exact item, provide data in this format:
 
 [NUTRITION]
+Name: [Exact product name]
 Calories: XXX kcal
 Protein: XXg
 Carbs: XXg
@@ -1023,6 +1006,7 @@ function extractFoodFromAIResponse(query, aiMessage) {
         const nutritionText = nutritionBlock[1];
         
         // Extract values from the nutrition block
+        const nameMatch = nutritionText.match(/Name:\s*(.+)/i);
         const calorieMatch = nutritionText.match(/Calories?:\s*(\d+)\s*(kcal|cal)?/i);
         const proteinMatch = nutritionText.match(/Protein:\s*(\d+\.?\d*)\s*g?/i);
         const carbMatch = nutritionText.match(/Carbs?:\s*(\d+\.?\d*)\s*g?/i);
@@ -1030,12 +1014,8 @@ function extractFoodFromAIResponse(query, aiMessage) {
         const servingMatch = nutritionText.match(/Serving:\s*(.+)/i);
         
         if (calorieMatch) {
-            // Extract product name from the confirmation message
-            let productName = query;
-            const foundMatch = aiMessage.match(/Found it!\s*([^?]+)\?/i);
-            if (foundMatch) {
-                productName = foundMatch[1].trim();
-            }
+            // THE AI PROVIDES THE NAME - JUST USE IT!
+            let productName = nameMatch ? nameMatch[1].trim() : query;
             
             // Determine serving size and unit
             let baseQuantity = 1;
@@ -1060,16 +1040,18 @@ function extractFoodFromAIResponse(query, aiMessage) {
                 }
             }
             
+            console.log('Product name from AI:', productName);
+            
             const food = {
                 name: productName,
                 baseQuantity: baseQuantity,
                 baseUnit: baseUnit,
                 kcal: parseInt(calorieMatch[1]),
-                protein: proteinMatch ? parseFloat(proteinMatch[1]) : estimateProtein(parseInt(calorieMatch[1])),
-                carbs: carbMatch ? parseFloat(carbMatch[1]) : estimateCarbs(parseInt(calorieMatch[1])),
-                fat: fatMatch ? parseFloat(fatMatch[1]) : estimateFat(parseInt(calorieMatch[1])),
-                cost: estimateCost(productName),
-                suggestedCategory: guessCategory(productName)
+                protein: proteinMatch ? parseFloat(proteinMatch[1]) : 0,
+                carbs: carbMatch ? parseFloat(carbMatch[1]) : 0,
+                fat: fatMatch ? parseFloat(fatMatch[1]) : 0,
+                cost: 0,
+                suggestedCategory: 'extras'
             };
             foods.push(food);
             return foods;
@@ -1085,28 +1067,6 @@ function extractFoodFromAIResponse(query, aiMessage) {
     return null;
 }
 
-function estimateCost(productName) {
-    const nameLower = productName.toLowerCase();
-    if (nameLower.includes('mcdonald') || nameLower.includes('starbucks')) return 5.50;
-    if (nameLower.includes('burger') || nameLower.includes('pizza')) return 8.00;
-    if (nameLower.includes('sandwich')) return 6.50;
-    return 3.00;
-}
-
-function estimateProtein(kcal) {
-    // Rough estimate: 20% of calories from protein
-    return Math.round((kcal * 0.20) / 4); // 4 kcal per gram of protein
-}
-
-function estimateCarbs(kcal) {
-    // Rough estimate: 45% of calories from carbs
-    return Math.round((kcal * 0.45) / 4); // 4 kcal per gram of carbs
-}
-
-function estimateFat(kcal) {
-    // Rough estimate: 35% of calories from fat
-    return Math.round((kcal * 0.35) / 9); // 9 kcal per gram of fat
-}
 
 function analyzeUserQuery(query) {
     const queryLower = query.toLowerCase();
@@ -1424,7 +1384,7 @@ function searchAIFoodsWithWebData(query) {
         if (queryLower.includes(key)) {
             results.push({
                 ...data,
-                suggestedCategory: guessCategory(data.name)
+                suggestedCategory: 'extras'
             });
             return results;
         }
@@ -1452,7 +1412,7 @@ function searchAIFoods(query) {
     
     // If no exact matches, create AI suggestions
     if (results.length === 0) {
-        const suggestedCategory = guessCategory(query);
+        const suggestedCategory = 'extras';
         const baseFood = createAIFood(query, suggestedCategory);
         
         // Add the main result
@@ -1506,32 +1466,6 @@ function searchAIFoods(query) {
     }
     
     return results.slice(0, 6); // Limit to 6 results
-}
-
-function guessCategory(foodName) {
-    const nameLower = foodName.toLowerCase();
-    
-    if (nameLower.includes('chicken') || nameLower.includes('beef') || nameLower.includes('fish') || 
-        nameLower.includes('egg') || nameLower.includes('protein')) {
-        return 'protein';
-    } else if (nameLower.includes('milk') || nameLower.includes('cheese') || nameLower.includes('yogurt')) {
-        return 'dairy';
-    } else if (nameLower.includes('bread') || nameLower.includes('rice') || nameLower.includes('pasta') || 
-               nameLower.includes('cereal')) {
-        return 'grains';
-    } else if (nameLower.includes('potato') || nameLower.includes('beans')) {
-        return 'carbs';
-    } else if (nameLower.includes('salad') || nameLower.includes('vegetable')) {
-        return 'veg';
-    } else if (nameLower.includes('fruit') || nameLower.includes('apple') || nameLower.includes('banana')) {
-        return 'fruit';
-    } else if (nameLower.includes('cake') || nameLower.includes('cookie') || nameLower.includes('chocolate')) {
-        return 'sweets';
-    } else if (nameLower.includes('coffee') || nameLower.includes('juice') || nameLower.includes('smoothie')) {
-        return 'drinks';
-    }
-    
-    return 'extras';
 }
 
 // Note: AI foods now use regular food item drag handlers
@@ -1634,74 +1568,19 @@ function sendAIFoodRequest(category) {
 }
 
 function createAIFood(foodName, category) {
-    // This is where AI would analyze the food and create nutritional values
-    // For now, we'll use smart estimates based on the food name
-    
-    const estimates = estimateNutrition(foodName, category);
-    
+    // Return default values - real nutrition data should come from database
     return {
         name: foodName,
-        baseQuantity: estimates.quantity,
-        baseUnit: estimates.unit,
-        kcal: estimates.kcal,
-        protein: estimates.protein,
-        carbs: estimates.carbs,
-        fat: estimates.fat,
-        cost: estimates.cost
+        baseQuantity: 100,
+        baseUnit: 'g',
+        kcal: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        cost: 0
     };
 }
 
-function estimateNutrition(foodName, category) {
-    const nameLower = foodName.toLowerCase();
-    
-    // Default values
-    let nutrition = {
-        quantity: 100,
-        unit: 'g',
-        kcal: 200,
-        protein: 10,
-        carbs: 20,
-        fat: 8,
-        cost: 3.00
-    };
-    
-    // Adjust based on keywords in the food name
-    if (nameLower.includes('big mac') || nameLower.includes('burger')) {
-        nutrition = { quantity: 1, unit: 'unit', kcal: 563, protein: 26, carbs: 45, fat: 33, cost: 7.50 };
-    } else if (nameLower.includes('mcnuggets') || nameLower.includes('nuggets')) {
-        nutrition = { quantity: 6, unit: 'pieces', kcal: 250, protein: 13, carbs: 15, fat: 15, cost: 5.00 };
-    } else if (nameLower.includes('pizza')) {
-        nutrition = { quantity: 1, unit: 'slice', kcal: 285, protein: 12, carbs: 36, fat: 10, cost: 4.00 };
-    } else if (nameLower.includes('smoothie')) {
-        nutrition = { quantity: 250, unit: 'ml', kcal: 180, protein: 8, carbs: 32, fat: 3, cost: 6.00 };
-    } else if (nameLower.includes('salad')) {
-        nutrition = { quantity: 1, unit: 'bowl', kcal: 150, protein: 5, carbs: 15, fat: 8, cost: 8.00 };
-    } else if (nameLower.includes('pasta') || nameLower.includes('lasagna')) {
-        nutrition = { quantity: 1, unit: 'serving', kcal: 420, protein: 18, carbs: 55, fat: 14, cost: 12.00 };
-    } else if (nameLower.includes('sandwich')) {
-        nutrition = { quantity: 1, unit: 'unit', kcal: 350, protein: 20, carbs: 40, fat: 12, cost: 8.00 };
-    } else if (nameLower.includes('protein bar')) {
-        nutrition = { quantity: 1, unit: 'bar', kcal: 230, protein: 20, carbs: 25, fat: 8, cost: 3.50 };
-    } else if (nameLower.includes('eggs')) {
-        nutrition = { quantity: 2, unit: 'large', kcal: 156, protein: 13, carbs: 1.2, fat: 11, cost: 1.20 };
-    } else if (nameLower.includes('steak')) {
-        nutrition = { quantity: 200, unit: 'g', kcal: 434, protein: 52, carbs: 0, fat: 24, cost: 15.00 };
-    }
-    
-    // Adjust for category
-    if (category === 'protein') {
-        nutrition.protein *= 1.5;
-        nutrition.carbs *= 0.5;
-    } else if (category === 'carbs') {
-        nutrition.carbs *= 1.5;
-        nutrition.protein *= 0.7;
-    } else if (category === 'sweets') {
-        nutrition.carbs *= 2;
-        nutrition.kcal *= 1.3;
-    }
-    
-    return nutrition;
-}
 
 function addAIFoodToCategory(category, foodItem) {
     const column = document.querySelector(`.category-column[data-category="${category}"]`);
@@ -1813,13 +1692,15 @@ function createDayColumn(dayName) {
         <div class="day-header">
             <div class="day-header-content">
                 <div class="day-name">${dayName}</div>
-                <button class="btn-minimize-day" onclick="toggleDayMinimize(event)" title="${isMinimized ? 'Expand' : 'Minimize'}">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="${isMinimized ? 'M12 5v14M5 12h14' : 'M19 12H5'}"/>
-                    </svg>
-                </button>
+                <div class="day-header-buttons">
+                    <button class="add-meal-btn" onclick="addMeal('${dayName.toLowerCase()}')">+ Meal</button>
+                    <button class="btn-minimize-day" onclick="toggleDayMinimize(event)" title="${isMinimized ? 'Expand' : 'Minimize'}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="${isMinimized ? 'M12 5v14M5 12h14' : 'M19 12H5'}"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <button class="add-meal-btn" onclick="addMeal('${dayName.toLowerCase()}')">+ Meal</button>
         </div>
         <div class="meals-container">
             ${createMealHTML(dayName.toLowerCase(), 'Breakfast', '07:00')}
@@ -1960,7 +1841,7 @@ function updateModulePortion(moduleId, newQuantity) {
     const currentUnit = moduleData.unit;
     
     // Calculate new macros
-    const baseQuantityInUnit = convertUnit(baseFood.baseQuantity, baseFood.baseUnit, currentUnit);
+    const baseQuantityInUnit = UnitConverter.convert(baseFood.baseQuantity, baseFood.baseUnit, currentUnit);
     const ratio = parseFloat(newQuantity) / baseQuantityInUnit;
     
     moduleData.quantity = parseFloat(newQuantity);
@@ -1977,7 +1858,7 @@ function updateModulePortion(moduleId, newQuantity) {
     macrosDiv.innerHTML = `
         <div class="macro-bar-container">
             <div class="macro-bar">
-                ${createMacroBar(moduleData.protein, moduleData.carbs, moduleData.fat)}
+                ${NutritionCalculator.createMacroBarHTML(moduleData.protein, moduleData.carbs, moduleData.fat)}
             </div>
             <div class="macro-labels">
                 <span class="macro-label protein">P: ${moduleData.protein.toFixed(1)}g</span>
@@ -2007,7 +1888,7 @@ function updateModuleUnit(moduleId, newUnit) {
     const currentQuantity = moduleData.quantity;
     
     // Convert quantity to new unit
-    const newQuantity = convertUnit(currentQuantity, currentUnit, newUnit);
+    const newQuantity = UnitConverter.convert(currentQuantity, currentUnit, newUnit);
     const portionInput = module.querySelector('.module-portion-input');
     portionInput.value = newQuantity.toFixed(2);
     
@@ -2022,7 +1903,7 @@ function updateModuleUnit(moduleId, newUnit) {
     portionInput.dataset.unit = newUnit;
     
     // Calculate new macros
-    const baseQuantityInNewUnit = convertUnit(baseFood.baseQuantity, baseFood.baseUnit, newUnit);
+    const baseQuantityInNewUnit = UnitConverter.convert(baseFood.baseQuantity, baseFood.baseUnit, newUnit);
     const ratio = newQuantity / baseQuantityInNewUnit;
     
     moduleData.unit = newUnit;
@@ -2040,7 +1921,7 @@ function updateModuleUnit(moduleId, newUnit) {
     macrosDiv.innerHTML = `
         <div class="macro-bar-container">
             <div class="macro-bar">
-                ${createMacroBar(moduleData.protein, moduleData.carbs, moduleData.fat)}
+                ${NutritionCalculator.createMacroBarHTML(moduleData.protein, moduleData.carbs, moduleData.fat)}
             </div>
             <div class="macro-labels">
                 <span class="macro-label protein">P: ${moduleData.protein.toFixed(1)}g</span>
@@ -2185,7 +2066,7 @@ function updateDayTotals(dayColumn) {
         </div>
         <div class="macro-bar-container">
             <div class="macro-bar day-macro-bar">
-                ${createMacroBar(dayTotals.protein, dayTotals.carbs, dayTotals.fat)}
+                ${NutritionCalculator.createMacroBarHTML(dayTotals.protein, dayTotals.carbs, dayTotals.fat)}
             </div>
             <div class="macro-labels compact">
                 <span class="macro-label protein">P: ${dayTotals.protein.toFixed(0)}g</span>
@@ -2378,16 +2259,6 @@ function addNewDay() {
 }
 
 // Clear Board
-function clearBoard() {
-    if (confirm('Are you sure you want to clear all category columns? Day columns will remain.')) {
-        document.querySelectorAll('.category-column').forEach(column => {
-            column.style.animation = 'fadeOut 0.3s ease';
-            setTimeout(() => column.remove(), 300);
-        });
-        activeColumns = [];
-    }
-}
-
 // Recipe handlers
 function handleRecipeDragOver(e) {
     e.preventDefault();
@@ -2479,7 +2350,6 @@ window.handleMealTimeBlur = MealContainer.handleTimeBlur;
 window.handleMealTimeKeydown = MealContainer.handleTimeKeydown;
 window.handlePillClick = handlePillClick;
 window.addNewDay = addNewDay;
-window.clearBoard = clearBoard;
 window.filterFoodItems = filterFoodItems;
 window.removeColumn = removeColumn;
 window.openAIFoodChat = openAIFoodChat;
@@ -2492,9 +2362,7 @@ window.focusAIInput = focusAIInput;
 window.updateUserLocation = updateUserLocation;
 window.filterByMacro = filterByMacro;
 window.createCategoryColumn = createCategoryColumn;
-window.getAvailableUnits = getAvailableUnits;
-window.createMacroBar = createMacroBar;
-window.createMacroLabels = createMacroLabels;
+window.getAvailableUnits = (baseUnit) => UnitConverter.getAvailableUnits(baseUnit);
 
 // Expose food database and functions for AI assistant
 window.foodDatabase = foodDatabase;

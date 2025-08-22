@@ -7,7 +7,7 @@ class AIService {
     
     async chat(userInput, context) {
         try {
-            console.log('Sending to AI with history:', context.conversationHistory);
+            console.log('Sending to AI with history:', JSON.stringify(context.conversationHistory, null, 2));
             const response = await fetch(`${this.apiUrl}/ai/chat`, {
                 method: 'POST',
                 headers: {
@@ -33,6 +33,7 @@ class AIService {
             
         } catch (error) {
             console.error('AI Service error:', error);
+            console.log('Using fallback response');
             // Return fallback response
             return this.getFallbackResponse(userInput, context);
         }
