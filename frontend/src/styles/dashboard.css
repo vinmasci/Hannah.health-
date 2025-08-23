@@ -1,0 +1,493 @@
+/* Dashboard Styles - Hannah Health */
+
+.dashboard-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.dashboard-header h1 {
+    font-size: 2rem;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.user-mode-badge,
+.practitioner-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.user-mode-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.practitioner-badge {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    grid-auto-flow: dense;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-card h2 {
+    font-size: 1.25rem;
+    color: #34495e;
+    margin: 0 0 1rem 0;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.card-header h2 {
+    margin: 0;
+}
+
+/* Quick Stats */
+.quick-stats .stats-grid,
+.practice-stats .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.stat-item {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* Meal Plans Section */
+.meal-plans-section {
+    grid-column: span 2;
+}
+
+.plans-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.plan-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.plan-card:hover {
+    border-color: #667eea;
+}
+
+.plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.plan-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+.plan-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.plan-badge.active {
+    background: #48bb78;
+    color: white;
+}
+
+.plan-meta {
+    font-size: 0.875rem;
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+}
+
+.plan-meta span {
+    display: inline-block;
+    margin-right: 1rem;
+}
+
+.plan-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Quick Actions */
+.actions-grid,
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.action-btn,
+.tool-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.action-btn:hover,
+.tool-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.action-icon,
+.tool-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Clients Section (Practitioner) */
+.clients-section {
+    grid-column: span 2;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.search-input {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    width: 200px;
+}
+
+.clients-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.client-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.client-card:hover {
+    border-color: #f093fb;
+    background: white;
+}
+
+.client-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.client-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.client-info {
+    flex: 1;
+}
+
+.client-info h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    color: #2c3e50;
+}
+
+.client-condition {
+    font-size: 0.875rem;
+    color: #7f8c8d;
+}
+
+.client-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.client-status.active {
+    background: #48bb78;
+    color: white;
+}
+
+.client-status.inactive {
+    background: #cbd5e0;
+    color: #4a5568;
+}
+
+.client-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 6px;
+}
+
+.client-stats .stat {
+    flex: 1;
+    text-align: center;
+}
+
+.client-stats .label {
+    display: block;
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    margin-bottom: 0.25rem;
+}
+
+.client-stats .value {
+    display: block;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.client-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Recent Activity / Alerts */
+.activity-feed,
+.alerts-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.activity-item,
+.alert-item {
+    padding: 0.75rem;
+    border-left: 3px solid #667eea;
+    background: #f8f9fa;
+    margin-bottom: 0.75rem;
+    border-radius: 0 6px 6px 0;
+}
+
+.alert-item.warning {
+    border-left-color: #f6ad55;
+}
+
+.alert-item.critical {
+    border-left-color: #fc8181;
+}
+
+/* Buttons */
+.btn-primary {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    padding: 0.5rem 1rem;
+    background: white;
+    color: #667eea;
+    border: 1px solid #667eea;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #f8f9fa;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: #667eea;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* Empty States */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #7f8c8d;
+}
+
+.empty-state p {
+    margin-bottom: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-wrapper {
+        padding: 1rem;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .meal-plans-section,
+    .clients-section {
+        grid-column: span 1;
+    }
+    
+    .actions-grid,
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-input {
+        width: 100%;
+    }
+}
+
+/* Scrollbar Styling */
+.plans-list::-webkit-scrollbar,
+.clients-list::-webkit-scrollbar,
+.activity-feed::-webkit-scrollbar,
+.alerts-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.plans-list::-webkit-scrollbar-track,
+.clients-list::-webkit-scrollbar-track,
+.activity-feed::-webkit-scrollbar-track,
+.alerts-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.plans-list::-webkit-scrollbar-thumb,
+.clients-list::-webkit-scrollbar-thumb,
+.activity-feed::-webkit-scrollbar-thumb,
+.alerts-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.plans-list::-webkit-scrollbar-thumb:hover,
+.clients-list::-webkit-scrollbar-thumb:hover,
+.activity-feed::-webkit-scrollbar-thumb:hover,
+.alerts-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

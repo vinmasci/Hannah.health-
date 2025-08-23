@@ -106,6 +106,18 @@ export class FoodModule {
     }
     
     /**
+     * Get module data by ID
+     * @param {string} moduleId - Module ID
+     * @returns {Object|null} Module data or null if not found
+     */
+    static getModuleData(moduleId) {
+        const module = document.querySelector(`[data-module-id="${moduleId}"]`);
+        if (!module) return null;
+        
+        return JSON.parse(module.dataset.module);
+    }
+    
+    /**
      * Update module data
      * @param {string} moduleId - Module ID
      * @param {Object} data - New data to update

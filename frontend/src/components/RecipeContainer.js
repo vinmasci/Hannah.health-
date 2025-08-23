@@ -1,5 +1,6 @@
 // RecipeContainer component - represents a recipe within a meal
 import { NutritionCalculator } from '../services/nutritionCalculator.js';
+import eventBus from '../services/EventBus.js';
 
 export class RecipeContainer {
     /**
@@ -27,7 +28,7 @@ export class RecipeContainer {
                         <span class="chevron">▼</span>
                     </button>
                     <button class="recipe-control-btn" 
-                            onclick="RecipeContainer.remove('${id}')" 
+                            onclick="window.removeRecipe('${id}')" 
                             title="Remove Recipe">×</button>
                 </div>
             </div>
@@ -210,7 +211,22 @@ export class RecipeContainer {
         const filtered = templates.filter(t => t.id !== templateId);
         localStorage.setItem('recipe-templates', JSON.stringify(filtered));
     }
+    
+    /**
+     * Initialize event listeners
+     */
+    static init() {
+        // Listen for recipe removal from event bus
+        eventBus.on('recipe:remove', ({ recipeId }) => {
+            this.remove(recipeId);
+        });
+        
+        console.log('[RecipeContainer] Event listeners initialized');
+    }
 }
+
+// Initialize when loaded
+RecipeContainer.init();
 
 // Make RecipeContainer available globally for onclick handlers
 window.RecipeContainer = RecipeContainer;

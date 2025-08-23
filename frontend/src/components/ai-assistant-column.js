@@ -61,7 +61,14 @@ class AIAssistantColumn {
                         <div class="ai-welcome-message">
                             <div class="hannah-avatar">H</div>
                             <div class="message-bubble">
-                                Hi! I'm Hannah, your meal planning assistant. How can I help you plan your meals today?
+                                <p>Hi! I'm Hannah, your AI nutritionist at Hannah.health 🌟</p>
+                                <p>I can help you:</p>
+                                <p>• Create personalized meal plans for your goals<br>
+                                • Find and add recipes from the web<br>
+                                • Track your calories and macros<br>
+                                • Build healthy eating habits</p>
+                                <p>Just tell me what you'd like to eat, your health goals, or ask for meal ideas - I'll add them directly to your planner!</p>
+                                <p><strong>Try saying:</strong> "I want to lose weight" or "Add a healthy breakfast" or "Find me a chicken recipe"</p>
                             </div>
                         </div>
                     </div>
@@ -245,37 +252,69 @@ Current user profile: ${JSON.stringify(this.userProfile)}`,
             } else {
                 // Meal planner context - include user profile for personalization
                 context = {
-                systemPrompt: `You are Hannah from Hannah.health, a friendly and knowledgeable meal planning assistant.
+                systemPrompt: `You are Hannah, the AI assistant for Hannah.health - a visual meal planning application that helps users plan their weekly meals, track nutrition, and achieve their health goals.
 
-IMPORTANT RULES:
-1. You have full web search capabilities through Brave Search API
-2. When users ask for recipes, you MUST search the web for real recipes with actual instructions and ingredients
-3. NEVER make up or invent recipes - always search for and provide real recipes from actual websites
-4. Include the source URL when sharing recipes so users can follow the full instructions
-5. You CAN and DO search the web automatically for nutrition data, recipes, and food information
+ABOUT HANNAH.HEALTH:
+- It's a drag-and-drop meal planner where users organize meals for each day of the week
+- Users can drag food items from category columns (protein, dairy, veg, fruit, etc.) into meal slots
+- Each day has 6 meal slots: breakfast, morning snack, lunch, afternoon snack, dinner, evening snack
+- The app automatically calculates calories, macros (protein, carbs, fat), and costs for each meal and day
+- Users can see visual macro breakdowns with color-coded bars
+- The app is designed to make meal planning simple, visual, and effective
 
-When adding meals to the planner, use this format:
+YOUR ROLE AS HANNAH:
+You are a proactive, intelligent nutritionist and meal planning expert who:
+1. Understands users' health goals and creates personalized meal plans
+2. Searches the web for real recipes and nutrition information (you have Brave Search API access)
+3. Actively adds meals to their planner using ACTION blocks (not just describing them)
+4. Provides evidence-based nutrition advice
+5. Helps users stay on track with encouragement and practical tips
+6. Remembers user preferences and adapts recommendations accordingly
+
+BE PROACTIVE:
+- If someone says they're hungry, suggest and ADD a healthy snack
+- If they mention a goal (lose weight, gain muscle), create and ADD appropriate meal plans
+- If they mention they like certain foods, search for recipes and ADD them
+- If they ask about any food or recipe, search for it and offer to ADD it
+- Always think: "How can I make their meal planning easier right now?"
+
+CRITICAL: You MUST use ACTION blocks to add food to the planner. Just describing meals does NOT add them!
+
+When users mention food or meals, ALWAYS use ACTION blocks to actually add them:
 **ACTION_START**
 {
   "action": "add_meal",
   "items": [
-    {"food": "Oatmeal", "day": "monday", "meal": "breakfast", "quantity": 60, "unit": "g"},
-    {"food": "Banana", "day": "monday", "meal": "breakfast", "quantity": 1, "unit": "medium"},
-    {"food": "Blueberries", "day": "monday", "meal": "breakfast", "quantity": 100, "unit": "g"},
-    {"food": "Almond Butter", "day": "monday", "meal": "breakfast", "quantity": 15, "unit": "g"}
+    {"food": "Grilled Chicken Breast", "day": "Monday", "meal": "lunch", "quantity": 150, "unit": "g"},
+    {"food": "Brown Rice", "day": "Monday", "meal": "lunch", "quantity": 75, "unit": "g"},
+    {"food": "Broccoli", "day": "Monday", "meal": "lunch", "quantity": 100, "unit": "g"},
+    {"food": "Olive Oil", "day": "Monday", "meal": "lunch", "quantity": 1, "unit": "tbsp"}
   ]
 }
 **ACTION_END**
 
-Guidelines:
-- Be conversational and friendly
-- Create balanced, nutritious meals
-- Include all components of a dish (protein, carbs, veggies, healthy fats)
-- Use realistic portions: fruits/veg 1-2 pieces or 80-150g, proteins 100-200g, grains 50-100g
-- Days: monday, tuesday, wednesday, thursday, friday, saturday, sunday
-- Meals: breakfast, morning snack, lunch, afternoon snack, dinner, evening snack
+SMART BEHAVIORS:
+- When someone asks "what should I eat?", don't just suggest - CREATE and ADD a meal
+- When they mention being on a diet, immediately offer to create a week's meal plan
+- If they mention a recipe, search for it and ADD all ingredients
+- Track their preferences: if they're vegetarian, never suggest meat
+- If no day is specified, assume they mean today (Monday by default)
+- If no meal is specified, figure out the appropriate meal based on time context
 
-When creating full day plans, add ALL meals in one response with multiple ACTION blocks if needed.`,
+PORTION GUIDELINES:
+- Proteins: 100-200g per meal
+- Grains/carbs: 50-100g (dry weight) or 150-200g (cooked)
+- Vegetables: 100-200g per meal
+- Fruits: 1-2 pieces or 100-150g
+- Nuts/seeds: 20-30g
+- Oils/fats: 1-2 tbsp
+
+IMPORTANT TECHNICAL DETAILS:
+- Days must be capitalized: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
+- Meals: breakfast, morning snack, lunch, afternoon snack, dinner, evening snack
+- You have web search capability - USE IT for any food/recipe questions
+- When multiple recipes are found, ask which one to add (don't add all)
+- User profile data: ${JSON.stringify(this.userProfile)}`,
                     conversationHistory: this.conversationHistory.slice(-10)
                 };
             }
@@ -291,6 +330,57 @@ When creating full day plans, add ALL meals in one response with multiple ACTION
             // Simulate typing delay
             await this.delay(1000);
             this.hideTypingIndicator(messagesAreaId);
+            
+            // Check if the response contains recipe URLs
+            const urlMatches = response.message.match(/(https?:\/\/[^\s\)]+)/g);
+            
+            // Store URLs in instance for later reference if user chooses one
+            if (urlMatches && urlMatches.length > 0) {
+                this.lastRecipeUrls = urlMatches.map(url => url.replace(/[<>\)]/g, ''));
+            }
+            
+            // Check if user is choosing from previously shown recipes
+            const isChoosingRecipe = userText.toLowerCase().match(/add\s+(the\s+)?(first|second|third|1st|2nd|3rd|recipe\s*[123]|number\s*[123])/i) ||
+                                    userText.toLowerCase().includes('add that one') ||
+                                    (userText.match(/https?:\/\/[^\s]+/i) && (userText.toLowerCase().includes('add') || userText.toLowerCase().includes('use')));
+            
+            if (isChoosingRecipe && this.lastRecipeUrls && this.lastRecipeUrls.length > 0) {
+                // User is choosing from previously shown recipes
+                let selectedUrl = null;
+                
+                // Check if they provided a URL directly
+                const userUrl = userText.match(/https?:\/\/[^\s]+/i);
+                if (userUrl) {
+                    selectedUrl = userUrl[0];
+                } else {
+                    // Parse which number they chose
+                    const choiceMatch = userText.toLowerCase().match(/(first|1st|recipe\s*1|number\s*1)/) ? 0 :
+                                       userText.toLowerCase().match(/(second|2nd|recipe\s*2|number\s*2)/) ? 1 :
+                                       userText.toLowerCase().match(/(third|3rd|recipe\s*3|number\s*3)/) ? 2 : 0;
+                    selectedUrl = this.lastRecipeUrls[choiceMatch];
+                }
+                
+                if (selectedUrl) {
+                    // Process the selected recipe
+                    await this.processRecipeUrl(selectedUrl, userText, messagesAreaId);
+                }
+            } else if (urlMatches && urlMatches.length > 1 && (response.message.includes('recipe') || response.message.includes('Recipe'))) {
+                // Multiple recipes found - ask user to choose but DON'T add them all
+                this.addMessage("I found multiple recipes! Please tell me which one you'd like to add by saying something like 'add the first one' or 'add recipe 2' or just paste the URL of the one you want.", 'hannah', messagesAreaId);
+                // DON'T process any recipes here - wait for user to choose
+            } else if (urlMatches && urlMatches.length === 1 && (response.message.includes('recipe') || response.message.includes('Recipe'))) {
+                const recipeUrl = urlMatches[0].replace(/[<>\)]/g, ''); // Clean the URL
+                
+                // Check if user explicitly wants to add this recipe
+                if ((userText.toLowerCase().includes('add') && userText.toLowerCase().includes('recipe')) || 
+                    userText.toLowerCase().includes('add that') || 
+                    userText.toLowerCase().includes('add it') ||
+                    userText.toLowerCase().includes('add this')) {
+                    
+                    // Process this single recipe
+                    await this.processRecipeUrl(recipeUrl, userText, messagesAreaId);
+                }
+            }
             
             // Parse response for actions - can have multiple action blocks
             const actionMatches = response.message.matchAll(/\*\*ACTION_START\*\*([\s\S]*?)\*\*ACTION_END\*\*/g);
@@ -328,6 +418,18 @@ When creating full day plans, add ALL meals in one response with multiple ACTION
             } else if (!hasActions && response.message) {
                 // Only show original message if no clean message and no actions
                 this.addMessage(response.message, 'hannah', messagesAreaId);
+            }
+            
+            // Check if AI described meals but didn't add them
+            if (!hasActions && 
+                (response.message.toLowerCase().includes('breakfast') || 
+                 response.message.toLowerCase().includes('lunch') || 
+                 response.message.toLowerCase().includes('dinner')) &&
+                (response.message.toLowerCase().includes('meal plan') || 
+                 response.message.toLowerCase().includes('balanced') ||
+                 response.message.toLowerCase().includes('includes'))) {
+                // AI described meals but didn't add them
+                this.addMessage("I've described some meals for you. Would you like me to actually add them to your planner? Just say 'yes' or 'add them'!", 'hannah', messagesAreaId);
             }
             
             // If in About Me tab, parse and store user stats
@@ -554,6 +656,58 @@ When creating full day plans, add ALL meals in one response with multiple ACTION
     
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    async processRecipeUrl(recipeUrl, userText, messagesAreaId) {
+        // Scrape the recipe for ingredients
+        try {
+            const scrapeResponse = await fetch('/api/recipe/scrape', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: recipeUrl })
+            });
+            
+            if (scrapeResponse.ok) {
+                const recipeData = await scrapeResponse.json();
+                
+                if (recipeData.ingredients && recipeData.ingredients.length > 0) {
+                    // Determine which meal to add to
+                    let targetMeal = 'lunch'; // default
+                    if (userText.toLowerCase().includes('breakfast')) targetMeal = 'breakfast';
+                    else if (userText.toLowerCase().includes('dinner')) targetMeal = 'dinner';
+                    else if (userText.toLowerCase().includes('snack')) targetMeal = 'afternoon snack';
+                    
+                    // Determine which day to add to
+                    let targetDay = 'Monday'; // default
+                    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                    for (const day of days) {
+                        if (userText.toLowerCase().includes(day.toLowerCase())) {
+                            targetDay = day;
+                            break;
+                        }
+                    }
+                    
+                    // Add all ingredients to the meal
+                    this.addMessage(`Adding ${recipeData.ingredients.length} ingredients from the recipe to ${targetDay} ${targetMeal}! 🍳`, 'hannah', messagesAreaId);
+                    
+                    for (const ingredient of recipeData.ingredients) {
+                        await this.addFoodToPlanner({
+                            food: ingredient.name,
+                            day: targetDay,
+                            meal: targetMeal,
+                            quantity: parseInt(ingredient.amount) || 100,
+                            unit: ingredient.amount.includes('ml') ? 'ml' : 'g'
+                        });
+                        await this.delay(200);
+                    }
+                    
+                    this.addMessage(`✅ All ingredients added to ${targetMeal}!`, 'hannah', messagesAreaId);
+                }
+            }
+        } catch (error) {
+            console.error('Recipe scraping error:', error);
+            this.addMessage("Sorry, I couldn't process that recipe. Please try again.", 'hannah', messagesAreaId);
+        }
     }
     
     parseUserStats(message) {

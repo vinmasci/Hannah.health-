@@ -6,6 +6,7 @@
     <title>Meal Planner - Clean Design</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="frontend/src/styles/shopping-list.css">
+    <link rel="stylesheet" href="frontend/src/styles/ai-assistant-column.css">
 </head>
 <body>
     <!-- Header -->
@@ -15,7 +16,9 @@
             <button class="header-btn" onclick="favoritesManager.showFavoritesModal()">❤️ Favorites</button>
             <button class="header-btn" onclick="BarcodeScanner.openScanner()">📱 Scan Barcode</button>
             <button class="header-btn" onclick="ShoppingListGenerator.showShoppingList()">🛒 Shopping List</button>
-            <button class="header-btn" onclick="MealStorage.saveMealPlan()">💾 Save Plan</button>
+            <button class="header-btn save-plan-icon" onclick="MealStorage.saveMealPlan()" title="Save Plan">
+                <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F4BE.svg" alt="Save" width="24" height="24">
+            </button>
             <button class="header-btn" id="addDayBtn">+ Add Day</button>
         </div>
     </header>

@@ -189,8 +189,14 @@ CRITICAL RULES:
         enhancedSystemPrompt = `${enhancedSystemPrompt}\n\nYou have performed a web search and found real recipes. When sharing URLs:
 - ONLY share URLs that were marked as [REAL URL: ...] in the search results
 - Copy the URL exactly as it appeared after [REAL URL: ]
+- Use markdown format for links: [Recipe Name](url) - do NOT also include the plain URL
 - If you can't find a specific recipe in the search results, suggest similar ones from what you found
-- NEVER make up or guess URLs - only use the exact URLs from search results`;
+- NEVER make up or guess URLs - only use the exact URLs from search results
+
+CRITICAL REMINDER: To actually ADD items to the meal planner (not just describe them), you MUST use ACTION blocks:
+**ACTION_START**
+{"action": "add_meal", "items": [{"food": "Food Name", "day": "monday", "meal": "breakfast", "quantity": 100, "unit": "g"}]}
+**ACTION_END**`;
       } else {
         enhancedSystemPrompt = `${enhancedSystemPrompt}\n\nYou have searched the web for current information. Only share URLs that were marked as [REAL URL: ...] in the search results.`;
       }

@@ -27,6 +27,7 @@ app.use((req, res, next) => {
 // API routes
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/brave', require('./routes/brave-search'));
+app.use('/api/recipe', require('./routes/recipe-scraper'));
 
 // Health check
 app.get('/api/health', (req, res) => {

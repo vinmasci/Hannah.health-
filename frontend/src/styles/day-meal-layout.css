@@ -10,8 +10,8 @@
     flex-direction: column;
     height: calc(100vh - 160px);
     max-height: 800px;
-    padding-bottom: 8px;
     transition: all 0.3s ease;
+    position: relative;
 }
 
 /* Minimized Day Column */
@@ -29,23 +29,51 @@
 .day-column.minimized .day-header {
     padding: 12px 8px;
     height: 100%;
+    display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
     gap: 12px;
 }
 
-.day-column.minimized .day-header-content {
-    flex-direction: column-reverse;
+.day-column.minimized .day-header-content,
+.day-column.minimized .day-header-main {
+    flex-direction: column;
     gap: 12px;
     align-items: center;
+    justify-content: flex-start;
+    display: flex;
+}
+
+.day-column.minimized .day-info {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
 }
 
 .day-column.minimized .day-name {
     font-size: 13px;
     letter-spacing: 0.08em;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
+}
+
+.day-column.minimized .date-part {
+    font-weight: normal;
+    font-size: 11px;
+}
+
+.day-column.minimized .day-date {
+    font-size: 11px;
+    margin-top: 0;
+    margin-left: 4px;
+}
+
+.day-column.minimized .day-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    order: -1;
 }
 
 .day-column.minimized .btn-minimize-day {
@@ -61,11 +89,61 @@
     display: none;
 }
 
+/* Add Day Placeholder Styling */
+.day-column.add-day-placeholder {
+    background: rgba(30, 144, 255, 0.15) !important;
+    border: 2px dashed #1e90ff;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.day-column.add-day-placeholder:hover {
+    opacity: 1;
+    border-color: #1e90ff;
+    background: rgba(30, 144, 255, 0.2) !important;
+    transform: scale(1.02);
+}
+
+.day-column.add-day-placeholder .day-header {
+    background: transparent;
+    color: #1e90ff;
+}
+
+.day-column.add-day-placeholder .day-name {
+    font-weight: 600;
+    color: #1e90ff;
+}
+
+.day-column.add-day-placeholder .btn-minimize-day {
+    background: #1e90ff;
+    color: white;
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.day-column.add-day-placeholder .btn-minimize-day:hover {
+    background: #0066cc;
+    transform: rotate(90deg);
+}
+
 .day-header {
     background: #1e90ff;
     color: white;
     padding: 16px 20px;
     border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.day-header-main {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -91,6 +169,47 @@
     letter-spacing: 0.06em;
 }
 
+.date-part {
+    font-weight: normal;
+}
+
+.day-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.color-picker-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-picker-btn:hover {
+    transform: scale(1.15);
+}
+
+.color-picker-btn:hover .color-circle {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.color-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #1e90ff;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
 .btn-minimize-day {
     background: rgba(255,255,255,0.2);
     border: 1px solid rgba(255,255,255,0.3);
@@ -103,6 +222,9 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1;
 }
 
 .btn-minimize-day:hover {
@@ -131,13 +253,20 @@
     transform: translateY(-1px);
 }
 
+/* Day Content Wrapper */
+.day-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
 /* Meals Container */
 .meals-container {
     flex: 1;
     padding: 12px;
     overflow-y: auto;
     background: #e6f3ff !important;
-    margin-bottom: 8px;
 }
 
 /* Meal */
@@ -365,13 +494,19 @@
     font-weight: 700;
 }
 
-/* Day Totals - Separate Box */
+/* Day Totals - Footer Style */
 .day-totals {
+    background: #1e90ff;
+    padding: 12px;
+    border-radius: 0 0 8px 8px;
+    flex-shrink: 0;
+}
+
+.day-totals-card {
     background: white;
-    padding: 8px 10px;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06);
-    margin: 0 8px 0 8px;
+    padding: 10px 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .day-totals-header {
@@ -523,4 +658,88 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
+}
+
+/* Color Picker Popover */
+.color-picker-popover {
+    position: fixed;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    z-index: 10000;
+    animation: popoverFade 0.2s ease;
+}
+
+@keyframes popoverFade {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.color-picker-header {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.color-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.color-option {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.color-preview {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 12px;
+    height: 12px;
+    border-bottom-left-radius: 8px;
+}
+
+.color-picker-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #f0f0f0;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.color-picker-close:hover {
+    background: #e0e0e0;
+    transform: rotate(90deg);
 }

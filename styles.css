@@ -59,6 +59,78 @@ body {
     box-shadow: 0 4px 8px rgba(255, 167, 166, 0.3);
 }
 
+/* Liquid Glass Save Plan Icon */
+.header-btn.save-plan-icon {
+    padding: 12px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(255, 242, 241, 0.85) 50%, 
+        rgba(255, 220, 219, 0.75) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 167, 166, 0.4);
+    box-shadow: 
+        0 8px 32px rgba(255, 167, 166, 0.15),
+        inset 0 2px 4px rgba(255, 255, 255, 0.9),
+        inset 0 -2px 4px rgba(255, 167, 166, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.header-btn.save-plan-icon::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 70%
+    );
+    transform: rotate(45deg);
+    transition: transform 0.6s ease;
+}
+
+.header-btn.save-plan-icon:hover {
+    background: linear-gradient(135deg, 
+        rgba(255, 167, 166, 0.95) 0%, 
+        rgba(255, 200, 199, 0.85) 50%, 
+        rgba(255, 242, 241, 0.75) 100%);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 
+        0 12px 40px rgba(255, 167, 166, 0.25),
+        inset 0 2px 6px rgba(255, 255, 255, 0.95),
+        inset 0 -2px 6px rgba(255, 167, 166, 0.15);
+    border-color: rgba(255, 167, 166, 0.6);
+}
+
+.header-btn.save-plan-icon:hover::before {
+    transform: rotate(45deg) translateX(100%);
+}
+
+.header-btn.save-plan-icon:active {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 
+        0 4px 16px rgba(255, 167, 166, 0.2),
+        inset 0 2px 4px rgba(255, 167, 166, 0.2),
+        inset 0 -1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.header-btn.save-plan-icon img {
+    width: 24px;
+    height: 24px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
 /* Category Pills Container */
 .category-pills-container {
     background: linear-gradient(to right, #FFF2F1, #FFDCDB);
@@ -401,10 +473,26 @@ body {
     align-items: center;
 }
 
+.day-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
 .day-name {
     font-size: 22px;
     font-weight: 800;
     text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    line-height: 1.2;
+}
+
+.day-date {
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.85;
+    text-transform: uppercase;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
 }
 
 .add-meal-btn {
