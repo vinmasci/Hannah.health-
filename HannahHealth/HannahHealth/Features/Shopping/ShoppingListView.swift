@@ -14,60 +14,48 @@ struct ShoppingListView: View {
     @State private var selectedCategory = ShoppingItem.ItemCategory.produce
     
     var body: some View {
-        NavigationStack {
-            ZStack {
-                // Dynamic time-based background like the rest of the app
-                DynamicTimeBackground()
-                    .ignoresSafeArea()
-                
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Header with progress
-                        headerCard
+        ZStack {
+            // Dynamic time-based background like the rest of the app
+            DynamicTimeBackground()
+                .ignoresSafeArea()
+            
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 18) {
+                    // Dashboard-style header
+                    ShoppingHeader()
+                        .padding(.top, 5)
+                        .padding(.horizontal)
+                    
+                    // Header with progress
+                    headerCard
+                        .padding(.horizontal)
+                    
+                    // Category filter pills
+                    categoryFilter
+                        .padding(.horizontal)
+                    
+                    // Shopping items by category
+                    ForEach(viewModel.itemsByCategory, id: \.category) { category, items in
+                        categorySection(category: category, items: items)
                             .padding(.horizontal)
-                            .padding(.top)
-                        
-                        // Category filter pills
-                        categoryFilter
-                            .padding(.horizontal)
-                        
-                        // Shopping items by category
-                        ForEach(viewModel.itemsByCategory, id: \.category) { category, items in
-                            categorySection(category: category, items: items)
-                                .padding(.horizontal)
-                        }
-                        
-                        // Add custom item button
-                        addItemButton
-                            .padding(.horizontal)
-                        
-                        // Bottom padding
-                        Color.clear.frame(height: 100)
                     }
+                    
+                    // Add custom item button
+                    addItemButton
+                        .padding(.horizontal)
+                    
+                    // Bottom padding for tab bar
+                    Color.clear.frame(height: 140)
                 }
-            }
-            .navigationTitle("Shopping List")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbarColorScheme(.dark, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if viewModel.checkedItemsCount > 0 {
-                        Button(action: {
-                            withAnimation {
-                                viewModel.clearCheckedItems()
-                            }
-                        }) {
-                            Text("Clear Done")
-                                .foregroundColor(Theme.emerald)
-                        }
-                    }
-                }
+                .padding(.top, 5)
             }
         }
         .sheet(isPresented: $showingAddItem) {
             addItemSheet
         }
-    }
+    }  // End of body - DO NOT CLOSE STRUCT HERE
+    
+    // MARK: - View Components (inside ShoppingListView)
     
     private var headerCard: some View {
         HStack {
@@ -174,8 +162,8 @@ struct ShoppingListView: View {
     }
     
     private func categorySection(category: ShoppingItem.ItemCategory, items: [ShoppingItem]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Category header
+        VStack(spacing: 1) {
+            // Category header - inside the card
             HStack {
                 Image(systemName: category.icon)
                     .font(.system(size: 16))
@@ -192,25 +180,28 @@ struct ShoppingListView: View {
                     .foregroundColor(.white.opacity(0.7))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 2)
-                    .background(Theme.glassMorphism)
+                    .background(Color.white.opacity(0.1))
                     .cornerRadius(8)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.vertical, 12)
+            .background(Color.white.opacity(0.05))
+            
+            // Divider
+            Color.white.opacity(0.1)
+                .frame(height: 1)
             
             // Items in category
-            VStack(spacing: 1) {
-                ForEach(items) { item in
-                    itemRow(item: item)
-                }
+            ForEach(items) { item in
+                itemRow(item: item)
             }
-            .background(Theme.glassMorphism)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Theme.cardBorder)
-            )
         }
+        .background(Theme.glassMorphism)
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Theme.cardBorder)
+        )
     }
     
     private func itemRow(item: ShoppingItem) -> some View {
@@ -346,5 +337,39 @@ struct ShoppingListView: View {
         case .snacks: return Theme.emerald
         case .other: return Theme.cardBorder
         }
+    }
+}  // End of ShoppingListView struct
+
+// Dashboard-style header component
+struct ShoppingHeader: View {
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("This week's")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.7))
+                
+                Text("Shopping List")
+                    .font(Theme.title)
+                    .foregroundColor(.white)
+                    .fontWeight(.bold)
+            }
+            
+            Spacer()
+            
+            Button {
+                // Clear or settings action
+            } label: {
+                Circle()
+                    .fill(Theme.glassMorphism)
+                    .frame(width: 44, height: 44)
+                    .overlay(
+                        Image(systemName: "cart.badge.plus")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                    )
+            }
+        }
+        .padding(.top, 8)
     }
 }

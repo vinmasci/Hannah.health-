@@ -118,6 +118,7 @@ Temporary Items
 HannahHealth/Core/Configuration/APIConfig.swift
 APIConfig.swift
 *.keys
+.env
 .env*
 *.env
 .env.local
@@ -146,6 +147,10 @@ APIConfig.swift
 
 # Serena development tool
 .serena/
+
+# Twilio/SMS files with potential secrets
+mobile/TWILIO-SETUP.md
+backend/.env.example
 
 # Test results
 *-test-results.json

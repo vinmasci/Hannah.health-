@@ -28,9 +28,9 @@ let lavender = Color(hex: "C06FFF")
 let emerald = Color(hex: "10B981")
 let sky = Color(hex: "38BDF8")
 
-// Glass Effects
-let cardBackground = Color.black.opacity(0.3)
-let cardBorder = Color.white.opacity(0.1)
+// Glass Effects (UPDATED: Actual values from app)
+let cardBackground = Color.black.opacity(0.5)  // 50% black for all cards
+let cardBorder = Color.white.opacity(0.05)     // Very subtle border
 ```
 
 ## Typography
@@ -39,6 +39,26 @@ let cardBorder = Color.white.opacity(0.1)
 - **Body**: 17pt regular
 - **Caption**: 14pt regular
 - **Confidence**: 12pt medium
+
+## Glass Morphic Card Styling (Standard for All Cards)
+```swift
+// Standard card styling used throughout app
+.background(Color.black.opacity(0.5))
+.cornerRadius(20)
+.overlay(
+    RoundedRectangle(cornerRadius: 20)
+        .stroke(Color.white.opacity(0.05))
+)
+
+// Or use the .glassCard() modifier from Theme.swift
+```
+
+## Component Spacing Guidelines
+- **Screen padding**: 16pt horizontal
+- **Card spacing**: 18pt between cards
+- **Safe area top**: 60pt padding
+- **Bottom navbar clearance**: 120pt padding
+- **Internal card padding**: 16pt all sides
 
 ## Navigation Structure
 
@@ -139,14 +159,35 @@ let cardBorder = Color.white.opacity(0.1)
 - 💧 Log Water
 - ⚖️ Log Weight
 
-### 4. Meal Plan Screen
-**Layout**: Week view with day columns
+### 4. Meal Plan Screen (UPDATED: Kanban Style)
+**Layout**: Horizontal scroll with 2 columns
 
-**Components**:
-- Week selector at top
-- Daily meal cards (Breakfast, Lunch, Dinner, Snacks)
-- Drag & drop between days
-- AI suggestions panel
+**Column 1 - Meal Plan**:
+- Week view with all days
+- Glass morphic cards (50% black opacity)
+- Each day shows Breakfast, Lunch, Dinner, Snacks
+- Tap to select meals (green border when selected)
+- Multi-selection supported
+
+**Column 2 - Chat Panel**:
+- Full height chat with Hannah
+- Glass morphic styling matching dashboard
+- Context-aware based on selected meals
+- Shows "3 meals selected" when multiple selected
+- Auto-clears selection after action
+
+**Interaction Flow**:
+1. Tap meal slots to select (multiple allowed)
+2. Swipe left to reveal chat
+3. Type commands: "Make these vegetarian", "Add 400 calories"
+4. Hannah updates selected meals
+5. Selection auto-clears
+
+**Styling**:
+- Background: `Color.black.opacity(0.5)`
+- Corner radius: 20pt
+- Border: `Color.white.opacity(0.05)`
+- Selection highlight: Green border (#10A37F)
 
 ### 5. Shopping List Screen
 **Layout**: Grouped list by category

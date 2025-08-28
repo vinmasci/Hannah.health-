@@ -29,6 +29,16 @@ final class DashboardViewModel: ObservableObject {
     @Published var caloriesConsumed: Int = 0 // From food logging
     @Published var basalMetabolicRate: Int = 2200 // From user profile
     
+    // MARK: - Navigation State
+    @Published var selectedPeriod: ViewPeriod = .day
+    @Published var currentDate: Date = Date()
+    
+    // MARK: - Dashboard Data
+    @Published var allDaysData: [DayData] = []
+    @Published var currentDayData: DayData?
+    @Published var currentWeekData: WeekData?
+    @Published var currentMonthData: MonthData?
+    
     // MARK: - Dependencies
     private let healthKitService: HealthKitServiceProtocol
     private var cancellables = Set<AnyCancellable>()
@@ -37,6 +47,8 @@ final class DashboardViewModel: ObservableObject {
     init(healthKitService: HealthKitServiceProtocol = HealthKitService()) {
         self.healthKitService = healthKitService
         setupHealthKit()
+        loadMockData()
+        setupDateObserver()
     }
     
     // MARK: - Public Methods
@@ -172,5 +184,88 @@ final class DashboardViewModel: ObservableObject {
     
     var caloriesTargetText: String {
         "\(caloriesBurnedGoal) cal"
+    }
+    
+    // MARK: - Mock Data Management
+    private func loadMockData() {
+        allDaysData = MockDataGenerator.shared.generateHistoricalData(days: 90)
+        updateCurrentPeriodData()
+    }
+    
+    private func setupDateObserver() {
+        // Observe changes to currentDate and selectedPeriod
+        $currentDate
+            .combineLatest($selectedPeriod)
+            .sink { [weak self] _, _ in
+                self?.updateCurrentPeriodData()
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func updateCurrentPeriodData() {
+        let calendar = Calendar.current
+        
+        switch selectedPeriod {
+        case .day:
+            // Find the day data for current date
+            currentDayData = allDaysData.first { day in
+                calendar.isDate(day.date, inSameDayAs: currentDate)
+            }
+            
+            // If no data exists for selected date, create empty data
+            if currentDayData == nil {
+                currentDayData = DayData(
+                    date: currentDate,
+                    calories: 0,
+                    protein: 0,
+                    carbs: 0,
+                    fat: 0,
+                    water: 0,
+                    steps: 0,
+                    sleep: 0,
+                    workoutMinutes: 0,
+                    weight: nil,
+                    meals: []
+                )
+            }
+            
+        case .week:
+            // Get the week containing current date
+            let weekday = calendar.component(.weekday, from: currentDate)
+            let daysFromMonday = (weekday + 5) % 7
+            guard let monday = calendar.date(byAdding: .day, value: -daysFromMonday, to: currentDate),
+                  let sunday = calendar.date(byAdding: .day, value: 6, to: monday) else { return }
+            
+            let weekDays = allDaysData.filter { day in
+                day.date >= monday && day.date <= sunday
+            }
+            
+            currentWeekData = WeekData(startDate: monday, endDate: sunday, days: weekDays)
+            
+        case .month:
+            // Get the month containing current date
+            let components = calendar.dateComponents([.year, .month], from: currentDate)
+            guard let year = components.year, let month = components.month else { return }
+            
+            let monthDays = allDaysData.filter { day in
+                let dayComponents = calendar.dateComponents([.year, .month], from: day.date)
+                return dayComponents.year == year && dayComponents.month == month
+            }
+            
+            let weeks = MockDataGenerator.shared.groupDataByWeeks(monthDays)
+            currentMonthData = MonthData(month: month, year: year, weeks: weeks)
+        }
+        
+        // Update UI based on current data
+        updateUIFromCurrentData()
+    }
+    
+    private func updateUIFromCurrentData() {
+        guard let dayData = currentDayData else { return }
+        
+        // Update the existing properties that the UI uses
+        caloriesConsumed = dayData.calories
+        todaySteps = dayData.steps
+        // Update other properties as needed
     }
 }

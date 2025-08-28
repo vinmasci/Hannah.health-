@@ -77,11 +77,11 @@ struct TabButton: View {
 }
 
 struct AddButton: View {
-    @State private var showingQuickAdd = false
+    @Binding var showQuickChat: Bool
     
     var body: some View {
         Button {
-            showingQuickAdd = true
+            showQuickChat = true
         } label: {
             ZStack {
                 // Main button circle - cleaner, smaller
@@ -99,16 +99,14 @@ struct AddButton: View {
                     .foregroundColor(.white)
             }
         }
-        .scaleEffect(showingQuickAdd ? 0.95 : 1.0)
-        .animation(.spring(duration: 0.2), value: showingQuickAdd)
-        .sheet(isPresented: $showingQuickAdd) {
-            QuickAddModal()
-        }
+        .scaleEffect(showQuickChat ? 0.95 : 1.0)
+        .animation(.spring(duration: 0.2), value: showQuickChat)
     }
 }
 
 struct CustomTabBar: View {
     @Binding var selectedTab: Tab
+    @Binding var showQuickChat: Bool
     
     var body: some View {
         ZStack {
@@ -141,7 +139,7 @@ struct CustomTabBar: View {
             .offset(y: -5) // Move all icons up 5pt
             
             // Floating center + button - moved up 10pt
-            AddButton()
+            AddButton(showQuickChat: $showQuickChat)
                 .offset(y: -15) // Moved up 10pt
         }
         .frame(height: 75)

@@ -17,6 +17,10 @@ Hannah Health is an AI-powered nutrition tracking iOS app that uses conversation
 - Confidence scoring (60-95% based on data source)
 - Real-time nutrition data from web search
 - Database persistence ready (pending auth UI)
+- **Multi-temporal dashboard**: Day, Week, and Month views with navigation
+- **Mock data system**: 90 days of realistic historical data
+- **Meal planning**: Weekly meal plans with Week 1 Magic unlock
+- **Shopping lists**: Auto-generated from meal plans with category organization
 
 ### Data Flow
 1. User sends message/photo to Hannah
@@ -59,9 +63,19 @@ HannahHealth/
 - Database schema includes B2B nutritionist features
 
 ## References
+
+### Core Documentation
+- `ARCHITECTURE.md` - Complete mobile app architecture documentation
+- `DEVELOPMENT-SUMMARY.md` - Quick overview and navigation to all sessions
+- `SECURITY-AUDIT.md` - Security assessment and critical vulnerabilities
+
+### Feature Documentation
 - `AI-INTEGRATION.md` - AI services documentation
 - `SUPABASE-SETUP.md` - Complete database setup and schema
 - `MEAL-PLANNING.md` - Meal planning and shopping list features
+- `DASHBOARD-VIEWS.md` - Multi-temporal dashboard system (day/week/month views)
 - `UI-DESIGN.md` - Current UI architecture and design system
-- `SECURITY-AUDIT.md` - Security assessment and critical vulnerabilities
-- `ARCHITECTURE.md` - Complete mobile app architecture documentation
+
+### Development History
+- `sessions/` - Individual development session details
+- `development-diary-archive.md` - Original consolidated diary (archived)

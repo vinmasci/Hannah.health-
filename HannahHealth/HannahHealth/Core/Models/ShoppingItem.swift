@@ -35,7 +35,7 @@ struct ShoppingItem: Identifiable, Codable {
             case .pantry: return "bag.fill"
             case .frozen: return "snowflake"
             case .beverages: return "cup.and.saucer.fill"
-            case .snacks: return "cookie"
+            case .snacks: return "carrot.fill"
             case .other: return "cart.fill"
             }
         }

@@ -89,11 +89,19 @@ User Input → View → ViewModel → Service → API
 - Cross-platform sync via Supabase
 - Local caching for offline access
 - Real-time updates
+- Mock data generation for development (90 days historical)
 
 ### Health Integration
 - HealthKit read/write
 - Nutrition tracking
 - Activity monitoring
+
+### Dashboard Analytics
+- **Multi-temporal views**: Day, Week, Month perspectives
+- **Smart navigation**: Context-aware period switching
+- **Data aggregation**: Automatic totals and averages
+- **Weight tracking**: Progress monitoring over time
+- **Mock data system**: Realistic patterns for testing
 
 ## Security Architecture
 See [SECURITY-AUDIT.md](./SECURITY-AUDIT.md) for detailed security assessment and recommendations.

@@ -1,23 +1,32 @@
 # Hannah Health Supabase Database Documentation
 
 ## Overview
-Hannah Health uses Supabase for data persistence, user authentication, and real-time synchronization across devices. This enables the B2B nutritionist monitoring feature and the "Week 1 Magic" meal planning.
+Hannah Health uses Supabase for data persistence, user authentication, and real-time synchronization across devices. This enables the B2B nutritionist monitoring feature, the "Week 1 Magic" meal planning, and SMS food logging integration.
+
+**Last Updated**: January 27, 2025
+**Status**: ✅ Phone support migration applied successfully
 
 ## Connection Details
-- **Project URL**: `https://phnvrqzqhuigmvuxfktf.supabase.co`
-- **Anon Key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBobnZycXpxaHVpZ212dXhma3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyNTg2NDEsImV4cCI6MjA3MTgzNDY0MX0.ZJC01hu8APXgm9HMOGDOQr89SS64Vd2M_R8IouHgJvw`
-- **Dashboard**: https://app.supabase.com/project/phnvrqzqhuigmvuxfktf
+- **Project URL**: `https://YOUR_PROJECT_ID.supabase.co`
+- **Anon Key**: `YOUR_SUPABASE_ANON_KEY`
+- **Dashboard**: `https://app.supabase.com/project/YOUR_PROJECT_ID`
 
 ## Database Schema
 
 ### Core Tables
 
-#### 1. `user_profiles`
-Extends Supabase auth.users with health-specific data.
+#### 1. `user_profiles` 📱 UPDATED
+Extends Supabase auth.users with health-specific data and SMS support.
 ```sql
 - id: UUID (Primary Key, references auth.users)
 - email: Text
 - full_name: Text
+- phone_number: Text (UNIQUE) ✅ NEW
+- phone_verified: Boolean ✅ NEW
+- phone_verified_at: Timestamp ✅ NEW
+- sms_enabled: Boolean (default: true) ✅ NEW
+- sms_message_count: Integer (default: 0) ✅ NEW
+- sms_last_message_at: Timestamp ✅ NEW
 - weight_kg: Decimal (5,2)
 - height_cm: Integer
 - birth_date: Date
@@ -132,6 +141,41 @@ EXISTS (
 ```
 
 ## Key Functions
+
+### SMS-Specific Functions ✅ NEW
+
+#### `get_user_by_phone(phone_number)`
+Retrieves user info by verified phone number.
+```sql
+SELECT * FROM get_user_by_phone('+1234567890');
+-- Returns: user_id, full_name, sms_enabled, message_count
+```
+
+#### `log_food_via_sms(phone, food, calories, meal_type, confidence)`
+Logs food entry from SMS gateway.
+```sql
+SELECT log_food_via_sms(
+    '+1234567890',
+    '2 slices pizza',
+    580,
+    'lunch',
+    0.85
+);
+-- Returns: UUID of created food_entry
+```
+
+#### `verify_phone_number(user_id, phone, code)`
+Verifies SMS verification code.
+```sql
+SELECT verify_phone_number(
+    'user-uuid',
+    '+1234567890',
+    '123456'
+);
+-- Returns: TRUE/FALSE
+```
+
+### Original Functions
 
 ### `get_daily_calories(user_id, date)`
 Returns total calories consumed on a specific date.

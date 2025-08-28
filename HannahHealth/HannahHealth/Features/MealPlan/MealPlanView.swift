@@ -8,26 +8,38 @@
 import SwiftUI
 
 struct MealPlanView: View {
+    var body: some View {
+        MealPlanKanbanView()
+    }
+}
+
+// Original MealPlanView kept as backup
+struct MealPlanViewOriginal: View {
     @StateObject private var viewModel = MealPlanViewModel()
     @State private var showingEditSheet = false
     @State private var selectedMeal: PlannedMeal?
     
     var body: some View {
-        NavigationStack {
-            ZStack {
-                // Dynamic time-based background like dashboard
-                DynamicTimeBackground()
-                    .ignoresSafeArea()
-                
-                if viewModel.isUnlocked {
-                    unlockedContent
-                } else {
-                    lockedContent
+        ZStack {
+            // Dynamic time-based background like dashboard
+            DynamicTimeBackground()
+                .ignoresSafeArea()
+            
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 18) {
+                    // Dashboard-style header
+                    MealPlanHeader()
+                        .padding(.top, 5)
+                        .padding(.horizontal)
+                    
+                    if viewModel.isUnlocked {
+                        unlockedContent
+                    } else {
+                        lockedContent
+                    }
                 }
+                .padding(.top, 5)
             }
-            .navigationTitle("Meal Plan")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbarColorScheme(.dark, for: .navigationBar)
         }
     }
     
@@ -85,34 +97,31 @@ struct MealPlanView: View {
     }
     
     private var unlockedContent: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // Week selector (chat bubble style)
-                weekSelector
+        VStack(spacing: 20) {
+            // Week selector (chat bubble style)
+            weekSelector
+                .padding(.horizontal)
+            
+            // Day tabs
+            if let plan = viewModel.currentMealPlan {
+                dayTabs(for: plan.planData.days)
                     .padding(.horizontal)
-                    .padding(.top)
-                
-                // Day tabs
-                if let plan = viewModel.currentMealPlan {
-                    dayTabs(for: plan.planData.days)
-                        .padding(.horizontal)
-                }
-                
-                // Selected day meals
-                if let selectedDay = viewModel.selectedDay {
-                    dayMealsContent(for: selectedDay)
-                        .padding(.horizontal)
-                }
-                
-                // Weekly goals card
-                if let plan = viewModel.currentMealPlan {
-                    weeklyGoalsCard(plan.planData.weeklyGoals)
-                        .padding(.horizontal)
-                }
-                
-                // Bottom padding
-                Color.clear.frame(height: 100)
             }
+            
+            // Selected day meals
+            if let selectedDay = viewModel.selectedDay {
+                dayMealsContent(for: selectedDay)
+                    .padding(.horizontal)
+            }
+            
+            // Weekly goals card
+            if let plan = viewModel.currentMealPlan {
+                weeklyGoalsCard(plan.planData.weeklyGoals)
+                    .padding(.horizontal)
+            }
+            
+            // Bottom padding for tab bar
+            Color.clear.frame(height: 140)
         }
     }
     
@@ -385,5 +394,39 @@ struct MealPlanView: View {
         let end = formatter.string(from: endDate)
         
         return start + end
+    }
+}
+
+// Dashboard-style header component
+struct MealPlanHeader: View {
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Your weekly")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.7))
+                
+                Text("Meal Plan")
+                    .font(Theme.title)
+                    .foregroundColor(.white)
+                    .fontWeight(.bold)
+            }
+            
+            Spacer()
+            
+            Button {
+                // Settings action
+            } label: {
+                Circle()
+                    .fill(Theme.glassMorphism)
+                    .frame(width: 44, height: 44)
+                    .overlay(
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                    )
+            }
+        }
+        .padding(.top, 8)
     }
 }

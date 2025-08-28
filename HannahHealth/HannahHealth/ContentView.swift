@@ -9,6 +9,21 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedTab: Tab = .dashboard
+    @State private var showQuickChat = false
+    
+    // Compute context based on current tab
+    private var chatContext: ChatContext {
+        switch selectedTab {
+        case .dashboard:
+            return .dashboard
+        case .mealPlan:
+            return .mealPlan
+        case .shopping:
+            return .shopping
+        default:
+            return .dashboard
+        }
+    }
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -41,8 +56,23 @@ struct ContentView: View {
             .animation(.spring(duration: 0.3), value: selectedTab)
             
             // Custom Tab Bar
-            CustomTabBar(selectedTab: $selectedTab)
+            CustomTabBar(selectedTab: $selectedTab, showQuickChat: $showQuickChat)
                 .ignoresSafeArea(.keyboard)
+            
+            // Quick Chat Drawer
+            if showQuickChat {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        showQuickChat = false
+                    }
+                
+                VStack {
+                    Spacer()
+                    QuickChatDrawer(isPresented: $showQuickChat, context: chatContext)
+                }
+                .ignoresSafeArea(.keyboard)
+            }
         }
         .ignoresSafeArea(.all, edges: .bottom)
     }
