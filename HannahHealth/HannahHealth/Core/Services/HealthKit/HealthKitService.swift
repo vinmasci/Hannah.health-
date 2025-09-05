@@ -27,7 +27,10 @@ class HealthKitService: ObservableObject, HealthKitServiceProtocol {
     private let readTypes: Set<HKObjectType> = [
         HKObjectType.quantityType(forIdentifier: .stepCount)!,
         HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!,
-        HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!
+        HKObjectType.quantityType(forIdentifier: .basalEnergyBurned)!,  // Apple's Resting Energy
+        HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
+        HKObjectType.quantityType(forIdentifier: .bodyMass)!,  // Weight data
+        HKObjectType.workoutType()  // Add workout type to read actual workouts
     ]
     
     // Types to write (none for now)
@@ -46,8 +49,17 @@ class HealthKitService: ObservableObject, HealthKitServiceProtocol {
     
     func requestAuthorization() async -> Bool {
         guard HKHealthStore.isHealthDataAvailable() else {
+            print("❌ HealthKit not available on this device")
             return false
         }
+        
+        print("🔐 Requesting HealthKit authorization for:")
+        print("  - Steps")
+        print("  - Active Energy")
+        print("  - Basal Energy")
+        print("  - Distance")
+        print("  - Body Mass (Weight)")
+        print("  - Workouts")
         
         do {
             try await healthStore.requestAuthorization(
@@ -57,9 +69,10 @@ class HealthKitService: ObservableObject, HealthKitServiceProtocol {
             await MainActor.run {
                 self.isAuthorized = true
             }
+            print("✅ HealthKit authorization granted")
             return true
         } catch {
-            print("HealthKit authorization failed: \(error)")
+            print("❌ HealthKit authorization failed: \(error)")
             return false
         }
     }
@@ -151,12 +164,18 @@ class HealthKitService: ObservableObject, HealthKitServiceProtocol {
     }
     
     func fetchCaloriesBurned() async -> Int? {
+        return await fetchCaloriesBurned(for: Date())
+    }
+    
+    func fetchRestingEnergy() async -> Int? {
+        return await fetchRestingEnergy(for: Date())
+    }
+    
+    func fetchRestingEnergy(for date: Date) async -> Int? {
         guard isAuthorized else { return nil }
         
-        let energyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!
-        
         let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: Date())
+        let startOfDay = calendar.startOfDay(for: date)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
         
         let predicate = HKQuery.predicateForSamples(
@@ -164,6 +183,45 @@ class HealthKitService: ObservableObject, HealthKitServiceProtocol {
             end: endOfDay,
             options: .strictStartDate
         )
+        
+        // Get Apple's Resting Energy (Basal Energy Burned)
+        let restingType = HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned)!
+        
+        return await withCheckedContinuation { continuation in
+            let query = HKStatisticsQuery(
+                quantityType: restingType,
+                quantitySamplePredicate: predicate,
+                options: .cumulativeSum
+            ) { _, result, error in
+                guard let result = result,
+                      let sum = result.sumQuantity() else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+                
+                let calories = Int(sum.doubleValue(for: HKUnit.kilocalorie()))
+                continuation.resume(returning: calories)
+            }
+            
+            healthStore.execute(query)
+        }
+    }
+    
+    func fetchCaloriesBurned(for date: Date) async -> Int? {
+        guard isAuthorized else { return nil }
+        
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: date)
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        let predicate = HKQuery.predicateForSamples(
+            withStart: startOfDay,
+            end: endOfDay,
+            options: .strictStartDate
+        )
+        
+        // Always use total active energy burned (includes workouts + all movement)
+        let energyType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned)!
         
         return await withCheckedContinuation { continuation in
             let query = HKStatisticsQuery(
@@ -185,9 +243,128 @@ class HealthKitService: ObservableObject, HealthKitServiceProtocol {
         }
     }
     
+    private func fetchWorkoutCalories(from startDate: Date, to endDate: Date) async -> Int? {
+        let predicate = HKQuery.predicateForSamples(
+            withStart: startDate,
+            end: endDate,
+            options: .strictStartDate
+        )
+        
+        return await withCheckedContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: .workoutType(),
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: nil
+            ) { _, samples, error in
+                guard let workouts = samples as? [HKWorkout] else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+                
+                // Sum up all workout calories
+                let totalCalories = workouts.reduce(0) { total, workout in
+                    let calories = workout.totalEnergyBurned?.doubleValue(for: .kilocalorie()) ?? 0
+                    print("🏃 Workout: \(workout.workoutActivityType.name) - \(Int(calories)) cal")
+                    return total + Int(calories)
+                }
+                
+                continuation.resume(returning: totalCalories > 0 ? totalCalories : nil)
+            }
+            
+            healthStore.execute(query)
+        }
+    }
+    
+    func fetchWeightHistory(days: Int) async -> [(date: Date, weight: Double)] {
+        print("🏋️ fetchWeightHistory called for \(days) days")
+        
+        if !isAuthorized {
+            print("🏋️ Not authorized, requesting...")
+            let authorized = await requestAuthorization()
+            if !authorized {
+                print("❌ Authorization failed")
+                return []
+            }
+        }
+        
+        let weightType = HKQuantityType.quantityType(forIdentifier: .bodyMass)!
+        let calendar = Calendar.current
+        let endDate = Date()
+        guard let startDate = calendar.date(byAdding: .day, value: -days, to: endDate) else { 
+            print("❌ Failed to calculate start date")
+            return [] 
+        }
+        
+        print("🏋️ Querying weight from \(startDate) to \(endDate)")
+        
+        let predicate = HKQuery.predicateForSamples(
+            withStart: startDate,
+            end: endDate,
+            options: .strictStartDate
+        )
+        
+        return await withCheckedContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: weightType,
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+            ) { _, samples, error in
+                if let error = error {
+                    print("❌ HealthKit query error: \(error)")
+                    continuation.resume(returning: [])
+                    return
+                }
+                
+                guard let samples = samples as? [HKQuantitySample] else {
+                    print("⚠️ No weight samples found or wrong type")
+                    continuation.resume(returning: [])
+                    return
+                }
+                
+                print("✅ Found \(samples.count) weight samples")
+                
+                let weightData = samples.map { sample in
+                    let weightInKg = sample.quantity.doubleValue(for: HKUnit.gramUnit(with: .kilo))
+                    print("  📊 Weight: \(weightInKg)kg on \(sample.startDate)")
+                    return (date: sample.startDate, weight: weightInKg)
+                }
+                
+                continuation.resume(returning: weightData)
+            }
+            
+            healthStore.execute(query)
+        }
+    }
+    
     deinit {
         if let query = stepsObserverQuery {
             healthStore.stop(query)
+        }
+    }
+}
+
+// Extension to get workout type name
+extension HKWorkoutActivityType {
+    var name: String {
+        switch self {
+        case .running: return "Running"
+        case .walking: return "Walking"
+        case .cycling: return "Cycling"
+        case .swimming: return "Swimming"
+        case .functionalStrengthTraining: return "Strength Training"
+        case .traditionalStrengthTraining: return "Weight Training"
+        case .crossTraining: return "Cross Training"
+        case .yoga: return "Yoga"
+        case .pilates: return "Pilates"
+        case .dance: return "Dance"
+        case .elliptical: return "Elliptical"
+        case .rowing: return "Rowing"
+        case .stairClimbing: return "Stair Climbing"
+        case .highIntensityIntervalTraining: return "HIIT"
+        case .mixedCardio: return "Cardio"
+        default: return "Workout"
         }
     }
 }

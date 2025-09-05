@@ -3,19 +3,19 @@
 /* Food Items - matching food module styling */
 .food-item {
     background: white;
-    border: none;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     padding: 10px;
     margin-bottom: 6px;
     cursor: move;
     transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 /* Category-specific colors - removed gradients */
 
 .food-item:hover {
-    box-shadow: 0 4px 12px rgba(30, 144, 255, 0.15), 0 8px 20px rgba(30, 144, 255, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
     transform: translateY(-2px);
 }
 

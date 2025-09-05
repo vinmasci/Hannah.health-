@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Simulation Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+        }
+        .test-run {
+            border: 1px solid #0f0;
+            padding: 15px;
+            margin: 20px 0;
+            background: #0a0a0a;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 3px solid #0f0;
+            background: #111;
+        }
+        .error {
+            color: #f00;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ff0;
+        }
+        .success {
+            color: #0f0;
+        }
+        .data {
+            color: #0ff;
+            font-size: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid #0f0;
+            padding: 5px;
+            text-align: left;
+        }
+        th {
+            background: #0a0a0a;
+        }
+        .discrepancy {
+            background: #330000;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔬 Workflow Simulation Test - 5 Runs</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        // Simulate the entire workflow 5 times
+        const testRuns = [];
+        
+        // Test data variations for realistic simulation
+        const testProfiles = [
+            {
+                name: "Test User 1",
+                age: 35,
+                sex: "male",
+                weight: 85,
+                weightUnit: "kg",
+                height: 180,
+                heightUnit: "cm",
+                activityLevel: "moderately-active",
+                goal: "lose-weight",
+                conditions: ["none"],
+                medications: ["none"],
+                notes: ""
+            },
+            {
+                name: "Test User 2", 
+                age: 28,
+                sex: "female",
+                weight: 165,
+                weightUnit: "lbs",
+                height: 5.5,
+                heightUnit: "feet",
+                activityLevel: "active",
+                goal: "lose-weight",
+                conditions: ["diabetes"],
+                medications: ["metformin"],
+                notes: "Vegetarian"
+            },
+            {
+                name: "Test User 3",
+                age: 45,
+                sex: "male",
+                weight: 95,
+                weightUnit: "kg",
+                height: 175,
+                heightUnit: "cm",
+                activityLevel: "sedentary",
+                goal: "lose-weight",
+                conditions: ["nafld"],
+                medications: ["none"],
+                notes: ""
+            },
+            {
+                name: "Test User 4",
+                age: 32,
+                sex: "female",
+                weight: 60,
+                weightUnit: "kg",
+                height: 165,
+                heightUnit: "cm",
+                activityLevel: "very-active",
+                goal: "maintain-weight",
+                conditions: ["none"],
+                medications: ["none"],
+                notes: "Gluten free"
+            },
+            {
+                name: "Test User 5",
+                age: 50,
+                sex: "male",
+                weight: 200,
+                weightUnit: "lbs",
+                height: 6,
+                heightUnit: "feet",
+                activityLevel: "lightly-active",
+                goal: "lose-weight",
+                conditions: ["nafld", "diabetes"],
+                medications: ["insulin"],
+                notes: "Low carb preference"
+            }
+        ];
+
+        class WorkflowSimulator {
+            constructor(testProfile, runNumber) {
+                this.profile = testProfile;
+                this.runNumber = runNumber;
+                this.results = {
+                    runNumber: runNumber,
+                    profile: testProfile,
+                    steps: [],
+                    calculations: {},
+                    errors: [],
+                    warnings: []
+                };
+            }
+
+            // Step 1: Process Assessment Data
+            processAssessment() {
+                const step1 = {
+                    name: "Step 1: Assessment",
+                    input: this.profile,
+                    output: {},
+                    calculations: {}
+                };
+
+                try {
+                    // Convert height to cm if needed
+                    let heightCm = this.profile.height;
+                    if (this.profile.heightUnit === 'feet') {
+                        heightCm = Math.round(this.profile.height * 30.48);
+                        step1.calculations.heightConversion = `${this.profile.height} ft → ${heightCm} cm`;
+                    }
+
+                    // Convert weight to kg if needed
+                    let weightKg = this.profile.weight;
+                    if (this.profile.weightUnit === 'lbs') {
+                        weightKg = Math.round(this.profile.weight / 2.205);
+                        step1.calculations.weightConversion = `${this.profile.weight} lbs → ${weightKg} kg`;
+                    }
+
+                    step1.output = {
+                        ...this.profile,
+                        heightCm: heightCm,
+                        weightKg: weightKg
+                    };
+
+                    this.results.steps.push(step1);
+                    return step1.output;
+                } catch (error) {
+                    this.results.errors.push(`Step 1 Error: ${error.message}`);
+                    step1.error = error.message;
+                    this.results.steps.push(step1);
+                    return null;
+                }
+            }
+
+            // Step 2: Calculate Results
+            calculateResults(assessmentData) {
+                const step2 = {
+                    name: "Step 2: Results Calculation",
+                    input: assessmentData,
+                    output: {},
+                    calculations: {}
+                };
+
+                try {
+                    const { age, sex, weightKg, heightCm, activityLevel, goal } = assessmentData;
+
+                    // Calculate BMR using Mifflin-St Jeor
+                    let bmr;
+                    if (sex === 'male') {
+                        bmr = Math.round((10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5);
+                        step2.calculations.bmrFormula = `Male: (10 × ${weightKg}) + (6.25 × ${heightCm}) - (5 × ${age}) + 5`;
+                    } else {
+                        bmr = Math.round((10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161);
+                        step2.calculations.bmrFormula = `Female: (10 × ${weightKg}) + (6.25 × ${heightCm}) - (5 × ${age}) - 161`;
+                    }
+                    step2.calculations.bmr = bmr;
+
+                    // Calculate activity factor
+                    const activityFactors = {
+                        'sedentary': 1.2,
+                        'lightly-active': 1.375,
+                        'moderately-active': 1.55,
+                        'active': 1.725,
+                        'very-active': 1.9
+                    };
+                    const activityFactor = activityFactors[activityLevel] || 1.55;
+                    step2.calculations.activityFactor = activityFactor;
+
+                    // Calculate TDEE
+                    const tdee = Math.round(bmr * activityFactor);
+                    step2.calculations.tdee = `${bmr} × ${activityFactor} = ${tdee}`;
+
+                    // Calculate target calories
+                    let targetCalories = tdee;
+                    if (goal === 'lose-weight') {
+                        targetCalories = tdee - 500;
+                        step2.calculations.deficit = "500 cal deficit for weight loss";
+                    } else if (goal === 'gain-weight') {
+                        targetCalories = tdee + 300;
+                        step2.calculations.surplus = "300 cal surplus for weight gain";
+                    }
+                    step2.calculations.targetCalories = targetCalories;
+
+                    // Calculate BMI
+                    const heightM = heightCm / 100;
+                    const bmi = weightKg / (heightM * heightM);
+                    step2.calculations.bmi = `${weightKg} / (${heightM}² ) = ${bmi.toFixed(1)}`;
+
+                    // Calculate macros
+                    const proteinGrams = Math.round(targetCalories * 0.30 / 4);
+                    const carbGrams = Math.round(targetCalories * 0.35 / 4);
+                    const fatGrams = Math.round(targetCalories * 0.35 / 9);
+
+                    step2.calculations.macros = {
+                        protein: `${targetCalories} × 0.30 / 4 = ${proteinGrams}g`,
+                        carbs: `${targetCalories} × 0.35 / 4 = ${carbGrams}g`,
+                        fat: `${targetCalories} × 0.35 / 9 = ${fatGrams}g`
+                    };
+
+                    // Verify macro calories add up
+                    const proteinCals = proteinGrams * 4;
+                    const carbCals = carbGrams * 4;
+                    const fatCals = fatGrams * 9;
+                    const totalMacroCals = proteinCals + carbCals + fatCals;
+                    
+                    step2.calculations.macroVerification = {
+                        proteinCals: proteinCals,
+                        carbCals: carbCals,
+                        fatCals: fatCals,
+                        total: totalMacroCals,
+                        target: targetCalories,
+                        difference: Math.abs(totalMacroCals - targetCalories)
+                    };
+
+                    if (Math.abs(totalMacroCals - targetCalories) > 50) {
+                        this.results.warnings.push(`Macro calories (${totalMacroCals}) differ from target (${targetCalories}) by ${Math.abs(totalMacroCals - targetCalories)}`);
+                    }
+
+                    // Calculate meal distribution
+                    const mealDistribution = {
+                        breakfast: Math.round(targetCalories * 0.25),
+                        morningSnack: Math.round(targetCalories * 0.05),
+                        lunch: Math.round(targetCalories * 0.30),
+                        afternoonSnack: Math.round(targetCalories * 0.05),
+                        dinner: Math.round(targetCalories * 0.30),
+                        eveningSnack: Math.round(targetCalories * 0.05)
+                    };
+
+                    const mealTotal = Object.values(mealDistribution).reduce((a, b) => a + b, 0);
+                    step2.calculations.mealDistribution = {
+                        ...mealDistribution,
+                        total: mealTotal,
+                        difference: Math.abs(mealTotal - targetCalories)
+                    };
+
+                    if (Math.abs(mealTotal - targetCalories) > 10) {
+                        this.results.warnings.push(`Meal distribution total (${mealTotal}) differs from target (${targetCalories}) by ${Math.abs(mealTotal - targetCalories)}`);
+                    }
+
+                    step2.output = {
+                        bmr: bmr,
+                        tdee: tdee,
+                        targetCalories: targetCalories,
+                        bmi: bmi.toFixed(1),
+                        proteinGrams: proteinGrams,
+                        carbGrams: carbGrams,
+                        fatGrams: fatGrams,
+                        mealDistribution: mealDistribution,
+                        hasNAFLD: assessmentData.conditions.includes('nafld'),
+                        isDiabetic: assessmentData.conditions.includes('diabetes')
+                    };
+
+                    this.results.steps.push(step2);
+                    return step2.output;
+                } catch (error) {
+                    this.results.errors.push(`Step 2 Error: ${error.message}`);
+                    step2.error = error.message;
+                    this.results.steps.push(step2);
+                    return null;
+                }
+            }
+
+            // Step 3: Process Preferences
+            processPreferences(resultsData) {
+                const step3 = {
+                    name: "Step 3: Food Preferences",
+                    input: resultsData,
+                    output: {},
+                    calculations: {}
+                };
+
+                try {
+                    // Simulate random preferences (70% like, 30% dislike)
+                    const categories = ['proteins', 'fruits', 'vegetables', 'carbs', 'snacks'];
+                    const preferences = {};
+                    
+                    categories.forEach(category => {
+                        preferences[category] = {};
+                        // Each category has 10 items
+                        for (let i = 0; i < 10; i++) {
+                            const itemId = `${category}_item_${i}`;
+                            preferences[category][itemId] = Math.random() > 0.3 ? 'like' : 'dislike';
+                        }
+                    });
+
+                    // Count preferences
+                    let totalLikes = 0;
+                    let totalDislikes = 0;
+                    
+                    Object.values(preferences).forEach(category => {
+                        Object.values(category).forEach(pref => {
+                            if (pref === 'like') totalLikes++;
+                            else totalDislikes++;
+                        });
+                    });
+
+                    step3.calculations = {
+                        totalItems: 50,
+                        totalLikes: totalLikes,
+                        totalDislikes: totalDislikes,
+                        likePercentage: ((totalLikes / 50) * 100).toFixed(1) + '%'
+                    };
+
+                    step3.output = {
+                        preferences: preferences,
+                        targetCalories: resultsData.targetCalories,
+                        mealDistribution: resultsData.mealDistribution,
+                        macros: {
+                            protein: resultsData.proteinGrams,
+                            carbs: resultsData.carbGrams,
+                            fat: resultsData.fatGrams
+                        }
+                    };
+
+                    this.results.steps.push(step3);
+                    return step3.output;
+                } catch (error) {
+                    this.results.errors.push(`Step 3 Error: ${error.message}`);
+                    step3.error = error.message;
+                    this.results.steps.push(step3);
+                    return null;
+                }
+            }
+
+            // Step 4: Generate Meal Plan
+            generateMealPlan(preferencesData) {
+                const step4 = {
+                    name: "Step 4: Meal Plan Generation",
+                    input: preferencesData,
+                    output: {},
+                    calculations: {}
+                };
+
+                try {
+                    const { targetCalories, mealDistribution, preferences } = preferencesData;
+                    const weekPlan = [];
+                    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                    
+                    days.forEach(day => {
+                        const dayMeals = [];
+                        let dayTotalCalories = 0;
+                        let dayProtein = 0;
+                        let dayCarbs = 0;
+                        let dayFat = 0;
+
+                        // Generate meals for each time slot
+                        Object.entries(mealDistribution).forEach(([mealType, calories]) => {
+                            const meal = {
+                                type: this.getMealTypeName(mealType),
+                                targetCalories: calories,
+                                actualCalories: 0,
+                                items: []
+                            };
+
+                            // Simulate food items based on meal type
+                            if (mealType === 'breakfast') {
+                                meal.items = [
+                                    { name: 'Oatmeal', calories: 150, protein: 5, carbs: 27, fat: 3 },
+                                    { name: 'Greek Yogurt', calories: 100, protein: 10, carbs: 6, fat: 3 },
+                                    { name: 'Blueberries', calories: 40, protein: 0.5, carbs: 10, fat: 0.2 }
+                                ];
+                            } else if (mealType.includes('Snack')) {
+                                meal.items = [
+                                    { name: 'Apple', calories: 95, protein: 0.5, carbs: 25, fat: 0.3 }
+                                ];
+                            } else if (mealType === 'lunch' || mealType === 'dinner') {
+                                const proteinCalories = Math.round(calories * 0.4);
+                                const carbCalories = Math.round(calories * 0.35);
+                                const vegCalories = Math.round(calories * 0.25);
+                                
+                                meal.items = [
+                                    { name: 'Chicken Breast', calories: proteinCalories, protein: proteinCalories/5, carbs: 0, fat: proteinCalories/20 },
+                                    { name: 'Brown Rice', calories: carbCalories, protein: carbCalories/30, carbs: carbCalories/4, fat: carbCalories/100 },
+                                    { name: 'Broccoli', calories: vegCalories, protein: vegCalories/15, carbs: vegCalories/6, fat: vegCalories/50 }
+                                ];
+                            }
+
+                            // Calculate actual totals
+                            meal.items.forEach(item => {
+                                meal.actualCalories += item.calories;
+                                dayProtein += item.protein;
+                                dayCarbs += item.carbs;
+                                dayFat += item.fat;
+                            });
+                            
+                            dayTotalCalories += meal.actualCalories;
+                            meal.caloriesDifference = meal.actualCalories - meal.targetCalories;
+                            
+                            dayMeals.push(meal);
+                        });
+
+                        weekPlan.push({
+                            day: day,
+                            meals: dayMeals,
+                            totals: {
+                                calories: dayTotalCalories,
+                                protein: Math.round(dayProtein),
+                                carbs: Math.round(dayCarbs),
+                                fat: Math.round(dayFat),
+                                targetCalories: targetCalories,
+                                difference: dayTotalCalories - targetCalories
+                            }
+                        });
+                    });
+
+                    // Analyze accuracy
+                    const avgDayCalories = weekPlan.reduce((sum, day) => sum + day.totals.calories, 0) / 7;
+                    const calorieDifference = Math.abs(avgDayCalories - targetCalories);
+                    
+                    step4.calculations = {
+                        targetCalories: targetCalories,
+                        avgDayCalories: Math.round(avgDayCalories),
+                        calorieDifference: Math.round(calorieDifference),
+                        accuracyPercentage: ((1 - calorieDifference / targetCalories) * 100).toFixed(1) + '%'
+                    };
+
+                    if (calorieDifference > 100) {
+                        this.results.errors.push(`Large calorie discrepancy: ${calorieDifference} calories off target`);
+                    }
+
+                    step4.output = {
+                        weekPlan: weekPlan,
+                        summary: step4.calculations
+                    };
+
+                    this.results.steps.push(step4);
+                    return step4.output;
+                } catch (error) {
+                    this.results.errors.push(`Step 4 Error: ${error.message}`);
+                    step4.error = error.message;
+                    this.results.steps.push(step4);
+                    return null;
+                }
+            }
+
+            getMealTypeName(mealType) {
+                const names = {
+                    'breakfast': 'Breakfast',
+                    'morningSnack': 'Morning Snack',
+                    'lunch': 'Lunch',
+                    'afternoonSnack': 'Afternoon Snack',
+                    'dinner': 'Dinner',
+                    'eveningSnack': 'Evening Snack'
+                };
+                return names[mealType] || mealType;
+            }
+
+            run() {
+                console.log(`Starting Run #${this.runNumber}`);
+                
+                // Step 1
+                const assessmentData = this.processAssessment();
+                if (!assessmentData) return this.results;
+                
+                // Step 2
+                const resultsData = this.calculateResults(assessmentData);
+                if (!resultsData) return this.results;
+                
+                // Step 3
+                const preferencesData = this.processPreferences(resultsData);
+                if (!preferencesData) return this.results;
+                
+                // Step 4
+                const mealPlan = this.generateMealPlan(preferencesData);
+                if (!mealPlan) return this.results;
+                
+                // Final summary
+                this.results.summary = {
+                    success: this.results.errors.length === 0,
+                    errorCount: this.results.errors.length,
+                    warningCount: this.results.warnings.length,
+                    finalTargetCalories: resultsData.targetCalories,
+                    avgMealPlanCalories: mealPlan.summary.avgDayCalories,
+                    accuracy: mealPlan.summary.accuracyPercentage
+                };
+                
+                return this.results;
+            }
+        }
+
+        // Run all simulations
+        function runAllSimulations() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            
+            testProfiles.forEach((profile, index) => {
+                const simulator = new WorkflowSimulator(profile, index + 1);
+                const result = simulator.run();
+                testRuns.push(result);
+                displayResult(result, resultsDiv);
+            });
+            
+            // Display summary comparison
+            displayComparison(testRuns, resultsDiv);
+        }
+
+        function displayResult(result, container) {
+            const runDiv = document.createElement('div');
+            runDiv.className = 'test-run';
+            runDiv.innerHTML = `
+                <h2>Run #${result.runNumber}: ${result.profile.name}</h2>
+                <div class="data">Profile: ${result.profile.age}yo ${result.profile.sex}, ${result.profile.weight}${result.profile.weightUnit}, ${result.profile.activityLevel}</div>
+                
+                ${result.steps.map(step => `
+                    <div class="step">
+                        <h3>${step.name}</h3>
+                        ${step.error ? `<div class="error">ERROR: ${step.error}</div>` : ''}
+                        <div class="data">Calculations: ${JSON.stringify(step.calculations, null, 2)}</div>
+                    </div>
+                `).join('')}
+                
+                ${result.errors.length > 0 ? `
+                    <div class="error">Errors: ${result.errors.join(', ')}</div>
+                ` : ''}
+                
+                ${result.warnings.length > 0 ? `
+                    <div class="warning">Warnings: ${result.warnings.join(', ')}</div>
+                ` : ''}
+                
+                <div class="${result.summary.success ? 'success' : 'error'}">
+                    Summary: Target ${result.summary.finalTargetCalories} cal → Avg ${result.summary.avgMealPlanCalories} cal (${result.summary.accuracy} accurate)
+                </div>
+            `;
+            container.appendChild(runDiv);
+        }
+
+        function displayComparison(runs, container) {
+            const compDiv = document.createElement('div');
+            compDiv.className = 'test-run';
+            compDiv.innerHTML = `
+                <h2>📊 Comparison Summary</h2>
+                <table>
+                    <tr>
+                        <th>Run</th>
+                        <th>BMR</th>
+                        <th>TDEE</th>
+                        <th>Target Cal</th>
+                        <th>Avg Meal Cal</th>
+                        <th>Difference</th>
+                        <th>Accuracy</th>
+                        <th>Errors</th>
+                    </tr>
+                    ${runs.map(run => {
+                        const step2 = run.steps.find(s => s.name.includes('Results'));
+                        const bmr = step2?.output?.bmr || 'N/A';
+                        const tdee = step2?.output?.tdee || 'N/A';
+                        const target = run.summary?.finalTargetCalories || 'N/A';
+                        const avg = run.summary?.avgMealPlanCalories || 'N/A';
+                        const diff = target !== 'N/A' && avg !== 'N/A' ? avg - target : 'N/A';
+                        const accuracy = run.summary?.accuracy || 'N/A';
+                        const errors = run.summary?.errorCount || 0;
+                        
+                        const isDiff = Math.abs(diff) > 100;
+                        
+                        return `
+                            <tr class="${isDiff ? 'discrepancy' : ''}">
+                                <td>${run.runNumber}</td>
+                                <td>${bmr}</td>
+                                <td>${tdee}</td>
+                                <td>${target}</td>
+                                <td>${avg}</td>
+                                <td>${diff}</td>
+                                <td>${accuracy}</td>
+                                <td>${errors}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </table>
+                
+                <h3>Common Issues Found:</h3>
+                <ul>
+                    ${analyzeCommonIssues(runs).map(issue => `<li class="warning">${issue}</li>`).join('')}
+                </ul>
+            `;
+            container.appendChild(compDiv);
+        }
+
+        function analyzeCommonIssues(runs) {
+            const issues = [];
+            
+            // Check for calorie calculation consistency
+            const calorieDiscrepancies = runs.filter(r => {
+                const diff = Math.abs(r.summary?.avgMealPlanCalories - r.summary?.finalTargetCalories);
+                return diff > 100;
+            });
+            
+            if (calorieDiscrepancies.length > 0) {
+                issues.push(`${calorieDiscrepancies.length}/5 runs have >100 calorie discrepancies between target and actual`);
+            }
+            
+            // Check for macro calculation issues
+            runs.forEach((run, index) => {
+                const step2 = run.steps.find(s => s.name.includes('Results'));
+                if (step2?.calculations?.macroVerification) {
+                    const diff = step2.calculations.macroVerification.difference;
+                    if (diff > 50) {
+                        issues.push(`Run ${index + 1}: Macro calories differ from target by ${diff} calories`);
+                    }
+                }
+            });
+            
+            // Check for meal distribution issues
+            runs.forEach((run, index) => {
+                const step2 = run.steps.find(s => s.name.includes('Results'));
+                if (step2?.calculations?.mealDistribution) {
+                    const diff = step2.calculations.mealDistribution.difference;
+                    if (diff > 10) {
+                        issues.push(`Run ${index + 1}: Meal distribution total differs from target by ${diff} calories`);
+                    }
+                }
+            });
+            
+            return issues.length > 0 ? issues : ['No major issues found'];
+        }
+
+        // Run simulations on page load
+        runAllSimulations();
+    </script>
+</body>
+</html>

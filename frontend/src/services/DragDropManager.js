@@ -125,11 +125,14 @@ export class DragDropManager {
         const foodItem = e.target.closest('.food-item');
         if (!foodItem) return;
         
+        const food = JSON.parse(foodItem.dataset.food);
         DragDropManager.draggedElement = foodItem;
         DragDropManager.draggedData = {
             type: 'food',
-            food: JSON.parse(foodItem.dataset.food),
-            category: foodItem.dataset.category
+            food: food,
+            category: foodItem.dataset.category,
+            quantity: food.baseQuantity || 100,  // Use baseQuantity from food item or default to 100
+            unit: food.baseUnit || 'g'           // Use baseUnit from food item or default to 'g'
         };
         
         foodItem.classList.add('dragging');

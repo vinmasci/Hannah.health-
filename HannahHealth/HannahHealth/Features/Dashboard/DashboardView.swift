@@ -9,13 +9,14 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @StateObject private var viewModel = DashboardViewModel()
+    @EnvironmentObject var viewModel: DashboardViewModel
+    @Binding var showProfile: Bool
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
+        ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(spacing: 18) {
                     // Header
-                    DashboardHeader()
+                    DashboardHeader(showProfile: $showProfile)
                         .padding(.top, 5)
                     
                     // Period Navigation
@@ -26,15 +27,17 @@ struct DashboardView: View {
                     
                     // Show current period text
                     Text(ViewPeriodSelector.periodDisplayText(for: viewModel.currentDate, period: viewModel.selectedPeriod))
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.7))
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.white.opacity(0.9))
                     
                     // Content based on selected period
                     Group {
+                        let _ = print("🎯 Rendering view for period: \(viewModel.selectedPeriod)")
                         switch viewModel.selectedPeriod {
                         case .day:
                             dayViewContent
                         case .week:
+                            let _ = print("📊 Switching to week view")
                             weekViewContent
                         case .month:
                             monthViewContent
@@ -46,6 +49,11 @@ struct DashboardView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 5)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onAppear {
+            // Refresh health data when view appears
+            viewModel.refreshHealthData()
         }
         .environmentObject(viewModel)
         .onAppear {
@@ -61,14 +69,15 @@ extension DashboardView {
         // Daily Summary Card
         DailySummaryCard()
         
+        // Daily Goal Selector
+        DailyGoalSelector()
+        
         // Quick Stats Grid
         QuickStatsGrid()
         
         // Food & Activity Log
-        FoodActivityLogCard()
+        FoodActivityLogCard(currentDate: viewModel.currentDate)
         
-        // Hannah's Daily Advice
-        HannahAdviceCarousel()
     }
 }
 
@@ -76,34 +85,15 @@ extension DashboardView {
 extension DashboardView {
     @ViewBuilder
     private var weekViewContent: some View {
-        // Week Summary Card
+        // Week Summary with Ring Visualization
         if let weekData = viewModel.currentWeekData {
-            WeekSummaryCard(weekData: weekData)
-        }
-        
-        // Week Charts placeholder
-        VStack(spacing: 16) {
-            Text("Weekly Charts")
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            // Placeholder for charts
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Theme.glassMorphism)
-                .frame(height: 200)
-                .overlay(
-                    Text("Line Chart: Daily Calories")
-                        .foregroundColor(.white.opacity(0.5))
-                )
-            
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Theme.glassMorphism)
-                .frame(height: 150)
-                .overlay(
-                    Text("Bar Chart: Daily Macros")
-                        .foregroundColor(.white.opacity(0.5))
-                )
+            let _ = print("📈 Rendering WeeklyCaloriesView with \(weekData.days.count) days")
+            WeeklyCaloriesView(weekData: weekData)
+        } else {
+            let _ = print("⚠️ No currentWeekData available")
+            Text("No week data available")
+                .foregroundColor(.white.opacity(0.5))
+                .frame(maxWidth: .infinity, maxHeight: 200)
         }
     }
 }
@@ -112,26 +102,13 @@ extension DashboardView {
 extension DashboardView {
     @ViewBuilder
     private var monthViewContent: some View {
-        // Month Summary Card
+        // Month Summary with Ring Visualization
         if let monthData = viewModel.currentMonthData {
-            MonthSummaryCard(monthData: monthData)
-        }
-        
-        // Month visualization placeholder
-        VStack(spacing: 16) {
-            Text("Monthly Overview")
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            // Placeholder for calendar heatmap
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Theme.glassMorphism)
-                .frame(height: 300)
-                .overlay(
-                    Text("Calendar Heatmap")
-                        .foregroundColor(.white.opacity(0.5))
-                )
+            MonthlyCaloriesView(monthData: monthData)
+        } else {
+            Text("No month data available")
+                .foregroundColor(.white.opacity(0.5))
+                .frame(maxWidth: .infinity, maxHeight: 200)
         }
     }
 }
@@ -195,51 +172,7 @@ struct WeekSummaryCard: View {
     }
 }
 
-// MARK: - Month Summary Card
-struct MonthSummaryCard: View {
-    let monthData: MonthData
-    
-    var body: some View {
-        VStack(spacing: 12) {
-            Text("\(monthData.monthName) Summary")
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            HStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Total Days")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.7))
-                    Text("\(monthData.allDays.count)")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                }
-                
-                Spacer()
-                
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("Avg Daily Cal")
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.7))
-                    Text("\(monthData.averageDailyCalories)")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                }
-            }
-        }
-        .padding()
-        .background(Theme.glassMorphism)
-        .cornerRadius(16)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Theme.cardBorder)
-        )
-    }
-}
 
 #Preview {
-    DashboardView()
+    DashboardView(showProfile: .constant(false))
 }

@@ -8,23 +8,43 @@
 import SwiftUI
 
 struct DashboardHeader: View {
+    @Binding var showProfile: Bool
+    
+    private var greeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        let userName = AuthManager.shared.userProfile?.fullName ?? "Vince"
+        let baseGreeting: String
+        
+        switch hour {
+        case 0..<12:
+            baseGreeting = "Good morning"
+        case 12..<17:
+            baseGreeting = "Good afternoon"
+        case 17..<21:
+            baseGreeting = "Good evening"
+        default:
+            baseGreeting = "Good evening"
+        }
+        
+        return "\(baseGreeting), \(userName)"
+    }
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Good morning")
+                Text("Hannah.app v1.0.0")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.7))
                 
-                Text("Welcome back")
-                    .font(Theme.title)
+                Text(greeting)
+                    .font(.system(size: 26, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
-                    .fontWeight(.bold)
             }
             
             Spacer()
             
             Button {
-                // Profile action
+                showProfile = true
             } label: {
                 Circle()
                     .fill(Theme.glassMorphism)

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test</title>
+    <link rel="stylesheet" href="/src/styles/styles.css?v=2">
+    <link rel="stylesheet" href="/src/styles/day-meal-layout.css">
+</head>
+<body>
+    <h1>Debug Test</h1>
+    
+    <!-- Main Board -->
+    <div class="main-board"></div>
+    
+    <div id="output"></div>
+    
+    <script type="module">
+        const output = document.getElementById('output');
+        const mainBoard = document.querySelector('.main-board');
+        
+        output.innerHTML = '<p>Testing workflow initialization...</p>';
+        
+        try {
+            // First create a day column (needed as reference)
+            const dayColumn = document.createElement('div');
+            dayColumn.className = 'day-column';
+            dayColumn.dataset.day = 'monday';
+            dayColumn.innerHTML = '<h3>Monday</h3>';
+            mainBoard.appendChild(dayColumn);
+            output.innerHTML += '<p>✅ Created test day column</p>';
+            
+            // Import NutritionWorkflow directly
+            const { default: nutritionWorkflow } = await import('/src/components/NutritionWorkflow.js');
+            output.innerHTML += '<p>✅ Imported NutritionWorkflow</p>';
+            
+            // Initialize it
+            nutritionWorkflow.init(mainBoard);
+            output.innerHTML += '<p>✅ Called nutritionWorkflow.init()</p>';
+            
+            // Check for columns
+            const assessmentCol = document.querySelector('.ai-assessment-column');
+            const displayCol = document.querySelector('.ai-display-column');
+            const suggestionsCol = document.querySelector('.ai-suggestions-column');
+            
+            output.innerHTML += `<p>Assessment column: ${assessmentCol ? '✅' : '❌'}</p>`;
+            output.innerHTML += `<p>Display column: ${displayCol ? '✅' : '❌'}</p>`;
+            output.innerHTML += `<p>Suggestions column: ${suggestionsCol ? '✅' : '❌'}</p>`;
+            
+        } catch (e) {
+            output.innerHTML += `<p>❌ Error: ${e.message}</p>`;
+            console.error(e);
+        }
+    </script>
+</body>
+</html>

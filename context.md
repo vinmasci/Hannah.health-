@@ -9,6 +9,11 @@ Building the first meal planning app designed for healing, not dieting - serving
 
 ### Core Features
 - **Dual-Mode System**: Medical mode with health metrics and ED-safe mode that hides potentially triggering numbers
+- **Insights Dashboard**: Interactive health tracking with charts for weight, steps, and exercise calories
+  - Date navigation system with Today, Week, Month, 3 Months, and Year views
+  - Smart navigation preventing future date selection
+  - Dynamic data visualization that adjusts to selected time range
+  - Contextual date display ("Today", "This Week", etc.)
 - **AI-Powered Onboarding**: Conversational flow to understand user needs and generate personalized meal plans
 - **Drag-and-Drop Meal Planning**: Visual Kanban-style board for intuitive meal organization
 - **Smart Recipe Search**: Natural language AI-powered recipe discovery
@@ -124,6 +129,37 @@ Deployment: Vercel (planned)
 
 ## Platform Integration
 
+### iOS App - Hannah Health (In Active Development)
+- **Purpose**: Native iOS app for frictionless health tracking
+- **Tech Stack**: SwiftUI, HealthKit, Supabase, Combine
+- **Current Features**:
+  - Modular dashboard with customizable cards
+  - Real-time HealthKit integration (steps, calories burned)
+  - Quick Log drawer with AI-powered food recognition
+  - Intelligent meal type detection (asks user if not specified)
+  - Food logging with confirm/cancel buttons (no typing Y)
+  - Real-time dashboard updates when food is logged
+  - Swipe-to-delete functionality for food items
+  - Meal-specific icons and colors in food activity log
+  - Accurate calorie ring chart showing only logged meals
+  - Clean ring chart center display without containers
+  - Insights dashboard with interactive health charts
+  - Complete date navigation system (Today, Week, Month, 3 Months, Year)
+  - Weight tracking with automatic kg/lbs conversion
+  - Steps and exercise calorie monitoring
+  - Confidence scoring on all food logging
+  - Photo capture for meal analysis
+  - Dark glassmorphic UI with animated backgrounds
+- **Backend Integration**:
+  - Brave Search API for real nutrition data
+  - GPT-4o-mini for natural language processing
+  - Supabase for food entry storage
+  - Real-time meal breakdown tracking
+  - Meal type detection from natural language
+- **Architecture**: Strict MVVM with 350-line file limits
+- **Status**: Food logging fully functional with meal type detection, swipe-to-delete working, UI polish complete
+- **Known Limitations**: Exercise logging not yet supported (backend only accepts food)
+
 ### WhatsApp Bot
 - **Purpose**: Frictionless daily food and exercise logging
 - **Tech**: WhatsApp Business API + GPT-4o Mini
@@ -191,6 +227,7 @@ Preferences → Finalization → Signup
 - 🔄 Supabase integration
 - 🔄 User authentication
 - 🔄 Payment integration
+- 🔄 iOS App Development (Hannah Health)
 
 ### Upcoming
 - 📋 Production deployment
@@ -258,6 +295,7 @@ For detailed information about specific aspects of the project, see the followin
 - **[project-charter.md](./project-charter.md)** - Business plan, mission, vision, target users, and monetization strategy
 - **[database_documentation.md](./database_documentation.md)** - Complete Supabase PostgreSQL schema, tables, RLS policies, and migration strategy
 - **[context.md](./context.md)** - This file - comprehensive project overview and architecture
+- **[INSIGHTS.md](./HannahHealth/INSIGHTS.md)** - Insights feature documentation, charts, and user metrics tracking
 
 #### AI & Conversation Design
 - **[ai-onboarding-v2.md](./ai-onboarding-v2.md)** - Detailed conversation flow strategies and user journey mapping

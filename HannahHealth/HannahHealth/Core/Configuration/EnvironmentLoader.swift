@@ -28,38 +28,15 @@ class EnvironmentLoader {
         #endif
     }
     
-    /// Load variables from .env file
+    /// Load variables from .env file  
     private func loadFromEnvFile() {
-        guard let projectPath = Bundle.main.object(forInfoDictionaryKey: "PROJECT_DIR") as? String else {
-            print("⚠️ PROJECT_DIR not set in Info.plist")
-            loadDefaults()
-            return
-        }
-        
-        let envPath = "\(projectPath)/.env"
-        
-        do {
-            let contents = try String(contentsOfFile: envPath, encoding: .utf8)
-            let lines = contents.components(separatedBy: .newlines)
-            
-            for line in lines {
-                // Skip comments and empty lines
-                if line.hasPrefix("#") || line.trimmingCharacters(in: .whitespaces).isEmpty {
-                    continue
-                }
-                
-                // Parse KEY=VALUE
-                let parts = line.split(separator: "=", maxSplits: 1)
-                if parts.count == 2 {
-                    let key = String(parts[0]).trimmingCharacters(in: .whitespaces)
-                    let value = String(parts[1]).trimmingCharacters(in: .whitespaces)
-                    environment[key] = value
-                }
-            }
-            
-            print("✅ Loaded \(environment.count) environment variables")
-        } catch {
-            print("⚠️ Could not load .env file: \(error)")
+        // Try to load from Config.xcconfig file in bundle
+        if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+           let config = NSDictionary(contentsOfFile: path) as? [String: String] {
+            environment = config
+            print("✅ Loaded \(environment.count) environment variables from Config.plist")
+        } else {
+            print("⚠️ Config.plist not found, using defaults")
             loadDefaults()
         }
     }

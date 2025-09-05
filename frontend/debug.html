@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Meal Planner</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/src/styles/styles.css?v=2">
+    <link rel="stylesheet" href="/src/styles/shopping-list.css">
+    <link rel="stylesheet" href="/src/styles/ai-assessment-column.css">
+    <link rel="stylesheet" href="/src/styles/ai-display-column.css">
+    <link rel="stylesheet" href="/src/styles/ai-suggestions-column.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-brand">
+            <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F959.svg" alt="Stuffed Flatbread" width="42" height="42">
+            <div class="header-text">
+                <h1 class="header-title">Hannah.PT</h1>
+                <span class="header-tagline">Debug Mode</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Category Pills Container -->
+    <div class="category-pills-container">
+        <div class="category-pill" data-category="proteins">
+            <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F357.svg" width="20" height="20">
+            <span>Proteins</span>
+        </div>
+    </div>
+
+    <!-- Main Board -->
+    <div class="main-board">
+        <!-- Columns will be added here -->
+    </div>
+
+    <div id="debug-output" style="position: fixed; bottom: 10px; left: 10px; background: white; padding: 10px; border: 2px solid red; max-width: 300px; z-index: 9999;">
+        <h3>Debug Output:</h3>
+        <div id="log"></div>
+    </div>
+
+    <script type="module">
+        const log = document.getElementById('log');
+        const mainBoard = document.querySelector('.main-board');
+        
+        function addLog(msg, isError = false) {
+            const p = document.createElement('p');
+            p.style.margin = '2px 0';
+            p.style.color = isError ? 'red' : 'green';
+            p.textContent = msg;
+            log.appendChild(p);
+            console.log(msg);
+        }
+        
+        addLog('Starting debug...');
+        
+        try {
+            // Step 1: Create a test day column
+            addLog('Creating test day column...');
+            const dayCol = document.createElement('div');
+            dayCol.className = 'day-column';
+            dayCol.dataset.day = 'monday';
+            dayCol.innerHTML = '<div class="column-header"><h3>Monday</h3></div><div class="meals-container"></div>';
+            mainBoard.appendChild(dayCol);
+            addLog('✅ Day column created');
+            
+            // Step 2: Import and initialize NutritionWorkflow
+            addLog('Importing NutritionWorkflow...');
+            const { default: nutritionWorkflow } = await import('/src/components/NutritionWorkflow.js');
+            addLog('✅ NutritionWorkflow imported');
+            
+            // Step 3: Initialize workflow
+            addLog('Initializing workflow...');
+            nutritionWorkflow.init(mainBoard);
+            addLog('✅ Workflow initialized');
+            
+            // Step 4: Check what was created
+            const assessmentCol = document.querySelector('.ai-assessment-column');
+            const displayCol = document.querySelector('.ai-display-column');
+            const suggestionsCol = document.querySelector('.ai-suggestions-column');
+            const allCols = document.querySelectorAll('.main-board > *');
+            
+            addLog(`Total columns in board: ${allCols.length}`);
+            addLog(`Assessment: ${assessmentCol ? 'YES' : 'NO'}`);
+            addLog(`Display: ${displayCol ? 'YES' : 'NO'}`);
+            addLog(`Suggestions: ${suggestionsCol ? 'YES' : 'NO'}`);
+            
+            // List all columns
+            allCols.forEach((col, i) => {
+                addLog(`Col ${i}: ${col.className}`);
+            });
+            
+        } catch (error) {
+            addLog(`ERROR: ${error.message}`, true);
+            console.error(error);
+        }
+    </script>
+</body>
+</html>

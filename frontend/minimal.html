@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Minimal Test</title>
+    <link rel="stylesheet" href="/src/styles/styles.css">
+</head>
+<body>
+    <div class="main-board"></div>
+    
+    <script>
+        console.log('Page loaded');
+    </script>
+    
+    <script type="module">
+        console.log('Module script starting...');
+        
+        // Try importing just the main file
+        try {
+            await import('/src/main-meal-planner.js');
+            console.log('✅ main-meal-planner.js loaded');
+        } catch (e) {
+            console.error('❌ Failed to load main-meal-planner.js:', e);
+        }
+    </script>
+</body>
+</html>

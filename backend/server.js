@@ -11,11 +11,11 @@ const PORT = process.env.BACKEND_PORT || 3001;
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? 'https://hannah.health' 
-    : 'http://localhost:3000'
+  origin: '*', // Allow all origins for iOS app
+  credentials: true
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // For SMS webhook
 app.use(morgan('dev'));
 
 // Log all requests
@@ -28,6 +28,7 @@ app.use((req, res, next) => {
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/brave', require('./routes/brave-search'));
 app.use('/api/recipe', require('./routes/recipe-scraper'));
+app.use('/api/sms', require('./routes/sms'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -48,8 +49,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Hannah backend server running on port ${PORT}`);
-  console.log(`🔑 OpenAI API key loaded: ${process.env.OPENAI_API_KEY ? 'Yes' : 'No'}`);
-  console.log(`🔍 Brave API key loaded: ${process.env.BRAVE_API_KEY ? 'Yes' : 'No'}`);
-});
+// For Vercel deployment
+if (process.env.VERCEL) {
+  // Export for Vercel serverless
+  module.exports = app;
+} else {
+  // Local development
+  app.listen(PORT, () => {
+    console.log(`🚀 Hannah backend server running on port ${PORT}`);
+    console.log(`🔑 OpenAI API key loaded: ${process.env.OPENAI_API_KEY ? 'Yes' : 'No'}`);
+    console.log(`🔍 Brave API key loaded: ${process.env.BRAVE_API_KEY ? 'Yes' : 'No'}`);
+  });
+}

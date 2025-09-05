@@ -42,6 +42,8 @@ struct Theme {
     static let purple400 = lavender
     static let ocean = oceanBlue
     static let sunshine = Color(hex: "FFE66D")
+    static let gold = Color(hex: "fbbf24")
+    static let amber = Color(hex: "f59e0b")
     
     // Legacy gradients - keeping for backward compatibility
     static let primaryGradient = LinearGradient(
@@ -56,6 +58,7 @@ struct Theme {
     static let headline = Font.system(size: 20, weight: .semibold, design: .rounded)
     static let body = Font.system(size: 17, weight: .regular, design: .rounded)
     static let caption = Font.system(size: 14, weight: .regular, design: .rounded)
+    static let caption2 = Font.system(size: 12, weight: .regular, design: .rounded)
 }
 
 // MARK: - Color Extension

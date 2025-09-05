@@ -28,6 +28,7 @@ struct DayData: Identifiable {
     let steps: Int
     let sleep: Double // hours
     let workoutMinutes: Int
+    let activeEnergy: Int // Active Energy from HealthKit
     let weight: Double? // optional, kg
     let meals: [FoodEntry]
     

@@ -274,17 +274,45 @@ export class UIStateManager {
         // Update day totals display
         const totalsContainer = dayColumn.querySelector('.day-totals');
         if (totalsContainer) {
-            totalsContainer.querySelector('.total-calories').textContent = `${dayTotals.kcal} kcal`;
-            totalsContainer.querySelector('.total-cost').textContent = `$${dayTotals.cost.toFixed(2)}`;
+            const totalsCard = totalsContainer.querySelector('.day-totals-card');
             
-            const macroBar = totalsContainer.querySelector('.macro-bar');
-            if (macroBar) {
-                macroBar.innerHTML = NutritionCalculator.createMacroBarHTML(dayTotals.protein, dayTotals.carbs, dayTotals.fat);
-            }
+            // Check if there's any food
+            const hasFood = dayTotals.kcal > 0 || dayTotals.protein > 0 || dayTotals.carbs > 0 || dayTotals.fat > 0;
             
-            const macroText = totalsContainer.querySelector('.total-macros');
-            if (macroText) {
-                macroText.textContent = `${dayTotals.protein.toFixed(0)}g P • ${dayTotals.carbs.toFixed(0)}g C • ${dayTotals.fat.toFixed(0)}g F`;
+            if (hasFood) {
+                // Calculate percentages
+                const totalMacros = dayTotals.protein + dayTotals.carbs + dayTotals.fat;
+                const proteinPercent = totalMacros > 0 ? Math.round((dayTotals.protein / totalMacros) * 100) : 0;
+                const carbsPercent = totalMacros > 0 ? Math.round((dayTotals.carbs / totalMacros) * 100) : 0;
+                const fatPercent = totalMacros > 0 ? Math.round((dayTotals.fat / totalMacros) * 100) : 0;
+                
+                // Remove empty class and show full totals
+                totalsCard.classList.remove('empty-totals');
+                totalsCard.innerHTML = `
+                    <div class="day-totals-header">
+                        <span class="day-totals-title">Day Total</span>
+                        <div class="day-totals-quick-stats">
+                            <span class="quick-stat">${dayTotals.kcal} kcal</span>
+                        </div>
+                    </div>
+                    <div class="macro-bar">${NutritionCalculator.createMacroBarHTML(dayTotals.protein, dayTotals.carbs, dayTotals.fat)}</div>
+                    <div class="total-macros">
+                        <span class="macro-protein">Protein: ${dayTotals.protein.toFixed(0)}g (${proteinPercent}%)</span>
+                        <span class="macro-carbs">Carbs: ${dayTotals.carbs.toFixed(0)}g (${carbsPercent}%)</span>
+                        <span class="macro-fat">Fat: ${dayTotals.fat.toFixed(0)}g (${fatPercent}%)</span>
+                    </div>
+                `;
+            } else {
+                // Show empty state
+                totalsCard.classList.add('empty-totals');
+                totalsCard.innerHTML = `
+                    <div class="day-totals-header">
+                        <span class="day-totals-title">Day Total</span>
+                        <div class="day-totals-quick-stats">
+                            <span class="quick-stat empty">Empty</span>
+                        </div>
+                    </div>
+                `;
             }
         }
     }
@@ -299,18 +327,21 @@ export class UIStateManager {
         const button = event.target;
         const dayColumn = button.closest('.day-column');
         const dayContent = dayColumn.querySelector('.day-content');
+        const dayTotals = dayColumn.querySelector('.day-totals');
         const isMinimized = dayColumn.classList.contains('minimized');
         
         if (isMinimized) {
             // Expand
             dayColumn.classList.remove('minimized');
             dayContent.style.display = 'block';
+            if (dayTotals) dayTotals.style.display = 'block';
             button.textContent = '−';
             button.title = 'Minimize day';
         } else {
             // Minimize
             dayColumn.classList.add('minimized');
             dayContent.style.display = 'none';
+            if (dayTotals) dayTotals.style.display = 'none';
             button.textContent = '+';
             button.title = 'Expand day';
         }

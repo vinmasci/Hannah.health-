@@ -125,6 +125,16 @@ APIConfig.swift
 .env.development
 .env.production
 
+# Config files with API keys
+HannahHealth/Config.plist
+Config.plist
+
+# AuthManager with hardcoded Supabase keys
+HannahHealth/Core/Auth/AuthManager.swift
+
+# SupabaseService with hardcoded Supabase keys
+Core/Services/SupabaseService.swift
+
 # Sensitive data patterns
 **/secrets/
 **/credentials/

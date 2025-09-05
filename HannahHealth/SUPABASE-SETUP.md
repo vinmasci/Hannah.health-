@@ -119,6 +119,41 @@ AI-generated meal plans (Week 1 Magic feature).
 - created_at: Timestamp
 ```
 
+## Database Triggers
+
+### Auto-Create User Profile (Added Session 13)
+```sql
+-- Automatically creates user_profiles entry when user signs up
+CREATE OR REPLACE FUNCTION create_profile_on_signup()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO user_profiles (
+    id, email, full_name,
+    basal_metabolic_rate, daily_deficit_target,
+    tracking_mode, subscription_tier,
+    created_at, updated_at
+  )
+  VALUES (
+    NEW.id, NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', 'Friend'),
+    2200, 500, 'full', 'free',
+    NOW(), NOW()
+  );
+  RETURN NEW;
+EXCEPTION
+  WHEN others THEN
+    RAISE LOG 'Error creating user profile: %', SQLERRM;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger runs after user creation
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION create_profile_on_signup();
+```
+
 ## Row Level Security (RLS)
 
 All tables have RLS enabled for data privacy:

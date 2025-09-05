@@ -9,38 +9,38 @@ import SwiftUI
 
 enum Tab: String, CaseIterable {
     case dashboard = "dashboard"
-    case chat = "chat" 
-    case quickAdd = "quickAdd"
+    case log = "log"
     case mealPlan = "mealPlan"
     case shopping = "shopping"
+    case aiCoach = "aiCoach"
     
     var title: String {
         switch self {
         case .dashboard:
             return "Dashboard"
-        case .chat:
-            return "Chat"
-        case .quickAdd:
-            return ""
+        case .log:
+            return "Log"
         case .mealPlan:
             return "Meal Plan"
         case .shopping:
-            return "Shopping"
+            return "Shop List"
+        case .aiCoach:
+            return "AI Coach"
         }
     }
     
     var icon: String {
         switch self {
         case .dashboard:
-            return "rectangle.3.group.fill"
-        case .chat:
-            return "message"
-        case .quickAdd:
-            return "plus"
+            return "gauge.open.with.lines.needle.67percent.and.arrowtriangle"
+        case .log:
+            return "plus.bubble"
         case .mealPlan:
             return "calendar"
         case .shopping:
             return "cart"
+        case .aiCoach:
+            return "bubble.left.and.text.bubble.right"
         }
     }
 }
@@ -63,12 +63,12 @@ struct TabButton: View {
             VStack(spacing: 3) {
                 Image(systemName: icon)
                     .font(.system(size: 22, weight: isSelected ? .semibold : .regular))
-                    .foregroundColor(isSelected ? Theme.sky : .white.opacity(0.6))
+                    .foregroundColor(isSelected ? .white : .white.opacity(0.5))  // White icons
                 
                 if !tab.title.isEmpty {
                     Text(tab.title)
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(isSelected ? Theme.sky : .white.opacity(0.5))
+                        .foregroundColor(isSelected ? .white : .white.opacity(0.4))  // White text
                 }
             }
         }
@@ -76,44 +76,15 @@ struct TabButton: View {
     }
 }
 
-struct AddButton: View {
-    @Binding var showQuickChat: Bool
-    
-    var body: some View {
-        Button {
-            showQuickChat = true
-        } label: {
-            ZStack {
-                // Main button circle - cleaner, smaller
-                Circle()
-                    .fill(LinearGradient(
-                        colors: [Color(hex: "10B981"), Color(hex: "059669")], // Green gradient like reference
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
-                    .frame(width: 56, height: 56)
-                    .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 2)
-                
-                Image(systemName: "plus")
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundColor(.white)
-            }
-        }
-        .scaleEffect(showQuickChat ? 0.95 : 1.0)
-        .animation(.spring(duration: 0.2), value: showQuickChat)
-    }
-}
-
 struct CustomTabBar: View {
     @Binding var selectedTab: Tab
-    @Binding var showQuickChat: Bool
     
     var body: some View {
         ZStack {
             // Custom curved shape for tab bar
             TabBarShape()
                 .fill(.ultraThinMaterial)
-                .background(TabBarShape().fill(Theme.cardBackground))
+                .background(TabBarShape().fill(Color.black.opacity(0.5)))
                 .overlay(
                     TabBarShape()
                         .stroke(Theme.cardBorder, lineWidth: 0.5),
@@ -122,25 +93,17 @@ struct CustomTabBar: View {
                 .frame(height: 75)
                 .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: -3)
             
-            // Tab buttons - moved up 5pt
+            // Tab buttons
             HStack(spacing: 0) {
                 TabButton(icon: Tab.dashboard.icon, tab: .dashboard, selectedTab: $selectedTab)
-                TabButton(icon: Tab.chat.icon, tab: .chat, selectedTab: $selectedTab)
-                
-                // Spacer for center button - smaller
-                Color.clear
-                    .frame(width: 70)
-                
+                TabButton(icon: Tab.log.icon, tab: .log, selectedTab: $selectedTab)
                 TabButton(icon: Tab.mealPlan.icon, tab: .mealPlan, selectedTab: $selectedTab)
                 TabButton(icon: Tab.shopping.icon, tab: .shopping, selectedTab: $selectedTab)
+                TabButton(icon: Tab.aiCoach.icon, tab: .aiCoach, selectedTab: $selectedTab)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .offset(y: -5) // Move all icons up 5pt
-            
-            // Floating center + button - moved up 10pt
-            AddButton(showQuickChat: $showQuickChat)
-                .offset(y: -15) // Moved up 10pt
+            .padding(.top, 4)  // Icons moved even higher
+            .padding(.bottom, 20)  // Maintain bottom safe area spacing
         }
         .frame(height: 75)
     }

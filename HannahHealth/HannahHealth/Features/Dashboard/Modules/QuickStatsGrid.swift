@@ -9,6 +9,7 @@ import SwiftUI
 
 struct QuickStatsGrid: View {
     @EnvironmentObject var viewModel: DashboardViewModel
+    @State private var showingActiveEnergyHelp = false
     
     var body: some View {
         LazyVGrid(columns: [
@@ -19,19 +20,51 @@ struct QuickStatsGrid: View {
                 icon: "figure.walk",
                 title: "Steps",
                 value: viewModel.stepsDisplayText,
-                target: viewModel.stepsTargetText,
-                progress: viewModel.stepsProgress,
+                target: "",
+                subtitle: viewModel.stepsDistanceText,
+                progress: viewModel.stepsTDEEProgress,
                 color: Theme.emerald
             )
             
             StatCard(
                 icon: "flame.fill",
-                title: "Exercise",
+                title: "Active Energy",
                 value: viewModel.caloriesDisplayText,
-                target: viewModel.caloriesTargetText,
+                target: "",  // No goal for Active Energy
+                subtitle: viewModel.exerciseDetailsText,
                 progress: viewModel.caloriesProgress,
                 color: Theme.coral
             )
+            .overlay(alignment: .topTrailing) {
+                if viewModel.shouldShowActiveEnergyPrompt {
+                    Button {
+                        showingActiveEnergyHelp = true
+                    } label: {
+                        Image(systemName: "questionmark.circle.fill")
+                            .foregroundColor(.yellow)
+                            .font(.system(size: 20))
+                    }
+                    .offset(x: -8, y: 8)
+                }
+            }
+        }
+        .alert("Active Energy Not Recording", isPresented: $showingActiveEnergyHelp) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("You have \(viewModel.todaySteps) steps but no Active Energy recorded. This might mean Health tracking is disabled.\n\nTo enable: Settings > Privacy & Security > Motion & Fitness > Health")
+        }
+        .onReceive(viewModel.$shouldShowActiveEnergyPrompt) { shouldShow in
+            if shouldShow && !showingActiveEnergyHelp {
+                // Auto-show the alert once when detected
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    showingActiveEnergyHelp = true
+                }
+            }
         }
     }
 }
@@ -41,6 +74,7 @@ struct StatCard: View {
     let title: String
     let value: String
     let target: String
+    var subtitle: String? = nil
     let progress: Double
     let color: Color
     
@@ -51,6 +85,11 @@ struct StatCard: View {
                     .font(.title3)
                     .foregroundColor(color)
                 
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .fontWeight(.semibold)
+                
                 Spacer()
             }
             
@@ -60,9 +99,17 @@ struct StatCard: View {
                     .foregroundColor(.white)
                     .fontWeight(.semibold)
                 
-                Text(target)
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
+                if !target.isEmpty {
+                    Text(target)
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.7))
+                }
+                
+                if let subtitle = subtitle {
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.7))
+                }
             }
             
             // Progress bar

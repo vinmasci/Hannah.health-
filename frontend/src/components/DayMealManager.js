@@ -95,19 +95,20 @@ export class DayMealManager {
             <div class="day-content" ${isMinimized ? 'style="display: none;"' : ''}>
                 <div class="meals-container">
                     ${this.createMealHTML(dayName, 'Breakfast', '8:00 AM')}
+                    ${this.createMealHTML(dayName, 'Morning Snack', '10:00 AM')}
                     ${this.createMealHTML(dayName, 'Lunch', '12:00 PM')}
+                    ${this.createMealHTML(dayName, 'Afternoon Snack', '3:00 PM')}
                     ${this.createMealHTML(dayName, 'Dinner', '6:00 PM')}
+                    ${this.createMealHTML(dayName, 'Evening Snack', '8:00 PM')}
                 </div>
-                <div class="day-totals">
-                    <div class="day-totals-card">
-                        <div class="day-totals-header">
-                            <span class="day-totals-title">Day Total</span>
-                            <div class="day-totals-quick-stats">
-                                <span class="quick-stat">0 kcal</span>
-                            </div>
+            </div>
+            <div class="day-totals" ${isMinimized ? 'style="display: none;"' : ''}>
+                <div class="day-totals-card empty-totals">
+                    <div class="day-totals-header">
+                        <span class="day-totals-title">Day Total</span>
+                        <div class="day-totals-quick-stats">
+                            <span class="quick-stat empty">Empty</span>
                         </div>
-                        <div class="macro-bar"></div>
-                        <div class="total-macros">0g P • 0g C • 0g F</div>
                     </div>
                 </div>
             </div>
@@ -368,15 +369,13 @@ export class DayMealManager {
                     ${this.createMealHTML(dayName, 'Dinner', '6:00 PM')}
                 </div>
                 <div class="day-totals">
-                    <div class="day-totals-card">
+                    <div class="day-totals-card empty-totals">
                         <div class="day-totals-header">
                             <span class="day-totals-title">Day Total</span>
                             <div class="day-totals-quick-stats">
-                                <span class="quick-stat">0 kcal</span>
+                                <span class="quick-stat empty">Empty</span>
                             </div>
                         </div>
-                        <div class="macro-bar"></div>
-                        <div class="total-macros">0g P • 0g C • 0g F</div>
                     </div>
                 </div>
             </div>

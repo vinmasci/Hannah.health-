@@ -8,28 +8,14 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var dashboardViewModel = DashboardViewModel()
     @State private var selectedTab: Tab = .dashboard
-    @State private var showQuickChat = false
-    
-    // Compute context based on current tab
-    private var chatContext: ChatContext {
-        switch selectedTab {
-        case .dashboard:
-            return .dashboard
-        case .mealPlan:
-            return .mealPlan
-        case .shopping:
-            return .shopping
-        default:
-            return .dashboard
-        }
-    }
+    @State private var showProfile = false
+    @State private var showLogDrawer = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
             // Dynamic time-based background
-            // Automatically transitions through sunrise, midday, sunset, and midnight colors
-            // Your beloved OG midnight colors are preserved from 11pm-5am!
             DynamicTimeBackground()
                 .ignoresSafeArea()
             
@@ -37,16 +23,18 @@ struct ContentView: View {
             Group {
                 switch selectedTab {
                 case .dashboard:
-                    DashboardView()
-                case .chat:
-                    WorkingChatView()
-                case .quickAdd:
-                    // Quick add is handled by the modal
-                    DashboardView()
+                    DashboardView(showProfile: $showProfile)
+                        .environmentObject(dashboardViewModel)
+                case .log:
+                    // Log tab doesn't navigate, it opens a drawer
+                    DashboardView(showProfile: $showProfile)
+                        .environmentObject(dashboardViewModel)
                 case .mealPlan:
                     MealPlanWrapperView()
                 case .shopping:
                     ShoppingListWrapperView()
+                case .aiCoach:
+                    WorkingChatView()
                 }
             }
             .transition(.asymmetric(
@@ -56,25 +44,23 @@ struct ContentView: View {
             .animation(.spring(duration: 0.3), value: selectedTab)
             
             // Custom Tab Bar
-            CustomTabBar(selectedTab: $selectedTab, showQuickChat: $showQuickChat)
+            CustomTabBar(selectedTab: $selectedTab)
                 .ignoresSafeArea(.keyboard)
-            
-            // Quick Chat Drawer
-            if showQuickChat {
-                Color.black.opacity(0.3)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        showQuickChat = false
-                    }
-                
-                VStack {
-                    Spacer()
-                    QuickChatDrawer(isPresented: $showQuickChat, context: chatContext)
-                }
-                .ignoresSafeArea(.keyboard)
-            }
         }
         .ignoresSafeArea(.all, edges: .bottom)
+        .fullScreenCover(isPresented: $showProfile) {
+            UserProfileView()
+        }
+        .sheet(isPresented: $showLogDrawer) {
+            QuickLogDrawer(selectedDate: dashboardViewModel.currentDate)
+        }
+        .onChange(of: selectedTab) { oldValue, newValue in
+            if newValue == .log {
+                showLogDrawer = true
+                // Reset back to previous tab
+                selectedTab = oldValue != .log ? oldValue : .dashboard
+            }
+        }
     }
 }
 

@@ -1,0 +1,21 @@
+# Supabase MCP Configuration for Claude
+
+Project Reference: phnvrqzqhuigmvuxfktf
+Access Token: sbp_affcee5c1af92260e744c345ef45505804c24e36
+
+## MCP Server Configuration
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--project-ref=phnvrqzqhuigmvuxfktf"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_affcee5c1af92260e744c345ef45505804c24e36"
+      }
+    }
+  }
+}

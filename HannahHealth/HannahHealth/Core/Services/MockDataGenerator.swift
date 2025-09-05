@@ -60,6 +60,7 @@ class MockDataGenerator {
                 steps: steps,
                 sleep: sleep,
                 workoutMinutes: workoutMinutes,
+                activeEnergy: workoutMinutes * 10,  // Mock: roughly 10 cal/min
                 weight: weight,
                 meals: meals
             )

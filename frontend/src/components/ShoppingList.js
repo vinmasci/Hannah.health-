@@ -88,13 +88,8 @@ export class ShoppingList {
     attachToBoard() {
         const mainBoard = document.querySelector('.main-board');
         if (mainBoard) {
-            // Add as the first column in the board
-            const firstChild = mainBoard.firstChild;
-            if (firstChild) {
-                mainBoard.insertBefore(this.column, firstChild);
-            } else {
-                mainBoard.appendChild(this.column);
-            }
+            // Add as the last column in the board (rightmost position)
+            mainBoard.appendChild(this.column);
             
             // Ensure visibility
             this.column.style.display = 'flex';

@@ -2,41 +2,50 @@
 //  VortexSimpleBackground.swift
 //  HannahHealth
 //
-//  Simplified Vortex particle background
+//  Placeholder background - Vortex package removed
 //
 
 import SwiftUI
-// Uncomment after adding Vortex package
-// import Vortex
 
 struct VortexSimpleBackground: View {
     var body: some View {
+        // Simple animated gradient instead of Vortex particles
         ZStack {
-            // For now, use your existing background
-            DynamicTimeBackground()
+            LinearGradient(
+                colors: [
+                    Color.indigo.opacity(0.2),
+                    Color.cyan.opacity(0.1)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
             
-            // After adding Vortex package, replace with:
-            /*
-            VortexView(
-                VortexSystem(
-                    tags: ["particle"],
-                    shape: .box(width: 400, height: 800),
-                    birthRate: 20,
-                    lifespan: 3...6,
-                    speed: 0.02...0.05,
-                    angleRange: Angle.degrees(0)...Angle.degrees(360),
-                    size: 0.5...1.0
-                )
-            ) {
+            // Simple animated circles for visual effect
+            ForEach(0..<3, id: \.self) { index in
                 Circle()
-                    .fill(.white)
-                    .frame(width: 4, height: 4)
-                    .blur(radius: 1)
-                    .opacity(0.6)
-                    .tag("particle")
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color.white.opacity(0.1),
+                                Color.clear
+                            ],
+                            center: .center,
+                            startRadius: 50,
+                            endRadius: 200
+                        )
+                    )
+                    .frame(width: 300, height: 300)
+                    .offset(
+                        x: CGFloat(index - 1) * 100,
+                        y: CGFloat(index - 1) * 50
+                    )
+                    .blur(radius: 20)
             }
-            */
         }
         .ignoresSafeArea()
     }
+}
+
+#Preview {
+    VortexSimpleBackground()
 }

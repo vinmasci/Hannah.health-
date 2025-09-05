@@ -17,6 +17,9 @@ import aiSearchColumn from './AISearchColumn.js';
 import UIStateManager from '../services/UIStateManager.js';
 import DayMealManager from './DayMealManager.js';
 import AIAssistantColumn from './ai-assistant-column.js';
+import AIDisplayColumn from './AIDisplayColumn.js';
+import AIUserAssessment from './AIUserAssessment.js';
+import nutritionWorkflow from './NutritionWorkflow.js';
 import eventBus from '../services/EventBus.js';
 
 // DOM Elements
@@ -40,15 +43,59 @@ window.aiAssistant = aiAssistant;
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
-    initializeElements();
-    setupEventListeners();
-    initializeEventBus();
-    DayMealManager.createInitialDayColumns();
-    createAIAssistantColumn();
-    openMojiService.initializeStyles();
-    emojiReplacer.init();
-    UIStateManager.init(); // Initialize event listeners
-    RecipeContainer.init(); // Initialize recipe event listeners
+    console.log('🍱 Initializing Hannah.health...');
+    
+    try {
+        initializeElements();
+        console.log('✅ Elements initialized');
+    } catch (e) {
+        console.error('❌ Failed to initialize elements:', e);
+    }
+    
+    try {
+        setupEventListeners();
+        console.log('✅ Event listeners setup');
+    } catch (e) {
+        console.error('❌ Failed to setup event listeners:', e);
+    }
+    
+    try {
+        initializeEventBus();
+        console.log('✅ EventBus initialized');
+    } catch (e) {
+        console.error('❌ Failed to initialize EventBus:', e);
+    }
+    
+    // First create the day columns (needed as reference)
+    try {
+        DayMealManager.createInitialDayColumns();
+        console.log('✅ Day columns created');
+    } catch (e) {
+        console.error('❌ Failed to create day columns:', e);
+    }
+    
+    // Then initialize the nutrition workflow
+    setTimeout(() => {
+        try {
+            nutritionWorkflow.init(mainBoard);
+            console.log('✅ Nutrition workflow initialized');
+        } catch (e) {
+            console.error('❌ Failed to initialize nutrition workflow:', e);
+        }
+    }, 100); // Small delay to ensure DOM is ready
+    
+    // Initialize other services
+    try {
+        openMojiService.initializeStyles();
+        emojiReplacer.init();
+        UIStateManager.init();
+        RecipeContainer.init();
+        console.log('✅ Other services initialized');
+    } catch (e) {
+        console.error('❌ Failed to initialize other services:', e);
+    }
+    
+    console.log('✅ Hannah.health ready!');
 });
 
 function initializeElements() {
@@ -70,6 +117,74 @@ function initializeEventBus() {
             eventBus.emit('meal:update-totals', { meal });
             eventBus.emit('day:update-totals', { dayColumn: meal.closest('.day-column') });
         }
+    });
+    
+    // Listen for Kanban board population from Step 4
+    eventBus.on('populate:kanban', ({ weekPlan, userData, preferences, targetCalories }) => {
+        console.log('[App] Populating Kanban board with personalized meal plan');
+        
+        // Populate each day column with the meal plan
+        weekPlan.forEach(dayPlan => {
+            const dayColumn = document.querySelector(`[data-day="${dayPlan.day}"]`);
+            if (!dayColumn) return;
+            
+            // Process each meal for this day
+            dayPlan.meals.forEach(meal => {
+                // Find the meal container by meal name
+                const mealContainers = dayColumn.querySelectorAll('.meal');
+                let targetMealContainer = null;
+                
+                // Find the meal container that matches this meal type
+                mealContainers.forEach(container => {
+                    const mealNameEl = container.querySelector('.meal-name');
+                    if (mealNameEl) {
+                        const mealName = mealNameEl.textContent.trim().toLowerCase();
+                        const targetMealType = meal.type.toLowerCase();
+                        
+                        // Match meal names (e.g., "Breakfast" with "Breakfast", "Morning Snack" with "Morning Snack")
+                        if (mealName === targetMealType) {
+                            targetMealContainer = container;
+                        }
+                    }
+                });
+                
+                if (targetMealContainer) {
+                    // Find the food modules container within this meal
+                    const foodContainer = targetMealContainer.querySelector('.food-modules-container');
+                    if (foodContainer) {
+                        // Clear existing items
+                        foodContainer.innerHTML = '';
+                        
+                        // Add each food item as a proper food module
+                        meal.items.forEach(item => {
+                            // Create a proper food module using the global createFoodModule function
+                            if (window.createFoodModule && item.dragData) {
+                                const module = window.createFoodModule(item.dragData, false);
+                                foodContainer.appendChild(module);
+                            } else {
+                                // Fallback: create simple food item if no dragData
+                                const foodItem = document.createElement('div');
+                                foodItem.className = 'food-module';
+                                foodItem.innerHTML = `
+                                    <span class="food-emoji">🍽️</span>
+                                    <span class="food-name">${item.name || item}</span>
+                                    <button class="remove-btn" onclick="this.parentElement.remove()">×</button>
+                                `;
+                                foodContainer.appendChild(foodItem);
+                            }
+                        });
+                        
+                        // Update meal totals after adding all items
+                        UIStateManager.updateMealTotals(targetMealContainer);
+                    }
+                }
+            });
+            
+            // Update day totals after all meals are populated
+            UIStateManager.updateDayTotals(dayColumn);
+        });
+        
+        console.log('[App] Kanban board populated with ' + weekPlan.length + ' days of meals');
     });
     
     // Listen for recipe removal
@@ -102,6 +217,27 @@ function createAIAssistantColumn() {
             mainBoard.appendChild(aiColumn);
         }
     }
+}
+
+function createAIDisplayColumn(insertBefore = null) {
+    // Check if display column already exists
+    if (document.querySelector('.ai-display-column')) return;
+    
+    const displayColumn = AIDisplayColumn.create();
+    
+    if (insertBefore) {
+        mainBoard.insertBefore(displayColumn, insertBefore);
+    } else {
+        // Insert after the AI search column if it exists
+        const aiSearchCol = document.querySelector('.ai-search-column');
+        if (aiSearchCol && aiSearchCol.nextSibling) {
+            mainBoard.insertBefore(displayColumn, aiSearchCol.nextSibling);
+        } else {
+            mainBoard.appendChild(displayColumn);
+        }
+    }
+    
+    activeColumns.push('ai-display');
 }
 
 function setupEventListeners() {
@@ -155,7 +291,11 @@ function createCategoryColumn(category, insertBefore = null) {
     
     // Handle AI Search column specially
     if (category === 'ai-search') {
+        // Create AI Gatherer column
         aiSearchColumn.create(mainBoard, activeColumns, insertBefore);
+        
+        // Don't auto-create display column - NutritionWorkflow handles this now
+        // createAIDisplayColumn(insertBefore);
         return;
     }
     
@@ -185,16 +325,16 @@ function createCategoryColumn(category, insertBefore = null) {
     };
     
     const categoryEmojis = {
-        protein: '🥩',
-        dairy: '🥛',
-        veg: '🥦',
-        fruit: '🍎',
-        grains: '🌾',
-        nuts: '🥜',
-        carbs: '🥔',
-        drinks: '🥤',
-        sweets: '🍰',
-        extras: '✨'
+        protein: '1F356',  // meat on bone
+        dairy: '1F95B',    // glass of milk
+        veg: '1F966',      // broccoli
+        fruit: '1F34E',    // red apple
+        grains: '1F33E',   // ear of rice
+        nuts: '1F95C',     // peanuts
+        carbs: '1F956',    // baguette
+        drinks: '1F964',   // cup with straw
+        sweets: '1F9C1',   // cupcake
+        extras: '2728'     // sparkles
     };
     
     // Category-specific filters
@@ -271,13 +411,16 @@ function createCategoryColumn(category, insertBefore = null) {
         `
     };
     
+    // Create OpenMoji image element
+    const emojiImg = openMojiService.createEmojiElement(categoryEmojis[category], 20, category);
+    
     column.innerHTML = `
         <div class="category-header ${category}" style="background: ${categoryColors[category]}">
-            <span>${categoryEmojis[category]} ${category.charAt(0).toUpperCase() + category.slice(1)}</span>
+            <span class="category-title">
+                <span class="category-emoji"></span>
+                ${category.charAt(0).toUpperCase() + category.slice(1)}
+            </span>
             <div class="header-buttons">
-                <button class="ai-chat-btn" onclick="openAIFoodChat('${category}')" title="AI Food Creator">
-                    <span>✨</span>
-                </button>
                 <button class="close-column" onclick="removeCategoryColumn('${category}')">×</button>
             </div>
         </div>
@@ -293,6 +436,9 @@ function createCategoryColumn(category, insertBefore = null) {
                     <button class="filter-btn" onclick="filterByMacro('${category}', 'low-fat', this)">Low Fat</button>
                 `}
             </div>
+            <button class="ai-search-btn" onclick="openAISearchColumn('${category}')" title="AI Item Search">
+                ✨ Find item using AI
+            </button>
         </div>
         <div class="category-items" data-category="${category}">
             ${categoryData.map(food => createFoodItemHTML(food, category)).join('')}
@@ -310,6 +456,12 @@ function createCategoryColumn(category, insertBefore = null) {
         } else {
             mainBoard.appendChild(column);
         }
+    }
+    
+    // Add OpenMoji icon to the header
+    const emojiContainer = column.querySelector('.category-emoji');
+    if (emojiContainer) {
+        emojiContainer.appendChild(emojiImg);
     }
     
     activeColumns.push(category);
@@ -505,6 +657,30 @@ function createFavoritesColumn(insertBefore = null) {
 // Note: AI foods now use regular food item drag handlers
 // handleAIFoodDragStart and handleAIFoodDragEnd are no longer needed
 
+// Open AI Search Column next to category column
+function openAISearchColumn(categoryName) {
+    // Check if AI search column is already open
+    if (activeColumns.includes('ai-search')) {
+        // If already open, just focus on it
+        const aiColumn = document.querySelector('.ai-assistant-column');
+        if (aiColumn) {
+            aiColumn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        return;
+    }
+    
+    // Find the category column that triggered this
+    const categoryColumn = document.querySelector(`.category-column[data-category="${categoryName}"]`);
+    
+    // Insert AI search column right after the category column
+    if (categoryColumn) {
+        aiSearchColumn.create(mainBoard, activeColumns, categoryColumn.nextSibling);
+    } else {
+        // If no category column found, just create it normally
+        aiSearchColumn.create(mainBoard, activeColumns);
+    }
+}
+
 // AI Food Chat Interface (Modal version - keep for category button)
 function openAIFoodChat(category) {
     // Create modal overlay
@@ -641,9 +817,8 @@ function addAIFoodToCategory(category, foodItem) {
         newElement.classList.add('ai-added');
         itemsContainer.insertBefore(newElement, itemsContainer.firstChild);
         
-        // Setup drag handlers for the new item
-        newElement.addEventListener('dragstart', handleFoodDragStart);
-        newElement.addEventListener('dragend', handleFoodDragEnd);
+        // Setup drag handlers for the new item using DragDropManager
+        DragDropManager.attachHandlers(newElement, 'food');
         
         // Setup portion and unit change handlers
         newElement.querySelector('.portion-input')?.addEventListener('change', handlePortionChange);
@@ -771,6 +946,7 @@ window.addNewDay = () => DayMealManager.addNewDay();
 window.expandToAddDay = () => DayMealManager.expandToAddDay();
 window.filterFoodItems = filterFoodItems;
 window.removeColumn = removeColumn;
+window.openAISearchColumn = openAISearchColumn;
 window.openAIFoodChat = openAIFoodChat;
 window.closeAIFoodChat = closeAIFoodChat;
 window.sendAIFoodRequest = sendAIFoodRequest;

@@ -366,7 +366,7 @@ struct MealPlanViewOriginal: View {
     // Helper functions
     private func mealTypeColor(_ type: String) -> Color {
         switch type.lowercased() {
-        case "breakfast": return Color(hex: "38BDF8")  // Sky 400
+        case "breakfast": return Color(hex: "FDA4AF")  // Rose 300
         case "lunch": return Color(hex: "F59E0B")      // Amber 400  
         case "dinner": return Color(hex: "6366F1")      // Indigo 400
         case "snack": return Color(hex: "10B981")       // Emerald 400

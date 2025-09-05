@@ -11,14 +11,58 @@
     align-items: center;
 }
 
-.header-title {
-    color: #1a1a1a;
-    font-size: 24px;
-    font-weight: 700;
+.header-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.header-title {
+    font-size: 26px;
+    font-weight: 800;
     letter-spacing: -0.03em;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(255, 255, 255, 0.75) 50%, 
+        rgba(255, 255, 255, 0.85) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    position: relative;
+    margin: 0;
+    line-height: 1;
+}
+
+.header-tagline {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.02em;
+    text-transform: lowercase;
+}
+
+.header-title::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.2) 0%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: blur(8px);
 }
 
 .header-controls {
@@ -49,64 +93,43 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18), 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Liquid Glass Save Plan Icon */
-.header-btn.save-plan-icon {
-    padding: 8px;
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 
-        0 4px 30px rgba(0, 0, 0, 0.1),
-        inset 0 1px 1px rgba(255, 255, 255, 0.6);
-    display: flex;
+/* Icon Buttons - Matching Category Pills */
+.header-btn.save-plan-icon,
+.header-btn.user-icon {
+    padding: 6px 12px;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
+    transition: all 0.2s ease;
 }
 
-.header-btn.save-plan-icon::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.3) 50%,
-        transparent 70%
-    );
-    transform: rotate(45deg);
-    transition: transform 0.6s ease;
-}
-
-.header-btn.save-plan-icon:hover {
-    background: rgba(255, 255, 255, 0.35);
+.header-btn.save-plan-icon:hover,
+.header-btn.user-icon:hover {
     transform: translateY(-2px);
-    box-shadow: 
-        0 8px 40px rgba(0, 0, 0, 0.12),
-        inset 0 1px 1px rgba(255, 255, 255, 0.7);
-    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.header-btn.save-plan-icon:hover::before {
-    transform: rotate(45deg) translateX(100%);
-}
-
-.header-btn.save-plan-icon:active {
+.header-btn.save-plan-icon:active,
+.header-btn.user-icon:active {
     transform: translateY(0) scale(0.98);
-    box-shadow: 
-        0 2px 20px rgba(0, 0, 0, 0.08),
-        inset 0 1px 1px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.header-btn.save-plan-icon img {
+.header-btn.save-plan-icon img,
+.header-btn.user-icon img {
     width: 20px;
     height: 20px;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));

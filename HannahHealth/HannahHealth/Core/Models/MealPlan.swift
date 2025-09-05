@@ -45,7 +45,7 @@ struct DayPlan: Codable, Identifiable {
 struct PlannedMeal: Codable, Identifiable {
     let id = UUID()
     let mealType: String // breakfast, lunch, dinner, snack
-    let name: String
+    var name: String
     let calories: Int
     let protein: Double?
     let carbs: Double?

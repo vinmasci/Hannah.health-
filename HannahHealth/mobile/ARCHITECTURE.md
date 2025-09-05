@@ -38,16 +38,25 @@ HannahHealth/
 │   ├── Chat/                 # AI chat interface
 │   │   ├── ChatViewModel.swift
 │   │   └── WorkingChatView.swift
-│   ├── Dashboard/            # Main dashboard
-│   │   └── DashboardView.swift
-│   ├── MealPlan/            # Meal planning
+│   ├── Dashboard/            # Main dashboard with animations
+│   │   ├── DashboardView.swift
+│   │   ├── DashboardViewModel.swift
+│   │   └── Modules/         # Dashboard components
+│   │       ├── CaloriesView.swift    # Animated ring charts
+│   │       ├── FoodActivityLogCard.swift
+│   │       ├── DailySummaryCard.swift
+│   │       └── QuickStatsGrid.swift
+│   ├── Log/                  # Quick logging
+│   │   └── LogView.swift    # Food/exercise quick entry
+│   ├── MealPlan/            # Meal planning kanban
 │   │   ├── MealPlanViewModel.swift
-│   │   └── MealPlanView.swift
+│   │   ├── MealPlanKanbanView.swift
+│   │   └── MealPlanChatPanel.swift
 │   ├── Shopping/            # Shopping list
 │   │   ├── ShoppingListViewModel.swift
 │   │   └── ShoppingListView.swift
-│   └── Today/               # Daily tracking
-│       └── TodayView.swift
+│   └── Profile/             # User profile
+│       └── UserProfileView.swift
 ├── Components/              # Reusable UI components
 │   ├── Theme.swift         # Design system
 │   ├── CustomTabBar.swift
@@ -89,6 +98,12 @@ User Input → View → ViewModel → Service → API
 - Cross-platform sync via Supabase
 - Local caching for offline access
 - Real-time updates
+
+### Health Tracking
+- Active Energy integration from HealthKit (single source of truth for movement)
+- Steps tracking for display (not used in calorie calculations)
+- Automatic BMR from Apple Watch Resting Energy
+- Weekly aggregation of Active Energy data
 - Mock data generation for development (90 days historical)
 
 ### Health Integration
@@ -126,6 +141,45 @@ See [SECURITY-AUDIT.md](./SECURITY-AUDIT.md) for detailed security assessment an
 - Custom tab bar with glass effects
 - Card-based layouts
 - Consistent typography and spacing
+
+## Key Features & Improvements (Sept 2025)
+
+### 🎯 Dashboard Enhancements
+- **Animated Ring Charts:** Beautiful spring animations for calorie tracking
+- **Loading States:** Smooth skeleton loaders with rotating gradient rings
+- **Date Persistence:** Navigate between dates without data loss
+- **Smart Data Loading:** Single source of truth for food data via notifications
+- **Meal Type Categorization:** Separate tracking for morning/afternoon/evening snacks
+
+### 📊 Visual Features
+- **Multi-Ring Visualization:**
+  - Outer ring: TDEE components (BMR, Steps, Exercise, TEF)
+  - Inner ring: Food consumption by meal type
+  - Interactive segments with detailed breakdowns
+- **Responsive Animations:**
+  - 1.2s spring animation on data load
+  - Scale and opacity transitions
+  - No distracting shimmer effects
+
+### 🔄 Data Flow Improvements
+- **Optimized Loading:** Eliminated duplicate API calls
+- **Real-time Updates:** Instant UI refresh on food logging
+- **Historical Data:** Proper date-based queries for past entries
+- **HealthKit Integration:** Automatic workout import from Apple Health
+
+### 🐛 Bug Fixes
+- Fixed ring chart reverting when viewing historical dates
+- Resolved double-entry issue with meal+snack combinations
+- Fixed FoodActivityLogCard not loading on app launch
+- Corrected snack categorization in meal breakdowns
+- Removed distracting shimmer effect from loading animation
+
+### 💪 Activity Tracking Improvements (Session 23)
+- **Distance-Based Recommendations:** Converted abstract steps/minutes to concrete km targets
+- **Smart Offset Calculations:** Shows exact distance needed when over calorie target
+- **Activity-Specific Suggestions:** Light running (100 cal/km) or walking (50 cal/km)
+- **Accurate Progress Bars:** Visual gaps show percentage of additional activity needed
+- **Real-Time Feedback:** Dynamic text updates based on current vs. target calories
 
 ## Database Schema
 Detailed in [SUPABASE-SETUP.md](../SUPABASE-SETUP.md):
@@ -242,3 +296,116 @@ Detailed in [SUPABASE-SETUP.md](../SUPABASE-SETUP.md):
 
 ## License
 Proprietary - Hannah Health © 2025
+
+## Architecture Review Status (January 30, 2025 - Session 19 Completed)
+
+### Current Review Score: 6/10 ✅ IMPROVED
+
+#### ✅ CRITICAL ISSUE RESOLVED - MealPlanKanbanView.swift Successfully Refactored
+
+##### Session 19 Achievements
+
+**1. MealPlanKanbanView.swift Refactoring - COMPLETE**
+- **Before**: 1,056 lines (3x over limit) 🚨 COMPILER TIMEOUT RISK
+- **After**: 113 lines ✅ (89.3% reduction)
+- **Status**: Successfully split into 8 modular components
+
+**2. InsightsPlaceholder.swift Refactoring - COMPLETE**
+- **Before**: 694 lines (344 lines over limit) ⚠️
+- **After**: 152 lines ✅ (78% reduction)
+- **Status**: Successfully split into 7 modular components in Insights folder
+
+**Files Created During Refactoring**:
+
+**MealPlan Components (Session 19a):**
+1. **MealPlanTypes.swift** (109 lines) - All data models and enums
+2. **FoodSearchService.swift** (216 lines) - Nutrition API service
+3. **MealPlanHelpers.swift** (73 lines) - Utility functions  
+4. **TimePickerSheet.swift** (53 lines) - Time picker component
+5. **MealSlotCard.swift** (333 lines) - Individual meal slot UI
+6. **DayCard.swift** (190 lines) - Day container component
+7. **MealPlanKanbanHeader.swift** (33 lines) - Header component
+
+**Insights Components (Session 19b):**
+1. **InsightsTypes.swift** (54 lines) - MetricType, TimeRange, ChartDataPoint
+2. **InsightsDataService.swift** (154 lines) - Data generation service
+3. **InsightsChartView.swift** (124 lines) - Chart visualization
+4. **InsightsStatComponents.swift** (86 lines) - InsightsMetricTab, QuickStatCard
+5. **InsightsNavigationBar.swift** (152 lines) - Time range navigation
+6. **InsightsHelpers.swift** (107 lines) - Formatting utilities
+7. **InsightsPlaceholder.swift** (152 lines) - Main orchestrator
+
+**Technical Challenges Resolved**:
+- Fixed FocusState binding issues in SwiftUI components
+- Resolved Xcode project file integration problems
+- Eliminated name conflicts (MealPlanHeader renamed to MealPlanKanbanHeader)
+- Simplified folder structure for better visibility
+
+#### 🚨 Remaining Critical Violations - URGENT
+
+##### File Size Violations (Highest Priority)
+1. **CaloriesView.swift: 1,144 lines** (794 lines over limit!) 
+   - Status: CRITICAL - 3.3x over limit!
+   - Risk: Compiler timeout imminent
+   - Contains CombinedDonutChart component (added during session)
+   
+2. ~~**InsightsPlaceholder.swift: 694 lines**~~ ✅ FIXED in Session 19b
+   - Refactored to 152 lines + 6 component files
+
+3. **CaloriesView.swift: 627 lines** (277 lines over limit)
+   - Status: HIGH PRIORITY
+   
+4. **TimeOfDayBackgrounds.swift: 586 lines** (236 lines over limit)
+   - Status: HIGH PRIORITY
+
+5. **MealPlanChatViewModel.swift: 540 lines** (340 lines over 200 limit)
+   - Status: CRITICAL (ViewModel violation)
+
+6. **AuthManager.swift: 459 lines** (259 lines over 200 limit)
+   - Status: CRITICAL (Service violation + Security risk)
+
+##### 🔒 Security Vulnerabilities - RESOLVED
+- **Hardcoded Supabase credentials** in AuthManager.swift - ✅ FIXED
+- API key: `[REDACTED]` - ✅ SECURED
+- Debug logging throughout production code - ⚠️ IN PROGRESS
+- Development skip buttons still present - ⚠️ IN PROGRESS
+
+#### ✅ Architecture Strengths (Maintained)
+- Excellent MVVM pattern implementation
+- Clean dependency injection patterns
+- Proper async/await usage
+- Good service layer separation
+- Successful modularization (proven with MealPlanKanbanView)
+
+#### 🎯 Immediate Next Steps (Priority Order)
+
+1. **UserProfileView.swift Refactoring (NEXT TARGET)**
+   - [ ] Extract CountryPickerView.swift (~250 lines)
+   - [ ] Create PhoneNumberFormatter.swift utility (~100 lines)
+   - [ ] Move validation logic to UserProfileViewModel (~150 lines)
+   - [ ] Extract form sections into components
+   - Target: <300 lines for main view
+
+2. **Security Fixes (CRITICAL)**
+   - [ ] Move API keys to Config.plist
+   - [ ] Implement Keychain storage
+   - [ ] Remove all hardcoded credentials
+   - [ ] Clean up debug logging
+
+3. **InsightsPlaceholder.swift Refactoring**
+   - [ ] Split into multiple feature components
+   - [ ] Extract chart components
+   - [ ] Separate data processing logic
+
+#### 📊 Progress Metrics
+- **Files Fixed**: 2/7 critical violations resolved ✅
+- **Lines Reduced**: 1,485 lines eliminated through refactoring
+- **Compiler Risk**: Eliminated for MealPlanKanbanView and InsightsPlaceholder
+- **Test Coverage**: Still 0% (needs immediate attention)
+
+#### 🏆 Session 19 Lessons Learned
+1. **Xcode Integration**: Keep file structure simple, avoid deep nesting
+2. **FocusState Bindings**: Use `FocusState<Bool>.Binding` type, not `@FocusState.Binding`
+3. **Component Naming**: Check for conflicts across the entire project
+4. **Incremental Testing**: Test after each extraction to catch issues early
+5. **Backup Strategy**: Always create backups before major refactoring

@@ -29,11 +29,16 @@ export class MealContainer {
             <div class="meal" data-meal-id="${mealId}">
                 <div class="meal-header">
                     <div class="meal-header-top">
-                        <div class="meal-name" contenteditable="true" 
-                             onclick="MealContainer.handleNameClick(event)" 
-                             onblur="MealContainer.handleNameBlur(event, '${mealId}')" 
-                             onkeydown="MealContainer.handleNameKeydown(event)">
-                            <img src="${emojiUrl}" width="${emojiSize}" height="${emojiSize}" class="meal-emoji openmoji-icon ${sizeClass}" alt="${mealName}"> ${mealName}
+                        <div class="meal-header-left">
+                            <span class="meal-icon">
+                                <img src="${emojiUrl}" width="${emojiSize}" height="${emojiSize}" class="meal-emoji openmoji-icon ${sizeClass}" alt="${mealName}">
+                            </span>
+                            <div class="meal-name" contenteditable="true" 
+                                 onclick="MealContainer.handleNameClick(event)" 
+                                 onblur="MealContainer.handleNameBlur(event, '${mealId}')" 
+                                 onkeydown="MealContainer.handleNameKeydown(event)">
+                                ${mealName}
+                            </div>
                         </div>
                         <div class="meal-header-actions">
                             <div class="meal-time" contenteditable="true" 
@@ -69,7 +74,7 @@ export class MealContainer {
                          ondragover="handleMealDragOver(event)" 
                          ondrop="handleMealDrop(event)" 
                          ondragleave="handleMealDragLeave(event)">
-                        <span class="add-food-text">+ Add food or recipe</span>
+                        <span class="add-food-text">+ ADD FOOD ITEMS</span>
                     </div>
                 </div>
                 <div class="meal-totals" style="display: none;">
@@ -255,7 +260,16 @@ export class MealContainer {
             // Expand the meal
             meal.classList.remove('minimized');
             dropZone.style.display = 'block';
-            if (totals) totals.style.display = 'block';
+            // Only show totals if there are food items
+            if (totals) {
+                const foodModules = meal.querySelectorAll('.food-module');
+                const recipes = meal.querySelectorAll('.recipe-container');
+                if (foodModules.length > 0 || recipes.length > 0) {
+                    totals.style.display = 'block';
+                } else {
+                    totals.style.display = 'none';
+                }
+            }
             minimizeBtn.title = 'Minimize';
         } else {
             // Minimize the meal
@@ -303,29 +317,30 @@ export class MealContainer {
     
     static handleNameBlur(event, mealId) {
         const element = event.target;
-        const text = element.textContent.trim();
-        // Remove any existing emoji image and extract text
-        const existingEmoji = element.querySelector('.meal-emoji');
-        if (existingEmoji) {
-            existingEmoji.remove();
-        }
-        const mealName = text.trim();
+        const mealName = element.textContent.trim();
         
         if (!mealName) {
-            element.innerHTML = element.dataset.originalText;
+            element.textContent = element.dataset.originalText || 'Untitled Meal';
             return;
         }
         
-        // Create new OpenMoji emoji with appropriate size
-        const emojiCode = this.getMealEmojiCode(mealName);
-        const emojiUrl = this.openMojiService.getEmojiUrl(emojiCode);
-        const mealLower = mealName.toLowerCase();
-        let emojiSize = 20; // default
-        if (mealLower.includes('breakfast')) emojiSize = 28;
-        else if (mealLower.includes('morning') && mealLower.includes('snack')) emojiSize = 24;
-        else if (mealLower.includes('dinner')) emojiSize = 24;
-        const sizeClass = `size-${emojiSize}`;
-        element.innerHTML = `<img src="${emojiUrl}" width="${emojiSize}" height="${emojiSize}" class="meal-emoji openmoji-icon ${sizeClass}" alt="${mealName}"> ${mealName}`;
+        // Update the icon separately (find the meal-icon sibling)
+        const mealHeader = element.closest('.meal-header');
+        const mealIcon = mealHeader.querySelector('.meal-icon img');
+        if (mealIcon) {
+            const emojiCode = this.getMealEmojiCode(mealName);
+            const emojiUrl = this.openMojiService.getEmojiUrl(emojiCode);
+            const mealLower = mealName.toLowerCase();
+            let emojiSize = 20; // default
+            if (mealLower.includes('breakfast')) emojiSize = 28;
+            else if (mealLower.includes('morning') && mealLower.includes('snack')) emojiSize = 24;
+            else if (mealLower.includes('dinner')) emojiSize = 24;
+            
+            mealIcon.src = emojiUrl;
+            mealIcon.width = emojiSize;
+            mealIcon.height = emojiSize;
+            mealIcon.alt = mealName;
+        }
     }
     
     static handleNameKeydown(event) {

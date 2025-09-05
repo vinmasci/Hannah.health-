@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hannah AI Conversation Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-case {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-case h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .user-message {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 16px;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        .expected-behavior {
+            background: #f0f0f0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .expected-behavior strong {
+            color: #667eea;
+        }
+        .check-mark {
+            color: green;
+            font-size: 20px;
+        }
+        .cross-mark {
+            color: red;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hannah AI Conversation Flow Test</h1>
+    <p>Test these conversation scenarios to ensure Hannah asks for information naturally before creating meal plans:</p>
+
+    <div class="test-case">
+        <h3>Test 1: Weight Loss Goal</h3>
+        <div class="user-message">I want to lose weight</div>
+        <div class="expected-behavior">
+            <strong>Expected Response:</strong><br>
+            Hannah should NOT immediately add meals. Instead, she should:<br>
+            1. Acknowledge the goal warmly<br>
+            2. Ask for current weight, height, and age<br>
+            3. Ask about activity level<br>
+            4. WAIT for user response before creating any meal plan
+        </div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test 2: Muscle Building Goal</h3>
+        <div class="user-message">I want to build muscle</div>
+        <div class="expected-behavior">
+            <strong>Expected Response:</strong><br>
+            Hannah should:<br>
+            1. Show enthusiasm for the goal<br>
+            2. Ask about current weight and training schedule<br>
+            3. Ask about protein preferences<br>
+            4. WAIT for answers before adding meals
+        </div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test 3: Health Condition</h3>
+        <div class="user-message">I have diabetes and need to watch my sugar</div>
+        <div class="expected-behavior">
+            <strong>Expected Response:</strong><br>
+            Hannah should:<br>
+            1. Show understanding and support<br>
+            2. Ask about type of diabetes (Type 1 or 2)<br>
+            3. Ask about current diet restrictions<br>
+            4. Ask about target carb limits per meal<br>
+            5. WAIT for information before creating meal plan
+        </div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test 4: After Getting Information</h3>
+        <div class="user-message">I'm 75kg, 170cm tall, 35 years old, and moderately active</div>
+        <div class="expected-behavior">
+            <strong>Expected Response:</strong><br>
+            NOW Hannah should:<br>
+            1. Calculate TDEE (approximately 2400-2500 calories)<br>
+            2. Create appropriate deficit/surplus based on goal<br>
+            3. USE ACTION blocks to add meals to Monday<br>
+            4. Actually fill the planner with food items
+        </div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test 5: Simple Hunger</h3>
+        <div class="user-message">I'm hungry</div>
+        <div class="expected-behavior">
+            <strong>Expected Response:</strong><br>
+            Hannah should IMMEDIATELY add a healthy snack using ACTION blocks<br>
+            No questions needed - just help right away!
+        </div>
+    </div>
+
+    <h2>Testing Instructions:</h2>
+    <ol>
+        <li>Open the application at <a href="http://localhost:3000">http://localhost:3000</a></li>
+        <li>Try each test case above</li>
+        <li>Verify Hannah asks for information when needed</li>
+        <li>Verify she uses ACTION blocks to add meals after getting information</li>
+        <li>Check that meals actually appear on the kanban board</li>
+    </ol>
+</body>
+</html>

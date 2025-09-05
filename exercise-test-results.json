@@ -1,0 +1,99 @@
+[
+  {
+    "scenario": "Gym and running routine",
+    "initial": "3x gym, 2x runs",
+    "aiResponse": "Great routine! Let's get specific so I can calculate accurately. For your gym sessions, how long do you typically spend and what's the intensity - light, moderate, or intense? And same for your runs?",
+    "needsFollowUp": true,
+    "followUp": "gym sessions 45 mins moderate intensity, runs 30 mins light intensity",
+    "followUpAIResponse": "Thanks for the details! That helps me understand your exercise routine better. Let's move to the next question.",
+    "stillNeedsFollowUp": false,
+    "status": "success"
+  },
+  {
+    "scenario": "No exercise",
+    "initial": "none",
+    "aiResponse": "Got it.",
+    "needsFollowUp": false,
+    "status": "success"
+  },
+  {
+    "scenario": "Yoga practice",
+    "initial": "yoga 4 times a week",
+    "aiResponse": "Great routine! Let's get specific so I can calculate accurately. For your yoga sessions, how long do you typically spend and what's the intensity - light, moderate, or intense?",
+    "needsFollowUp": true,
+    "followUp": "1 hour sessions, light to moderate intensity",
+    "followUpAIResponse": "Thanks for the details! That helps me understand your exercise routine better. Let's move to the next question.",
+    "stillNeedsFollowUp": false,
+    "status": "success"
+  },
+  {
+    "scenario": "Mixed activities",
+    "initial": "swimming twice, cycling once, and weekend hikes",
+    "aiResponse": "Great routine! Let's get specific so I can calculate accurately. For your swimming, cycling, and weekend hikes, how long do you typically spend on each activity and what's the intensity - light, moderate, or intense?",
+    "needsFollowUp": true,
+    "followUp": "swimming 45 mins moderate, cycling 1 hour moderate, hikes 2-3 hours light",
+    "followUpAIResponse": "Thanks for the details! That helps me understand your exercise routine better. Let's move to the next question.",
+    "stillNeedsFollowUp": false,
+    "status": "success"
+  },
+  {
+    "scenario": "CrossFit enthusiast",
+    "initial": "crossfit 5x week",
+    "aiResponse": "Great routine! Let's get specific so I can calculate accurately. For your CrossFit sessions, how long do you typically spend and what's the intensity - light, moderate, or intense?",
+    "needsFollowUp": true,
+    "followUp": "1 hour sessions, very intense",
+    "followUpAIResponse": "Thanks for the details! That helps me understand your exercise routine better. Let's move to the next question.",
+    "stillNeedsFollowUp": false,
+    "status": "success"
+  },
+  {
+    "scenario": "Simple walking",
+    "initial": "just daily walks",
+    "aiResponse": "Great routine! Let's get specific so I can calculate accurately. For your daily walks, how long do you typically spend and what's the intensity - light, moderate, or intense?",
+    "needsFollowUp": true,
+    "followUp": "30-45 minutes, light intensity",
+    "followUpAIResponse": "Thanks for the details! That helps me understand your exercise routine better. Let's move to the next question.",
+    "stillNeedsFollowUp": false,
+    "status": "success"
+  },
+  {
+    "scenario": "Sports player",
+    "initial": "basketball 3x week, tennis on weekends",
+    "aiResponse": "Great routine! Let's get specific so I can calculate accurately. For your basketball and tennis, how long do you typically spend on each and what's the intensity - light, moderate, or intense?",
+    "needsFollowUp": true,
+    "followUp": "basketball 90 mins high intensity, tennis 2 hours moderate",
+    "followUpAIResponse": "Thanks for the details! That helps me understand your exercise routine better. Let's move to the next question.",
+    "stillNeedsFollowUp": false,
+    "status": "success"
+  },
+  {
+    "scenario": "Home workouts",
+    "initial": "home workouts every morning",
+    "aiResponse": "Great routine! Let's get specific so I can calculate accurately. For your home workouts, how long do you typically spend and what's the intensity - light, moderate, or intense?",
+    "needsFollowUp": true,
+    "followUp": "20-30 minutes, moderate intensity bodyweight exercises",
+    "followUpAIResponse": "Thanks for the details! That helps me understand your exercise routine better. Let's move to the next question.",
+    "stillNeedsFollowUp": false,
+    "status": "success"
+  },
+  {
+    "scenario": "Martial arts",
+    "initial": "BJJ 3x week and boxing 2x",
+    "aiResponse": "Great routine! Let's get specific so I can calculate accurately. For your BJJ and boxing, how long do you typically spend and what's the intensity - light, moderate, or intense?",
+    "needsFollowUp": true,
+    "followUp": "BJJ 90 mins intense, boxing 1 hour very intense",
+    "followUpAIResponse": "Thanks for the details! That helps me understand your exercise routine better. Let's move to the next question.",
+    "stillNeedsFollowUp": false,
+    "status": "success"
+  },
+  {
+    "scenario": "Casual exercise",
+    "initial": "pilates twice a week",
+    "aiResponse": "Great routine! Let's get specific so I can calculate accurately. For your pilates sessions, how long do you typically spend and what's the intensity - light, moderate, or intense?",
+    "needsFollowUp": true,
+    "followUp": "45 minute classes, moderate intensity",
+    "followUpAIResponse": "Thanks for the details! That helps me understand your exercise routine better. Let's move to the next question.",
+    "stillNeedsFollowUp": false,
+    "status": "success"
+  }
+]

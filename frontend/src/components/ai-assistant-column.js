@@ -3,25 +3,32 @@
 
 import AIService from '../services/ai-service.js';
 import { OpenMojiService } from '../services/openmoji-service.js';
+import { UserProfileManager } from './UserProfileManager.js';
+import { RecipeProcessor } from './RecipeProcessor.js';
+import { ChatUIManager } from './ChatUIManager.js';
+import { AIMessageProcessor } from './AIMessageProcessor.js';
+import { ActionExecutor } from './ActionExecutor.js';
 
 class AIAssistantColumn {
     constructor() {
         this.aiService = new AIService();
         this.openMojiService = new OpenMojiService();
         this.conversationHistory = [];
-        this.aboutMeHistory = [];
         this.isProcessing = false;
-        this.activeTab = 'meal-planner';
         this.isMinimized = false;
-        this.userProfile = {
-            age: null,
-            weight: null,
-            height: null,
-            activityLevel: null,
-            goals: null,
-            restrictions: null,
-            tdee: null
-        };
+        
+        // Use extracted managers
+        this.profileManager = new UserProfileManager();
+        this.recipeProcessor = new RecipeProcessor();
+        this.chatUI = new ChatUIManager();
+        this.messageProcessor = new AIMessageProcessor(this.aiService);
+        this.actionExecutor = new ActionExecutor();
+        
+        // Set dependencies
+        this.actionExecutor.setDependencies(this.recipeProcessor);
+        
+        // Alias for backward compatibility
+        this.userProfile = this.profileManager.userProfile;
     }
     
     createColumn() {
@@ -35,7 +42,7 @@ class AIAssistantColumn {
                             <span class="ai-icon">💬</span>
                             <div class="ai-text-content">
                                 <h3>Hannah AI</h3>
-                                <span class="ai-subtitle">Your Meal Assistant</span>
+                                <span class="ai-subtitle">Your Nutrition Coach</span>
                             </div>
                         </div>
                         <button class="btn-minimize-ai" onclick="aiAssistant.toggleMinimize(event)" title="Minimize">
@@ -45,116 +52,25 @@ class AIAssistantColumn {
                         </button>
                     </div>
                 </div>
-                <div class="ai-tabs">
-                    <button class="ai-tab active" data-tab="meal-planner" onclick="aiAssistant.switchTab('meal-planner')">
-                        <img src="${this.openMojiService.getEmojiUrl('1F37D')}" width="20" height="20" class="openmoji-icon" alt="meal"> Meal Planner
-                    </button>
-                    <button class="ai-tab" data-tab="about-me" onclick="aiAssistant.switchTab('about-me')">
-                        <img src="${this.openMojiService.getEmojiUrl('1F977')}" width="20" height="20" class="openmoji-icon" alt="ninja"> About Me
-                    </button>
-                </div>
             </div>
             
             <div class="ai-column-body">
-                <div class="ai-tab-content" id="meal-planner-content">
-                    <div class="ai-chat-messages" id="ai-chat-messages">
-                        <div class="ai-welcome-message">
-                            <div class="hannah-avatar">H</div>
-                            <div class="message-bubble">
-                                <p>Hi! I'm Hannah, your AI nutritionist at Hannah.health 🌟</p>
-                                <p>I can help you:</p>
-                                <p>• Create personalized meal plans for your goals<br>
-                                • Find and add recipes from the web<br>
-                                • Track your calories and macros<br>
-                                • Build healthy eating habits</p>
-                                <p>Just tell me what you'd like to eat, your health goals, or ask for meal ideas - I'll add them directly to your planner!</p>
-                                <p><strong>Try saying:</strong> "I want to lose weight" or "Add a healthy breakfast" or "Find me a chicken recipe"</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="ai-tab-content" id="about-me-content" style="display: none;">
-                    <div class="user-profile-form">
-                        <div class="profile-section">
-                            <h4>What's Your Goal?</h4>
-                            <textarea id="user-goal" class="profile-textarea" placeholder="I want to lose 10kg for my wedding in 6 months..." onchange="aiAssistant.saveUserProfile()"></textarea>
-                        </div>
-                        
-                        <div class="profile-section">
-                            <h4>Physical Stats</h4>
-                            <div class="profile-row-half">
-                                <div class="profile-field">
-                                    <label>Weight (kg)</label>
-                                    <input type="number" id="user-weight" class="profile-input" placeholder="70" onchange="aiAssistant.saveUserProfile()">
-                                </div>
-                                <div class="profile-field">
-                                    <label>Height (cm)</label>
-                                    <input type="number" id="user-height" class="profile-input" placeholder="170" onchange="aiAssistant.saveUserProfile()">
-                                </div>
-                            </div>
-                            <div class="profile-row-half">
-                                <div class="profile-field">
-                                    <label>Age</label>
-                                    <input type="number" id="user-age" class="profile-input" placeholder="30" onchange="aiAssistant.saveUserProfile()">
-                                </div>
-                                <div class="profile-field">
-                                    <label>Gender</label>
-                                    <select id="user-gender" class="profile-input" onchange="aiAssistant.saveUserProfile()">
-                                        <option value="">Select...</option>
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
-                                        <option value="non-binary">Non-binary</option>
-                                        <option value="other">Other</option>
-                                        <option value="prefer-not-to-say">Prefer not to say</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="profile-section">
-                            <h4>Describe Your Lifestyle</h4>
-                            <textarea id="user-lifestyle" class="profile-textarea" placeholder="Office worker during the week, gym 3 times after work. Ride bikes on weekends with family. Usually walk the dog twice a day..." onchange="aiAssistant.saveUserProfile()"></textarea>
-                        </div>
-                        
-                        <div class="profile-section">
-                            <h4>Any Health Conditions or Dietary Restrictions?</h4>
-                            <textarea id="user-health" class="profile-textarea" placeholder="Type 2 diabetes, lactose intolerant, trying to lower cholesterol..." onchange="aiAssistant.saveUserProfile()"></textarea>
-                        </div>
-                        
-                        <div class="profile-section">
-                            <h4>What Does a Typical Day of Eating Look Like?</h4>
-                            <textarea id="user-typical-diet" class="profile-textarea" placeholder="Usually skip breakfast, coffee with milk. Sandwich for lunch. Dinner is usually meat and vegetables. Snack on chocolate in the afternoon..." onchange="aiAssistant.saveUserProfile()"></textarea>
-                        </div>
-                        
-                        <div class="profile-section">
-                            <h4>Biggest Challenges?</h4>
-                            <textarea id="user-challenges" class="profile-textarea" placeholder="Late night snacking, weekend binge eating, no time for meal prep, hate vegetables..." onchange="aiAssistant.saveUserProfile()"></textarea>
-                        </div>
-                        
-                        <div class="profile-section calculated-stats">
-                            <h4>AI Analysis</h4>
-                            <button class="analyze-profile-btn" onclick="aiAssistant.analyzeProfile()">
-                                <span class="btn-icon">🤖</span>
-                                Analyze My Profile
-                            </button>
-                            <div class="stats-display" id="ai-analysis" style="display: none;">
-                                <div class="stat-card full-width">
-                                    <span class="stat-label">Recommended Daily Calories</span>
-                                    <span class="stat-value" id="calc-target">-</span>
-                                </div>
-                                <div class="stat-card">
-                                    <span class="stat-label">BMI</span>
-                                    <span class="stat-value" id="calc-bmi">-</span>
-                                </div>
-                                <div class="stat-card">
-                                    <span class="stat-label">TDEE</span>
-                                    <span class="stat-value" id="calc-tdee">-</span>
-                                </div>
-                                <div class="analysis-summary" id="analysis-summary">
-                                    <!-- AI analysis will appear here -->
-                                </div>
-                            </div>
+                <div class="ai-chat-messages" id="ai-chat-messages">
+                    <div class="ai-welcome-message">
+                        <div class="hannah-avatar">H</div>
+                        <div class="message-bubble">
+                            <p><strong>Hi! I'm Hannah, your personal nutrition coach 👋</strong></p>
+                            <p>I'm here to create a personalized meal plan that works for YOUR body and YOUR goals.</p>
+                            <p>Whether you want to:</p>
+                            <p style="margin-left: 20px;">
+                            • Lose weight safely<br>
+                            • Build muscle<br>
+                            • Boost your energy<br>
+                            • Manage a health condition<br>
+                            • Or just eat healthier
+                            </p>
+                            <p>I'll ask you a few questions to understand your needs, then fill your meal planner with foods tailored specifically for you.</p>
+                            <p><strong>Let's start simple - what's your main health goal right now?</strong></p>
                         </div>
                     </div>
                 </div>
@@ -179,283 +95,129 @@ class AIAssistantColumn {
         return column;
     }
     
-    switchTab(tabName) {
-        // Update active tab
-        this.activeTab = tabName;
-        
-        // Update tab buttons
-        document.querySelectorAll('.ai-tab').forEach(tab => {
-            tab.classList.toggle('active', tab.dataset.tab === tabName);
-        });
-        
-        // Show/hide content
-        document.getElementById('meal-planner-content').style.display = 
-            tabName === 'meal-planner' ? 'flex' : 'none';
-        document.getElementById('about-me-content').style.display = 
-            tabName === 'about-me' ? 'flex' : 'none';
-            
-        // Update input area visibility
-        const inputArea = document.querySelector('.ai-chat-input-area');
-        if (tabName === 'about-me') {
-            inputArea.style.display = 'none';
-            this.loadUserProfile();
-        } else {
-            inputArea.style.display = 'flex';
-            const input = document.getElementById('ai-text-input');
-            input.placeholder = "Type a message...";
-        }
-    }
     
     async handleUserInput() {
-        const input = document.getElementById('ai-text-input');
-        const userText = input.value.trim();
-        if (!userText || this.isProcessing) return;
+        // Step 1: Get and validate input
+        const userText = this.getUserInput();
+        if (!userText) return;
         
-        // Clear input
-        input.value = '';
-        
-        // Determine which tab we're in
-        const isAboutMe = this.activeTab === 'about-me';
-        const messagesAreaId = isAboutMe ? 'about-me-messages' : 'ai-chat-messages';
-        
-        // Add user message to the appropriate chat
-        this.addMessage(userText, 'user', messagesAreaId);
-        
-        // Process with AI
-        this.isProcessing = true;
-        this.showTypingIndicator(messagesAreaId);
+        // Step 2: Setup UI for processing
+        const messagesAreaId = this.setupUIForProcessing(userText);
         
         try {
-            let context;
+            // Step 3: Build context and process message
+            const context = this.buildContext();
+            const result = await this.messageProcessor.processUserMessage(userText, context);
             
-            if (isAboutMe) {
-                // About Me context - for collecting user stats
-                context = {
-                    systemPrompt: `You are Hannah from Hannah.health. You're helping the user share their health information to create personalized meal plans.
-
-Extract and remember these details when users share them:
-- Age
-- Weight (kg or lbs)
-- Height (cm or ft/in)
-- Activity level (sedentary, lightly active, moderately active, very active, extremely active)
-- Goals (lose weight, gain muscle, maintain, etc.)
-- Dietary restrictions (vegetarian, vegan, allergies, etc.)
-- Daily steps or exercise routine
-
-Calculate their TDEE when you have enough information.
-Be conversational and encouraging. Ask follow-up questions to get complete information.
-Store this information to use when creating meal plans.
-
-Current user profile: ${JSON.stringify(this.userProfile)}`,
-                    conversationHistory: this.aboutMeHistory.slice(-10)
-                };
-            } else {
-                // Meal planner context - include user profile for personalization
-                context = {
-                systemPrompt: `You are Hannah, the AI assistant for Hannah.health - a visual meal planning application that helps users plan their weekly meals, track nutrition, and achieve their health goals.
-
-ABOUT HANNAH.HEALTH:
-- It's a drag-and-drop meal planner where users organize meals for each day of the week
-- Users can drag food items from category columns (protein, dairy, veg, fruit, etc.) into meal slots
-- Each day has 6 meal slots: breakfast, morning snack, lunch, afternoon snack, dinner, evening snack
-- The app automatically calculates calories, macros (protein, carbs, fat), and costs for each meal and day
-- Users can see visual macro breakdowns with color-coded bars
-- The app is designed to make meal planning simple, visual, and effective
-
-YOUR ROLE AS HANNAH:
-You are a proactive, intelligent nutritionist and meal planning expert who:
-1. Understands users' health goals and creates personalized meal plans
-2. Searches the web for real recipes and nutrition information (you have Brave Search API access)
-3. Actively adds meals to their planner using ACTION blocks (not just describing them)
-4. Provides evidence-based nutrition advice
-5. Helps users stay on track with encouragement and practical tips
-6. Remembers user preferences and adapts recommendations accordingly
-
-BE PROACTIVE:
-- If someone says they're hungry, suggest and ADD a healthy snack
-- If they mention a goal (lose weight, gain muscle), create and ADD appropriate meal plans
-- If they mention they like certain foods, search for recipes and ADD them
-- If they ask about any food or recipe, search for it and offer to ADD it
-- Always think: "How can I make their meal planning easier right now?"
-
-CRITICAL: You MUST use ACTION blocks to add food to the planner. Just describing meals does NOT add them!
-
-When users mention food or meals, ALWAYS use ACTION blocks to actually add them:
-**ACTION_START**
-{
-  "action": "add_meal",
-  "items": [
-    {"food": "Grilled Chicken Breast", "day": "Monday", "meal": "lunch", "quantity": 150, "unit": "g"},
-    {"food": "Brown Rice", "day": "Monday", "meal": "lunch", "quantity": 75, "unit": "g"},
-    {"food": "Broccoli", "day": "Monday", "meal": "lunch", "quantity": 100, "unit": "g"},
-    {"food": "Olive Oil", "day": "Monday", "meal": "lunch", "quantity": 1, "unit": "tbsp"}
-  ]
-}
-**ACTION_END**
-
-SMART BEHAVIORS:
-- When someone asks "what should I eat?", don't just suggest - CREATE and ADD a meal
-- When they mention being on a diet, immediately offer to create a week's meal plan
-- If they mention a recipe, search for it and ADD all ingredients
-- Track their preferences: if they're vegetarian, never suggest meat
-- If no day is specified, assume they mean today (Monday by default)
-- If no meal is specified, figure out the appropriate meal based on time context
-
-PORTION GUIDELINES:
-- Proteins: 100-200g per meal
-- Grains/carbs: 50-100g (dry weight) or 150-200g (cooked)
-- Vegetables: 100-200g per meal
-- Fruits: 1-2 pieces or 100-150g
-- Nuts/seeds: 20-30g
-- Oils/fats: 1-2 tbsp
-
-IMPORTANT TECHNICAL DETAILS:
-- Days must be capitalized: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
-- Meals: breakfast, morning snack, lunch, afternoon snack, dinner, evening snack
-- You have web search capability - USE IT for any food/recipe questions
-- When multiple recipes are found, ask which one to add (don't add all)
-- User profile data: ${JSON.stringify(this.userProfile)}`,
-                    conversationHistory: this.conversationHistory.slice(-10)
-                };
-            }
+            // Step 4: Handle the response
+            await this.handleAIResponse(result, userText, messagesAreaId);
             
-            const response = await this.aiService.chat(userText, context);
-            
-            // Show search status if web search was performed
-            if (response.searchStatus) {
-                this.showSearchStatus(response.searchStatus, messagesAreaId);
-                await this.delay(1500);
-            }
-            
-            // Simulate typing delay
-            await this.delay(1000);
-            this.hideTypingIndicator(messagesAreaId);
-            
-            // Check if the response contains recipe URLs
-            const urlMatches = response.message.match(/(https?:\/\/[^\s\)]+)/g);
-            
-            // Store URLs in instance for later reference if user chooses one
-            if (urlMatches && urlMatches.length > 0) {
-                this.lastRecipeUrls = urlMatches.map(url => url.replace(/[<>\)]/g, ''));
-            }
-            
-            // Check if user is choosing from previously shown recipes
-            const isChoosingRecipe = userText.toLowerCase().match(/add\s+(the\s+)?(first|second|third|1st|2nd|3rd|recipe\s*[123]|number\s*[123])/i) ||
-                                    userText.toLowerCase().includes('add that one') ||
-                                    (userText.match(/https?:\/\/[^\s]+/i) && (userText.toLowerCase().includes('add') || userText.toLowerCase().includes('use')));
-            
-            if (isChoosingRecipe && this.lastRecipeUrls && this.lastRecipeUrls.length > 0) {
-                // User is choosing from previously shown recipes
-                let selectedUrl = null;
-                
-                // Check if they provided a URL directly
-                const userUrl = userText.match(/https?:\/\/[^\s]+/i);
-                if (userUrl) {
-                    selectedUrl = userUrl[0];
-                } else {
-                    // Parse which number they chose
-                    const choiceMatch = userText.toLowerCase().match(/(first|1st|recipe\s*1|number\s*1)/) ? 0 :
-                                       userText.toLowerCase().match(/(second|2nd|recipe\s*2|number\s*2)/) ? 1 :
-                                       userText.toLowerCase().match(/(third|3rd|recipe\s*3|number\s*3)/) ? 2 : 0;
-                    selectedUrl = this.lastRecipeUrls[choiceMatch];
-                }
-                
-                if (selectedUrl) {
-                    // Process the selected recipe
-                    await this.processRecipeUrl(selectedUrl, userText, messagesAreaId);
-                }
-            } else if (urlMatches && urlMatches.length > 1 && (response.message.includes('recipe') || response.message.includes('Recipe'))) {
-                // Multiple recipes found - ask user to choose but DON'T add them all
-                this.addMessage("I found multiple recipes! Please tell me which one you'd like to add by saying something like 'add the first one' or 'add recipe 2' or just paste the URL of the one you want.", 'hannah', messagesAreaId);
-                // DON'T process any recipes here - wait for user to choose
-            } else if (urlMatches && urlMatches.length === 1 && (response.message.includes('recipe') || response.message.includes('Recipe'))) {
-                const recipeUrl = urlMatches[0].replace(/[<>\)]/g, ''); // Clean the URL
-                
-                // Check if user explicitly wants to add this recipe
-                if ((userText.toLowerCase().includes('add') && userText.toLowerCase().includes('recipe')) || 
-                    userText.toLowerCase().includes('add that') || 
-                    userText.toLowerCase().includes('add it') ||
-                    userText.toLowerCase().includes('add this')) {
-                    
-                    // Process this single recipe
-                    await this.processRecipeUrl(recipeUrl, userText, messagesAreaId);
-                }
-            }
-            
-            // Parse response for actions - can have multiple action blocks
-            const actionMatches = response.message.matchAll(/\*\*ACTION_START\*\*([\s\S]*?)\*\*ACTION_END\*\*/g);
-            let hasActions = false;
-            
-            for (const match of actionMatches) {
-                hasActions = true;
-                try {
-                    const action = JSON.parse(match[1]);
-                    
-                    if (action.action === 'add_recipe') {
-                        // Add a recipe with multiple items
-                        await this.addRecipeToPlanner(action);
-                    } else if (action.action === 'add_meal' && action.items) {
-                        // Process each meal item
-                        for (const item of action.items) {
-                            await this.addFoodToPlanner(item);
-                        }
-                    } else if (action.action === 'clear_meal') {
-                        // Clear a specific meal
-                        await this.clearMeal(action.day, action.meal);
-                    } else if (action.action === 'clear_day') {
-                        // Clear an entire day
-                        await this.clearDay(action.day);
-                    }
-                } catch (parseError) {
-                    console.error('Failed to parse action:', parseError);
-                }
-            }
-            
-            // Show response without the action blocks
-            const cleanMessage = response.message.replace(/\*\*ACTION_START\*\*[\s\S]*?\*\*ACTION_END\*\*/g, '').trim();
-            if (cleanMessage) {
-                this.addMessage(cleanMessage, 'hannah', messagesAreaId);
-            } else if (!hasActions && response.message) {
-                // Only show original message if no clean message and no actions
-                this.addMessage(response.message, 'hannah', messagesAreaId);
-            }
-            
-            // Check if AI described meals but didn't add them
-            if (!hasActions && 
-                (response.message.toLowerCase().includes('breakfast') || 
-                 response.message.toLowerCase().includes('lunch') || 
-                 response.message.toLowerCase().includes('dinner')) &&
-                (response.message.toLowerCase().includes('meal plan') || 
-                 response.message.toLowerCase().includes('balanced') ||
-                 response.message.toLowerCase().includes('includes'))) {
-                // AI described meals but didn't add them
-                this.addMessage("I've described some meals for you. Would you like me to actually add them to your planner? Just say 'yes' or 'add them'!", 'hannah', messagesAreaId);
-            }
-            
-            // If in About Me tab, parse and store user stats
-            if (isAboutMe) {
-                this.parseUserStats(response.message);
-                // Save to About Me history
-                this.aboutMeHistory.push(
-                    { role: 'user', content: userText },
-                    { role: 'assistant', content: cleanMessage || response.message }
-                );
-            } else {
-                // Save to conversation history with proper format for API
-                this.conversationHistory.push(
-                    { role: 'user', content: userText },
-                    { role: 'assistant', content: cleanMessage || response.message }
-                );
-            }
+            // Step 5: Update conversation history
+            this.updateConversationHistory(userText, result.cleanMessage || result.rawResponse.message);
             
         } catch (error) {
-            console.error('AI error:', error);
-            this.hideTypingIndicator(messagesAreaId);
-            this.addMessage("I'm having trouble connecting right now. Please try again in a moment.", 'hannah', messagesAreaId);
+            this.handleError(error, messagesAreaId);
         }
         
         this.isProcessing = false;
     }
+    
+    // Get user input and clear the field
+    getUserInput() {
+        const input = document.getElementById('ai-text-input');
+        const userText = input.value.trim();
+        if (!userText || this.isProcessing) return null;
+        input.value = '';
+        return userText;
+    }
+    
+    // Setup UI for message processing
+    setupUIForProcessing(userText) {
+        const messagesAreaId = 'ai-chat-messages';
+        
+        this.addMessage(userText, 'user', messagesAreaId);
+        this.isProcessing = true;
+        this.showTypingIndicator(messagesAreaId);
+        
+        return messagesAreaId;
+    }
+    
+    // Build AI context
+    buildContext() {
+        return this.messageProcessor.buildAIContext(
+            false,
+            this.userProfile,
+            this.conversationHistory,
+            []
+        );
+    }
+    
+    // Handle the AI response
+    async handleAIResponse(result, userText, messagesAreaId) {
+        // Show search status if needed
+        if (result.searchStatus) {
+            this.showSearchStatus(result.searchStatus, messagesAreaId);
+            await this.delay(1500);
+        }
+        
+        // Simulate typing delay
+        await this.delay(1000);
+        this.hideTypingIndicator(messagesAreaId);
+        
+        // Handle recipe selection
+        if (result.userIsChoosingRecipe) {
+            const selectedUrl = this.messageProcessor.getSelectedRecipeUrl(userText);
+            if (selectedUrl) {
+                await this.processRecipeUrl(selectedUrl, userText, messagesAreaId);
+            }
+        }
+        
+        // Handle multiple recipes
+        else if (result.recipeUrls.length > 1 && result.rawResponse.message.includes('recipe')) {
+            this.addMessage("I found multiple recipes! Please tell me which one you'd like to add by saying something like 'add the first one' or 'add recipe 2' or just paste the URL of the one you want.", 'hannah', messagesAreaId);
+        }
+        
+        // Handle single recipe auto-add
+        else if (this.messageProcessor.shouldAutoAddRecipe(userText, result.recipeUrls, result.rawResponse.message)) {
+            await this.processRecipeUrl(result.recipeUrls[0], userText, messagesAreaId);
+        }
+        
+        // Execute actions
+        if (result.actions.length > 0) {
+            await this.actionExecutor.executeActions(result.actions);
+        }
+        
+        // Show clean message
+        if (result.cleanMessage) {
+            this.addMessage(result.cleanMessage, 'hannah', messagesAreaId);
+        } else if (result.actions.length === 0 && result.rawResponse.message) {
+            this.addMessage(result.rawResponse.message, 'hannah', messagesAreaId);
+        }
+        
+        // Check if meals were described but not added
+        if (result.suggestedMeals && result.actions.length === 0) {
+            this.addMessage("I've described some meals for you. Would you like me to actually add them to your planner? Just say 'yes' or 'add them'!", 'hannah', messagesAreaId);
+        }
+        
+        // Always parse user stats from conversation
+        this.parseUserStats(result.rawResponse.message);
+    }
+    
+    // Update conversation history
+    updateConversationHistory(userText, responseText) {
+        this.conversationHistory.push(
+            { role: 'user', content: userText },
+            { role: 'assistant', content: responseText }
+        );
+    }
+    
+    // Handle errors
+    handleError(error, messagesAreaId) {
+        console.error('AI error:', error);
+        this.hideTypingIndicator(messagesAreaId);
+        this.addMessage("The meal planner service is currently unavailable. Please check your internet connection and try again later.", 'hannah', messagesAreaId);
+    }
+    
     
     async quickPlan() {
         this.addMessage("Quick meal plan!", 'user');
@@ -577,201 +339,41 @@ IMPORTANT TECHNICAL DETAILS:
     }
     
     addMessage(text, sender, messagesAreaId = 'ai-chat-messages') {
-        const messagesArea = document.getElementById(messagesAreaId);
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `ai-message ${sender}`;
-        
-        // Convert URLs to clickable links
-        let formattedText = text.replace(
-            /(https?:\/\/[^\s<]+)/g,
-            '<a href="$1" target="_blank" rel="noopener noreferrer" class="chat-link">$1</a>'
-        );
-        
-        // Convert line breaks and format lists
-        formattedText = formattedText
-            .replace(/\n\n/g, '</p><p>')  // Double line breaks to paragraphs
-            .replace(/\n/g, '<br>')        // Single line breaks to <br>
-            .replace(/^- /gm, '• ')        // Convert dashes to bullets
-            .replace(/^\d+\. /gm, match => `<strong>${match}</strong>`); // Bold numbered lists
-        
-        // Wrap in paragraph if not already
-        if (!formattedText.includes('<p>')) {
-            formattedText = `<p>${formattedText}</p>`;
-        }
-        
-        if (sender === 'hannah') {
-            messageDiv.innerHTML = `
-                <div class="hannah-avatar">H</div>
-                <div class="message-bubble">${formattedText}</div>
-            `;
-        } else {
-            messageDiv.innerHTML = `
-                <div class="message-bubble">${formattedText}</div>
-            `;
-        }
-        
-        messagesArea.appendChild(messageDiv);
-        messagesArea.scrollTop = messagesArea.scrollHeight;
+        return this.chatUI.addMessage(text, sender, messagesAreaId);
     }
-    
     showTypingIndicator(messagesAreaId = 'ai-chat-messages') {
-        const messagesArea = document.getElementById(messagesAreaId);
-        const typing = document.createElement('div');
-        typing.className = 'ai-typing-indicator';
-        typing.id = `ai-typing-${messagesAreaId}`;
-        typing.innerHTML = `
-            <div class="hannah-avatar">H</div>
-            <div class="typing-dots">
-                <span></span><span></span><span></span>
-            </div>
-        `;
-        messagesArea.appendChild(typing);
-        messagesArea.scrollTop = messagesArea.scrollHeight;
+        return this.chatUI.showTypingIndicator(messagesAreaId);
     }
-    
     hideTypingIndicator(messagesAreaId = 'ai-chat-messages') {
-        const typing = document.getElementById(`ai-typing-${messagesAreaId}`);
-        if (typing) typing.remove();
+        return this.chatUI.hideTypingIndicator(messagesAreaId);
     }
-    
     showSearchStatus(status, messagesAreaId = 'ai-chat-messages') {
-        const messagesArea = document.getElementById(messagesAreaId);
-        const searchStatus = document.createElement('div');
-        searchStatus.className = 'ai-search-status';
-        searchStatus.innerHTML = `
-            <div class="search-status-content">
-                <span class="search-icon">🔍</span>
-                <span class="search-text">${status}</span>
-            </div>
-        `;
-        messagesArea.appendChild(searchStatus);
-        messagesArea.scrollTop = messagesArea.scrollHeight;
-        
-        // Auto-remove after a delay
-        setTimeout(() => {
-            searchStatus.style.animation = 'fadeOut 0.5s ease';
-            setTimeout(() => searchStatus.remove(), 500);
-        }, 2000);
+        return this.chatUI.showSearchStatus(status, messagesAreaId);
     }
-    
     delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        return this.chatUI.delay(ms);
     }
-    
     async processRecipeUrl(recipeUrl, userText, messagesAreaId) {
-        // Scrape the recipe for ingredients
-        try {
-            const scrapeResponse = await fetch('/api/recipe/scrape', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: recipeUrl })
-            });
-            
-            if (scrapeResponse.ok) {
-                const recipeData = await scrapeResponse.json();
-                
-                if (recipeData.ingredients && recipeData.ingredients.length > 0) {
-                    // Determine which meal to add to
-                    let targetMeal = 'lunch'; // default
-                    if (userText.toLowerCase().includes('breakfast')) targetMeal = 'breakfast';
-                    else if (userText.toLowerCase().includes('dinner')) targetMeal = 'dinner';
-                    else if (userText.toLowerCase().includes('snack')) targetMeal = 'afternoon snack';
-                    
-                    // Determine which day to add to
-                    let targetDay = 'Monday'; // default
-                    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-                    for (const day of days) {
-                        if (userText.toLowerCase().includes(day.toLowerCase())) {
-                            targetDay = day;
-                            break;
-                        }
-                    }
-                    
-                    // Add all ingredients to the meal
-                    this.addMessage(`Adding ${recipeData.ingredients.length} ingredients from the recipe to ${targetDay} ${targetMeal}! 🍳`, 'hannah', messagesAreaId);
-                    
-                    for (const ingredient of recipeData.ingredients) {
-                        await this.addFoodToPlanner({
-                            food: ingredient.name,
-                            day: targetDay,
-                            meal: targetMeal,
-                            quantity: parseInt(ingredient.amount) || 100,
-                            unit: ingredient.amount.includes('ml') ? 'ml' : 'g'
-                        });
-                        await this.delay(200);
-                    }
-                    
-                    this.addMessage(`✅ All ingredients added to ${targetMeal}!`, 'hannah', messagesAreaId);
-                }
-            }
-        } catch (error) {
-            console.error('Recipe scraping error:', error);
-            this.addMessage("Sorry, I couldn't process that recipe. Please try again.", 'hannah', messagesAreaId);
-        }
+        return this.recipeProcessor.processRecipeUrl(
+            recipeUrl, 
+            userText,
+            (text, sender) => this.addMessage(text, sender, messagesAreaId),
+            (status) => this.showSearchStatus(status, messagesAreaId)
+        );
     }
-    
     parseUserStats(message) {
-        // Try to extract user stats from AI response
-        const lowerMessage = message.toLowerCase();
-        
-        // Parse age
-        const ageMatch = lowerMessage.match(/(\d+)\s*(?:years?\s*old|yo)/);
-        if (ageMatch) {
-            this.userProfile.age = parseInt(ageMatch[1]);
-        }
-        
-        // Parse weight
-        const weightMatch = lowerMessage.match(/(\d+(?:\.\d+)?)\s*(?:kg|kilograms?|lbs?|pounds?)/);
-        if (weightMatch) {
-            this.userProfile.weight = parseFloat(weightMatch[1]);
-            this.userProfile.weightUnit = lowerMessage.includes('kg') ? 'kg' : 'lbs';
-        }
-        
-        // Parse height
-        const heightMatch = lowerMessage.match(/(\d+(?:\.\d+)?)\s*(?:cm|centimeters?|ft|feet|')/);
-        if (heightMatch) {
-            this.userProfile.height = parseFloat(heightMatch[1]);
-            this.userProfile.heightUnit = lowerMessage.includes('cm') ? 'cm' : 'ft';
-        }
-        
-        // Parse activity level
-        if (lowerMessage.includes('sedentary')) this.userProfile.activityLevel = 'sedentary';
-        else if (lowerMessage.includes('lightly active')) this.userProfile.activityLevel = 'lightly active';
-        else if (lowerMessage.includes('moderately active')) this.userProfile.activityLevel = 'moderately active';
-        else if (lowerMessage.includes('very active')) this.userProfile.activityLevel = 'very active';
-        else if (lowerMessage.includes('extremely active')) this.userProfile.activityLevel = 'extremely active';
-        
-        // Parse goals
-        if (lowerMessage.includes('lose weight') || lowerMessage.includes('weight loss')) {
-            this.userProfile.goals = 'weight loss';
-        } else if (lowerMessage.includes('gain muscle') || lowerMessage.includes('bulk')) {
-            this.userProfile.goals = 'muscle gain';
-        } else if (lowerMessage.includes('maintain')) {
-            this.userProfile.goals = 'maintain';
-        }
-        
-        // Update display if we have stats
-        this.updateStatsDisplay();
+        const profile = this.profileManager.parseUserStats(message);
+        this.userProfile = profile; // Keep in sync
+        return profile;
     }
-    
     updateStatsDisplay() {
-        const statsDiv = document.getElementById('user-stats');
-        if (this.userProfile.age || this.userProfile.weight || this.userProfile.height) {
-            statsDiv.style.display = 'block';
-            
-            document.getElementById('stat-age').textContent = this.userProfile.age || '-';
-            document.getElementById('stat-weight').textContent = 
-                this.userProfile.weight ? `${this.userProfile.weight} ${this.userProfile.weightUnit || 'kg'}` : '-';
-            document.getElementById('stat-height').textContent = 
-                this.userProfile.height ? `${this.userProfile.height} ${this.userProfile.heightUnit || 'cm'}` : '-';
-            document.getElementById('stat-activity').textContent = this.userProfile.activityLevel || '-';
-            document.getElementById('stat-goal').textContent = this.userProfile.goals || '-';
-            document.getElementById('stat-tdee').textContent = 
-                this.userProfile.tdee ? `${this.userProfile.tdee} kcal` : '-';
-        }
+        return this.profileManager.updateStatsDisplay();
+    }
+    async clearMeal(day, meal) {
+        return this.actionExecutor.clearMeal(day, meal);
     }
     
-    async clearMeal(day, meal) {
+    async _clearMealOld(day, meal) {
         try {
             // Find the day column
             const dayColumn = document.querySelector(`.day-column[data-day="${day}"]`);
@@ -820,6 +422,10 @@ IMPORTANT TECHNICAL DETAILS:
     }
     
     async clearDay(day) {
+        return this.actionExecutor.clearDay(day);
+    }
+    
+    async _clearDayOld(day) {
         try {
             // Find the day column
             const dayColumn = document.querySelector(`.day-column[data-day="${day}"]`);
@@ -854,118 +460,15 @@ IMPORTANT TECHNICAL DETAILS:
     }
     
     async addRecipeToPlanner(recipeData) {
-        try {
-            // Find the day column
-            const dayColumn = document.querySelector(`.day-column[data-day="${recipeData.day}"]`);
-            if (!dayColumn) {
-                console.warn(`Day column not found: ${recipeData.day}`);
-                return;
-            }
-            
-            // Find the meal
-            const mealName = recipeData.meal.toLowerCase().replace(/[-_]/g, ' ');
-            const meals = dayColumn.querySelectorAll('.meal');
-            let targetMeal = null;
-            
-            for (const meal of meals) {
-                const mealNameEl = meal.querySelector('.meal-name');
-                if (mealNameEl) {
-                    const currentMealName = mealNameEl.textContent.toLowerCase();
-                    if (currentMealName.includes(mealName) || 
-                        (mealName === 'morning snack' && currentMealName.includes('morning') && currentMealName.includes('snack')) ||
-                        (mealName === 'afternoon snack' && currentMealName.includes('afternoon') && currentMealName.includes('snack')) ||
-                        (mealName === 'evening snack' && currentMealName.includes('evening') && currentMealName.includes('snack'))) {
-                        targetMeal = meal;
-                        break;
-                    }
-                }
-            }
-            
-            if (!targetMeal) {
-                console.warn(`Meal not found: ${recipeData.meal} on ${recipeData.day}`);
-                return;
-            }
-            
-            // Get the recipes container
-            const recipesContainer = targetMeal.querySelector('.recipes-container');
-            if (!recipesContainer) {
-                console.warn('Recipes container not found');
-                return;
-            }
-            
-            // Create the recipe container
-            const recipeContainer = window.createRecipeContainer(recipeData.recipe_name);
-            recipesContainer.appendChild(recipeContainer);
-            
-            // Add each ingredient to the recipe
-            const recipeModulesContainer = recipeContainer.querySelector('.recipe-modules-container');
-            for (const item of recipeData.items) {
-                // Look up or create food data
-                let foodData;
-                if (item.custom) {
-                    foodData = {
-                        name: item.food,
-                        category: this.categorizeFood(item.food, item.protein || 0, item.carbs || 0, item.fat || 0),
-                        baseQuantity: item.quantity || 100,
-                        baseUnit: item.unit || 'g',
-                        kcal: item.kcal || 100,
-                        protein: item.protein || 5,
-                        carbs: item.carbs || 10,
-                        fat: item.fat || 3,
-                        cost: item.cost || 2.00,
-                        custom: true
-                    };
-                } else {
-                    foodData = this.findFoodInDatabase(item.food);
-                    if (!foodData) {
-                        // Create basic item if not found
-                        foodData = {
-                            name: item.food,
-                            category: 'extras',
-                            baseQuantity: 100,
-                            baseUnit: 'g',
-                            kcal: 100,
-                            protein: 5,
-                            carbs: 10,
-                            fat: 3,
-                            cost: 2.00,
-                            custom: true
-                        };
-                    }
-                }
-                
-                // Create the food module
-                // Use the item's quantity if provided, otherwise use the food's base quantity
-                const dragData = {
-                    food: foodData,
-                    quantity: item.quantity !== undefined ? item.quantity : foodData.baseQuantity,
-                    unit: item.unit || foodData.baseUnit
-                };
-                
-                const module = this.createFoodModule(dragData);
-                recipeModulesContainer.appendChild(module);
-            }
-            
-            // Update all totals
-            if (window.updateRecipeTotals) {
-                window.updateRecipeTotals(recipeContainer);
-            }
-            if (window.updateMealTotals) {
-                window.updateMealTotals(targetMeal);
-            }
-            if (window.updateDayTotals) {
-                window.updateDayTotals(dayColumn);
-            }
-            
-            // Add animation
-            recipeContainer.classList.add('animate-in');
-            
-        } catch (error) {
-            console.error('Error adding recipe to planner:', error);
-        }
+        return this.recipeProcessor.addRecipeToPlanner(recipeData);
     }
     
+    
     async addFoodToPlanner(item) {
+        return this.actionExecutor.addFoodToPlanner(item);
+    }
+    
+    async _addFoodToPlannerOld(item) {
         try {
             // Find the day column
             const dayColumn = document.querySelector(`.day-column[data-day="${item.day}"]`);
@@ -1099,104 +602,12 @@ IMPORTANT TECHNICAL DETAILS:
     }
     
     findFoodInDatabase(foodName) {
-        // Access the global food database from app.js
-        if (!window.foodDatabase) {
-            console.warn('Food database not available');
-            return null;
-        }
-        
-        const searchName = foodName.toLowerCase();
-        
-        // Search through all categories
-        for (const category in window.foodDatabase) {
-            const foods = window.foodDatabase[category];
-            if (Array.isArray(foods)) {
-                const found = foods.find(food => 
-                    food.name.toLowerCase() === searchName ||
-                    food.name.toLowerCase().includes(searchName) ||
-                    searchName.includes(food.name.toLowerCase())
-                );
-                if (found) {
-                    return { ...found, category };
-                }
-            }
-        }
-        
-        // If not found, create a basic food item
-        return {
-            name: foodName,
-            category: 'extras',
-            baseQuantity: 100,
-            baseUnit: 'g',
-            kcal: 100,
-            protein: 5,
-            carbs: 10,
-            fat: 3,
-            cost: 2.00
-        };
+        return this.recipeProcessor.findFoodInDatabase(foodName);
     }
     
+    
     createFoodModule(dragData) {
-        // Use the global createFoodModule function if available
-        if (window.createFoodModule) {
-            return window.createFoodModule(dragData);
-        }
-        
-        // Fallback: create a simple module
-        const module = document.createElement('div');
-        const category = dragData.food.category || 'default';
-        module.className = `food-module food-module-${category} animate-in`;
-        module.draggable = true;
-        
-        const moduleId = `module-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const food = dragData.food;
-        const quantity = dragData.quantity;
-        const unit = dragData.unit;
-        
-        // Calculate macros based on portion
-        const ratio = quantity / food.baseQuantity;
-        
-        const moduleData = {
-            id: moduleId,
-            name: food.name,
-            category: food.category,
-            quantity: quantity,
-            unit: unit,
-            baseFood: food,
-            kcal: Math.round(food.kcal * ratio),
-            protein: food.protein * ratio,
-            carbs: food.carbs * ratio,
-            fat: food.fat * ratio,
-            cost: food.cost * ratio
-        };
-        
-        module.innerHTML = `
-            <div class="module-header">
-                <div class="module-name">${food.custom ? '✨ ' : ''}${food.name}</div>
-                <div class="module-actions">
-                    <button class="remove-module" onclick="removeModule('${moduleId}')">×</button>
-                </div>
-            </div>
-            <div class="module-controls">
-                <input type="number" class="module-portion-input" value="${quantity}" min="1" step="1" data-module-id="${moduleId}">
-                <select class="module-unit-select" data-module-id="${moduleId}">
-                    <option value="${unit}">${unit}</option>
-                </select>
-            </div>
-            <div class="module-macros">
-                <div class="macro-stats">
-                    <span class="macro kcal">${moduleData.kcal} kcal</span>
-                    <span class="macro">P: ${moduleData.protein.toFixed(1)}g</span>
-                    <span class="macro">C: ${moduleData.carbs.toFixed(1)}g</span>
-                    <span class="macro">F: ${moduleData.fat.toFixed(1)}g</span>
-                </div>
-            </div>
-        `;
-        
-        module.dataset.moduleId = moduleId;
-        module.dataset.module = JSON.stringify(moduleData);
-        
-        return module;
+        return this.recipeProcessor.createFoodModule(dragData);
     }
     
     // Toggle minimize/maximize
@@ -1224,66 +635,17 @@ IMPORTANT TECHNICAL DETAILS:
     }
     
     loadUserProfile() {
-        // Load saved profile from localStorage
-        const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-        
-        // Populate form fields
-        if (profile.goal) document.getElementById('user-goal').value = profile.goal;
-        if (profile.weight) document.getElementById('user-weight').value = profile.weight;
-        if (profile.height) document.getElementById('user-height').value = profile.height;
-        if (profile.age) document.getElementById('user-age').value = profile.age;
-        if (profile.gender) document.getElementById('user-gender').value = profile.gender;
-        if (profile.lifestyle) document.getElementById('user-lifestyle').value = profile.lifestyle;
-        if (profile.health) document.getElementById('user-health').value = profile.health;
-        if (profile.typicalDiet) document.getElementById('user-typical-diet').value = profile.typicalDiet;
-        if (profile.challenges) document.getElementById('user-challenges').value = profile.challenges;
-        
-        // Calculate basic stats if we have the numbers
-        if (profile.weight && profile.height) {
-            this.calculateBasicStats();
-        }
+        this.profileManager.loadProfile();
+        this.userProfile = this.profileManager.userProfile; // Keep in sync
     }
-    
     saveUserProfile() {
-        // Gather all form data
-        const profile = {
-            goal: document.getElementById('user-goal').value,
-            weight: parseFloat(document.getElementById('user-weight').value) || 0,
-            height: parseFloat(document.getElementById('user-height').value) || 0,
-            age: parseInt(document.getElementById('user-age').value) || 0,
-            gender: document.getElementById('user-gender').value,
-            lifestyle: document.getElementById('user-lifestyle').value,
-            health: document.getElementById('user-health').value,
-            typicalDiet: document.getElementById('user-typical-diet').value,
-            challenges: document.getElementById('user-challenges').value
-        };
-        
-        // Save to localStorage
-        localStorage.setItem('userProfile', JSON.stringify(profile));
-        
-        // Recalculate basic stats if we have the numbers
-        if (profile.weight && profile.height) {
-            this.calculateBasicStats();
-        }
+        this.profileManager.saveProfile();
+        this.userProfile = this.profileManager.userProfile; // Keep in sync
     }
-    
     calculateBasicStats() {
-        const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-        
-        if (profile.weight && profile.height) {
-            // Calculate BMI
-            const heightInM = profile.height / 100;
-            const bmi = profile.weight / (heightInM * heightInM);
-            document.getElementById('calc-bmi').textContent = bmi.toFixed(1);
-            
-            // Store basic stats
-            this.userStats = {
-                bmi,
-                profile
-            };
-        }
+        this.profileManager.calculateBasicStats();
+        this.userProfile = this.profileManager.userProfile; // Keep in sync
     }
-    
     async analyzeProfile() {
         const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
         

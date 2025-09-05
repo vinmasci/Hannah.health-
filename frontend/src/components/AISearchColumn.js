@@ -4,6 +4,7 @@
 import AIService from '../services/ai-service.js';
 import DragDropManager from '../services/DragDropManager.js';
 import { NutritionCalculator } from '../services/nutritionCalculator.js';
+import eventBus from '../services/EventBus.js';
 
 export class AISearchColumn {
     constructor() {
@@ -182,6 +183,43 @@ export class AISearchColumn {
                 
                 if (foodData && foodData.length > 0) {
                     resultsArea.innerHTML = '';
+                    
+                    // Emit event for AI Display column
+                    const nutritionData = {
+                        calories: foodData.reduce((sum, f) => sum + (f.kcal || 0), 0),
+                        protein: foodData.reduce((sum, f) => sum + (f.protein || 0), 0),
+                        carbs: foodData.reduce((sum, f) => sum + (f.carbs || 0), 0),
+                        fat: foodData.reduce((sum, f) => sum + (f.fat || 0), 0)
+                    };
+                    eventBus.emit('ai:nutrition-calculated', nutritionData);
+                    
+                    // Emit insights
+                    const insights = [
+                        `Found ${foodData.length} food item${foodData.length > 1 ? 's' : ''}`,
+                        `Total calories: ${nutritionData.calories} kcal`,
+                        `Macros: ${nutritionData.protein.toFixed(1)}g protein, ${nutritionData.carbs.toFixed(1)}g carbs, ${nutritionData.fat.toFixed(1)}g fat`
+                    ];
+                    eventBus.emit('ai:data-gathered', { insights });
+                    
+                    // Generate shopping list
+                    const shoppingItems = foodData.map(food => ({
+                        name: food.name,
+                        quantity: `${food.baseQuantity} ${food.baseUnit}`
+                    }));
+                    eventBus.emit('ai:shopping-list', { items: shoppingItems });
+                    
+                    // Generate recommendations based on the search
+                    const recommendations = [];
+                    if (nutritionData.protein < 20) {
+                        recommendations.push('Consider adding more protein to meet daily goals');
+                    }
+                    if (nutritionData.calories > 800) {
+                        recommendations.push('This is a high-calorie option - consider portion control');
+                    }
+                    if (foodData.some(f => f.name.toLowerCase().includes('organic'))) {
+                        recommendations.push('Great choice selecting organic options!');
+                    }
+                    eventBus.emit('ai:recommendations', { recommendations });
                     
                     foodData.forEach(food => {
                         const foodElement = document.createElement('div');

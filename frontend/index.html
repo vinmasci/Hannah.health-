@@ -12,67 +12,55 @@
     
     <link rel="stylesheet" href="/src/styles/styles.css?v=2">
     <link rel="stylesheet" href="/src/styles/shopping-list.css">
+    <link rel="stylesheet" href="/src/styles/ai-assessment-column.css">
+    <link rel="stylesheet" href="/src/styles/ai-display-column.css">
+    <link rel="stylesheet" href="/src/styles/ai-meal-plan.css">
+    <link rel="stylesheet" href="/src/styles/ai-suggestions-column.css">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
-        <h1 class="header-title">🍱 Hannah.health Meal Planner</h1>
+        <div class="header-brand">
+            <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F959.svg" alt="Stuffed Flatbread" width="42" height="42" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
+            <div class="header-text">
+                <h1 class="header-title" data-text="Hannah.PT">Hannah.PT</h1>
+                <span class="header-tagline">Meal planner & wellness tracker</span>
+            </div>
+        </div>
         <div class="header-controls">
             <button class="header-btn save-plan-icon" onclick="MealStorage.saveMealPlan()" title="Save Plan">
                 <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F4BE.svg" alt="Save" width="20" height="20">
             </button>
+            <button class="header-btn user-icon" onclick="UserProfile.showProfile()" title="User Profile">
+                <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F9D1-200D-1F373.svg" alt="Cook" width="20" height="20">
+            </button>
         </div>
     </header>
 
-    <!-- Category Pills Container -->
+    <!-- Category Pills Container (Simplified for storing user's meal options) -->
     <div class="category-pills-container">
-        <span class="pills-label">Drag to add →</span>
-        <div class="category-pill ai-search" draggable="true" data-category="ai-search">
-            <span>🤖</span>
-            <span>AI Item Search</span>
-        </div>
-        <div class="category-pill favorites" draggable="true" data-category="favorites">
-            <span>❤️</span>
-            <span>Favorites</span>
-        </div>
-        <div class="category-pill protein" draggable="true" data-category="protein">
-            <span>🥩</span>
+        <div class="category-pill" data-category="proteins">
+            <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F357.svg" width="20" height="20">
             <span>Proteins</span>
         </div>
-        <div class="category-pill dairy" draggable="true" data-category="dairy">
-            <span>🥛</span>
-            <span>Dairy</span>
-        </div>
-        <div class="category-pill veg" draggable="true" data-category="veg">
-            <span>🥦</span>
-            <span>Veggies</span>
-        </div>
-        <div class="category-pill fruit" draggable="true" data-category="fruit">
-            <span>🍎</span>
-            <span>Fruits</span>
-        </div>
-        <div class="category-pill grains" draggable="true" data-category="grains">
-            <span>🌾</span>
-            <span>Grains</span>
-        </div>
-        <div class="category-pill nuts" draggable="true" data-category="nuts">
-            <span>🥜</span>
-            <span>Nuts</span>
-        </div>
-        <div class="category-pill carbs" draggable="true" data-category="carbs">
-            <span>🥔</span>
+        <div class="category-pill" data-category="carbs">
+            <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F35E.svg" width="20" height="20">
             <span>Carbs</span>
         </div>
-        <div class="category-pill drinks" draggable="true" data-category="drinks">
-            <span>🥤</span>
-            <span>Drinks</span>
+        <div class="category-pill" data-category="fruit">
+            <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F34E.svg" width="20" height="20">
+            <span>Fruit</span>
         </div>
-        <div class="category-pill sweets" draggable="true" data-category="sweets">
-            <span>🍰</span>
-            <span>Sweets</span>
+        <div class="category-pill" data-category="veg">
+            <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F966.svg" width="20" height="20">
+            <span>Veg</span>
         </div>
-        <div class="category-pill extras" draggable="true" data-category="extras">
-            <span>✨</span>
+        <div class="category-pill" data-category="snacks">
+            <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F36A.svg" width="20" height="20">
+            <span>Snacks</span>
+        </div>
+        <div class="category-pill" data-category="extras">
+            <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/2728.svg" width="20" height="20">
             <span>Extras</span>
         </div>
     </div>

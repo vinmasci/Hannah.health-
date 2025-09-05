@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+    <h1>Module Test</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        const output = document.getElementById('output');
+        
+        try {
+            const module1 = await import('/src/services/EventBus.js');
+            output.innerHTML += '<p>✅ EventBus loaded</p>';
+        } catch (e) {
+            output.innerHTML += `<p>❌ EventBus failed: ${e.message}</p>`;
+        }
+        
+        try {
+            const module2 = await import('/src/components/AIUserAssessment.js');
+            output.innerHTML += '<p>✅ AIUserAssessment loaded</p>';
+        } catch (e) {
+            output.innerHTML += `<p>❌ AIUserAssessment failed: ${e.message}</p>`;
+        }
+        
+        try {
+            const module3 = await import('/src/components/AIMealSuggestions.js');
+            output.innerHTML += '<p>✅ AIMealSuggestions loaded</p>';
+        } catch (e) {
+            output.innerHTML += `<p>❌ AIMealSuggestions failed: ${e.message}</p>`;
+        }
+        
+        try {
+            const module4 = await import('/src/components/NutritionWorkflow.js');
+            output.innerHTML += '<p>✅ NutritionWorkflow loaded</p>';
+        } catch (e) {
+            output.innerHTML += `<p>❌ NutritionWorkflow failed: ${e.message}</p>`;
+        }
+    </script>
+</body>
+</html>

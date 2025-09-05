@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Full App</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/src/styles/styles.css?v=2">
+    <link rel="stylesheet" href="/src/styles/shopping-list.css">
+    <link rel="stylesheet" href="/src/styles/ai-assessment-column.css">
+    <link rel="stylesheet" href="/src/styles/ai-display-column.css">
+    <link rel="stylesheet" href="/src/styles/ai-suggestions-column.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-brand">
+            <img src="https://cdn.jsdelivr.net/npm/openmoji@14.0.0/color/svg/1F959.svg" alt="Stuffed Flatbread" width="42" height="42">
+            <div class="header-text">
+                <h1 class="header-title">Hannah.PT</h1>
+                <span class="header-tagline">Debug Full App</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Category Pills Container -->
+    <div class="category-pills-container">
+        <div class="category-pill" data-category="proteins">Proteins</div>
+    </div>
+
+    <!-- Main Board -->
+    <div class="main-board"></div>
+
+    <div id="debug-output" style="position: fixed; bottom: 10px; left: 10px; background: white; padding: 10px; border: 2px solid red; max-width: 400px; z-index: 9999; max-height: 300px; overflow-y: auto;">
+        <h3>Debug Output:</h3>
+        <div id="log"></div>
+    </div>
+
+    <script type="module">
+        const log = document.getElementById('log');
+        
+        function addLog(msg, isError = false) {
+            const p = document.createElement('p');
+            p.style.margin = '2px 0';
+            p.style.fontSize = '12px';
+            p.style.color = isError ? 'red' : 'green';
+            p.textContent = msg;
+            log.appendChild(p);
+            console.log(msg);
+        }
+        
+        // Override console.error to catch errors
+        const originalError = console.error;
+        console.error = function(...args) {
+            addLog(`ERROR: ${args.join(' ')}`, true);
+            originalError.apply(console, args);
+        };
+        
+        addLog('Loading main app...');
+        
+        try {
+            // Import the main app
+            await import('/src/components/app.js');
+            addLog('✅ App.js loaded');
+            
+            // Wait for initialization
+            setTimeout(() => {
+                const mainBoard = document.querySelector('.main-board');
+                const allCols = mainBoard.children;
+                
+                addLog(`Total columns: ${allCols.length}`);
+                
+                // List all columns
+                Array.from(allCols).forEach((col, i) => {
+                    const classes = col.className.split(' ').slice(0, 2).join(' ');
+                    addLog(`Col ${i}: ${classes}`);
+                });
+                
+                // Check for specific columns
+                const assessmentCol = document.querySelector('.ai-assessment-column');
+                const displayCol = document.querySelector('.ai-display-column');
+                const suggestionsCol = document.querySelector('.ai-suggestions-column');
+                const dayCols = document.querySelectorAll('.day-column');
+                
+                addLog(`Assessment: ${assessmentCol ? 'YES' : 'NO'}`);
+                addLog(`Display: ${displayCol ? 'YES' : 'NO'}`);
+                addLog(`Suggestions: ${suggestionsCol ? 'YES' : 'NO'}`);
+                addLog(`Day columns: ${dayCols.length}`);
+                
+            }, 500); // Wait for setTimeout in app.js
+            
+        } catch (error) {
+            addLog(`IMPORT ERROR: ${error.message}`, true);
+            console.error(error);
+        }
+    </script>
+</body>
+</html>

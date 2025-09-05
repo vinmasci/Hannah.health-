@@ -1,0 +1,72 @@
+[
+  {
+    "scenario": "NAFLD with severity details",
+    "status": "completed",
+    "followUpCount": 1,
+    "initialResponse": "NAFLD",
+    "followUpResponse": "mild, recently diagnosed"
+  },
+  {
+    "scenario": "Diabetes with management info",
+    "status": "completed",
+    "followUpCount": 1,
+    "initialResponse": "Type 2 diabetes",
+    "followUpResponse": "managed with medication for 5 years"
+  },
+  {
+    "scenario": "Heart disease - user declines details",
+    "status": "completed",
+    "followUpCount": 1,
+    "initialResponse": "heart disease",
+    "followUpResponse": "move on"
+  },
+  {
+    "scenario": "No conditions",
+    "status": "completed",
+    "followUpCount": 0,
+    "initialResponse": "none",
+    "followUpResponse": null
+  },
+  {
+    "scenario": "High cholesterol with control status",
+    "status": "completed",
+    "followUpCount": 1,
+    "initialResponse": "high cholesterol",
+    "followUpResponse": "under control with statins"
+  },
+  {
+    "scenario": "Multiple conditions with details",
+    "status": "completed",
+    "followUpCount": 1,
+    "initialResponse": "NAFLD and high blood pressure",
+    "followUpResponse": "both mild, diagnosed last year"
+  },
+  {
+    "scenario": "Celiac disease with timeline",
+    "status": "completed",
+    "followUpCount": 1,
+    "initialResponse": "celiac disease",
+    "followUpResponse": "diagnosed 3 months ago"
+  },
+  {
+    "scenario": "IBS with severity",
+    "status": "completed",
+    "followUpCount": 1,
+    "initialResponse": "IBS",
+    "followUpResponse": "moderate, managing with diet"
+  },
+  {
+    "scenario": "Hypertension - user says no to details",
+    "status": "completed",
+    "followUpCount": 1,
+    "initialResponse": "hypertension",
+    "followUpResponse": "no"
+  },
+  {
+    "scenario": "Allergies with specifics",
+    "status": "completed",
+    "followUpCount": 1,
+    "initialResponse": "food allergies",
+    "followUpResponse": "severe peanut allergy, carry epipen"
+  }
+]

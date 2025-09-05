@@ -3,12 +3,20 @@
 ## Overview
 Hannah Health includes an AI-powered meal planning system that generates personalized weekly meal plans and automatically creates shopping lists from the planned meals. The system uses the "Week 1 Magic" concept - unlocking after 7 days of food tracking to learn user preferences.
 
+**Last Updated**: January 30, 2025
+**Status**: ✅ Complete nutrition tracking with macros, smart food parsing, daily totals
+
 ## Meal Planning System
 
 ### Features
 - **7-Day Meal Plans**: Complete weekly schedule with breakfast, lunch, dinner, and snacks
-- **AI Generation**: ChatGPT creates personalized plans based on user requests
-- **Nutritional Balance**: Each meal includes calories and macro tracking
+- **Multiple Items Per Meal**: Each meal slot can contain multiple food items (e.g., omelette + yogurt + toast for breakfast)
+- **AI-Powered Nutrition**: Automatic calorie lookup with confidence ratings
+- **Natural Language Updates**: "Add chicken to Monday lunch" or "Set all breakfasts to omelette"
+- **Confidence Tracking**: Visual indicators show data accuracy (green/yellow/orange/red)
+- **Collapsible Days**: Minimize/expand each day for focused planning
+- **Smart Food Search**: Integrates with Brave Search and OpenAI for accurate nutrition
+- **Bulk Updates**: Apply meals to all instances (e.g., "all breakfasts")
 - **Progress Tracking**: Visual day-by-day navigation with completion checkboxes
 - **Week 1 Magic**: Unlocks after 7 days of consistent tracking
 
@@ -45,6 +53,24 @@ struct MealPlan {
     let isActive: Bool
 }
 
+struct DayMealSlot {
+    let id = UUID()
+    var slotType: MealSlotType
+    var time: String
+    var meals: [Meal]  // Array of meals for multiple items
+    var totalCalories: Int { meals.reduce(0) { $0 + $1.calories } }
+}
+
+struct Meal {
+    var name: String
+    let calories: Int
+    let protein: Int?     // Grams of protein
+    let carbs: Int?       // Grams of carbohydrates
+    let fat: Int?         // Grams of fat
+    let confidence: Double?  // Confidence rating 0-100%
+    let id = UUID()
+}
+
 struct PlannedMeal {
     let mealType: String // breakfast, lunch, dinner, snack
     let name: String
@@ -58,14 +84,73 @@ struct PlannedMeal {
 }
 ```
 
-### Chat Integration
-Users can request meal plans through natural language:
-- "Create me a high protein meal plan"
-- "Make me a vegetarian weekly plan"
-- "Plan my meals for weight loss"
-- "Update my meal plan with low carb options"
+### Multiple Items Per Meal
 
-The chat detects meal plan keywords and triggers the generation flow.
+#### How It Works
+Each meal slot can now contain multiple food items, allowing for realistic meal tracking:
+- **Breakfast Example**: Omelette (234 cal) + Greek yogurt (150 cal) + Toast (180 cal) = 564 total calories
+- **Individual Management**: Each item has its own calories, confidence rating, and can be edited/removed independently
+- **Easy Addition**: Plus button adds new items to any meal slot
+- **Smart Totaling**: Automatically calculates total calories and macros for all items in a meal
+
+#### Smart Food Parsing
+- **Comma/And Splitting**: Enter "eggs, toast and yogurt" → automatically creates 3 separate items
+- **Intelligent Recognition**: Handles various separators and trims whitespace
+- **Individual Lookups**: Each item gets its own AI-powered nutrition search
+- **Works Everywhere**: Both inline editing and chat commands support multi-item parsing
+
+#### Complete Macro Tracking
+- **Per Item**: Each food shows calories + optional protein, carbs, fat
+- **Per Meal**: Total section shows combined calories and macros
+- **Per Day**: Daily total with comprehensive macro breakdown
+- **Visual Hierarchy**: Dividers and color coding for easy scanning
+
+#### User Interface
+- Each food item displays on its own line with:
+  - Editable name (tap to edit inline)
+  - Calorie count
+  - Confidence indicator (color-coded)
+  - Remove button (minus icon)
+- "Add item" button at bottom of each meal slot
+- **Total Section** (always shown):
+  - Total calories for the meal
+  - Macro breakdown (P/C/F) when available
+  - Visual divider for clarity
+- **Daily Totals**:
+  - Prominent green calorie total
+  - Detailed protein, carbs, fat breakdown
+  - Clean card design at bottom of each day
+- Auto-focus on new items for immediate typing
+
+### Chat Integration
+
+#### Natural Language Commands
+Users can update meal plans through conversational chat:
+
+**Adding Meals**:
+- "Add chicken salad to Monday lunch" - Updates specific slot
+- "Set all breakfasts to 3 egg omelette" - Updates all breakfast slots
+- "Make Tuesday dinner salmon with veggies" - Replaces meal
+
+**Bulk Operations**:
+- "Add oatmeal to all breakfasts" - Updates entire week
+- "Make all lunches vegetarian" - Applies to all lunch slots
+- "Clear all snacks" - Removes all snack entries
+
+**Smart Features**:
+- Auto-searches nutrition data via Brave Search
+- Shows confidence ratings (85% confident, 90% confident, etc.)
+- Cleans user input ("Can you add..." → just the food name)
+- Handles common patterns ("3 egg" → "3 egg omelette")
+
+#### Confidence Ratings
+Each food item shows data accuracy:
+- 🟢 **Green (90-100%)**: Official sources (McDonald's, USDA)
+- 🟡 **Yellow (70-90%)**: Common foods, verified databases
+- 🟠 **Orange (50-70%)**: Homemade, estimated values
+- 🔴 **Red (<50%)**: Low confidence, needs verification
+
+The chat detects meal plan keywords and triggers appropriate actions.
 
 ## Shopping List System
 
@@ -152,19 +237,23 @@ The system automatically maps meals to ingredients:
 ## Implementation Files
 
 ### Core Models
-- `/Core/Models/MealPlan.swift` - Meal plan data structures
+- `/Core/Models/MealPlan.swift` - Meal plan data structures (includes confidence)
 - `/Core/Models/ShoppingItem.swift` - Shopping list items
 
 ### ViewModels
-- `/Features/MealPlan/MealPlanViewModel.swift` - Meal plan logic
+- `/Features/MealPlan/MealPlanViewModel.swift` - Meal plan logic, collapse states
+- `/Features/MealPlan/MealPlanChatViewModel.swift` - Natural language processing
 - `/Features/Shopping/ShoppingListViewModel.swift` - Shopping list logic
 
 ### Views
-- `/Features/MealPlan/MealPlanView.swift` - Meal plan UI
+- `/Features/MealPlan/MealPlanKanbanView.swift` - Kanban-style meal plan UI
+- `/Features/MealPlan/MealPlanChatPanel.swift` - Integrated chat panel
 - `/Features/Shopping/ShoppingListView.swift` - Shopping list UI
 
-### Chat Integration
-- `/Features/Chat/ChatViewModel.swift` - Handles meal plan requests
+### Services
+- `/Core/Services/BraveSearchService.swift` - Nutrition data search
+- `/Core/Services/NutritionConfidenceService.swift` - Confidence calculations
+- `/Core/Services/OpenAIService.swift` - AI-powered nutrition extraction
 
 ## Future Enhancements
 

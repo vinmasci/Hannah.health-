@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>App Test</title>
+    <link rel="stylesheet" href="/src/styles/styles.css?v=2">
+    <link rel="stylesheet" href="/src/styles/shopping-list.css">
+    <link rel="stylesheet" href="/src/styles/ai-assessment-column.css">
+    <link rel="stylesheet" href="/src/styles/ai-display-column.css">
+    <link rel="stylesheet" href="/src/styles/ai-suggestions-column.css">
+</head>
+<body>
+    <h1>App Initialization Test</h1>
+    
+    <!-- Category Pills Container -->
+    <div class="category-pills-container">
+        <div class="category-pill" data-category="proteins">Proteins</div>
+    </div>
+    
+    <!-- Main Board -->
+    <div class="main-board">
+        <p>Main board ready</p>
+    </div>
+    
+    <div id="output"></div>
+    
+    <script type="module">
+        const output = document.getElementById('output');
+        output.innerHTML = '<p>Starting module imports...</p>';
+        
+        try {
+            // Import the main app
+            await import('/src/components/app.js');
+            output.innerHTML += '<p>✅ App.js loaded successfully</p>';
+            
+            // Check if nutrition workflow initialized
+            if (window.nutritionWorkflow) {
+                output.innerHTML += '<p>✅ Nutrition workflow exists</p>';
+            } else {
+                output.innerHTML += '<p>❌ Nutrition workflow not found</p>';
+            }
+            
+            // Check for columns
+            const columns = document.querySelectorAll('.ai-assessment-column, .ai-display-column, .ai-suggestions-column');
+            output.innerHTML += `<p>Found ${columns.length} workflow columns</p>`;
+            
+        } catch (e) {
+            output.innerHTML += `<p>❌ Error: ${e.message}</p>`;
+            console.error(e);
+        }
+    </script>
+</body>
+</html>
